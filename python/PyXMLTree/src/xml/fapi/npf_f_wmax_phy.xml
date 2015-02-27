@@ -1,0 +1,1510 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE api SYSTEM ".\xmlfapi.dtd">
+<api name="npf_f_wmax_phy">
+	<preamble>
+		INTEL CONFIDENTIAL
+		
+		Copyright 2000 - 2005 Intel Corporation All Rights Reserved.
+		
+		The source code contained or described herein and all documents related to
+		the source code ("Material") are owned by Intel Corporation or its 
+		suppliers or licensors.
+		
+		Title to the Material remains with Intel Corporation or its suppliers and
+		licensors. The Material contains trade secrets and proprietary and
+		confidential information of Intel or its suppliers and licensors.
+		The Material is protected by worldwide copyright and trade secret laws and
+		treaty provisions. No part of the Material may be used, copied, reproduced,
+		modified, published, uploaded, posted, transmitted, distributed,
+		or disclosed in any way without Intel's prior express written permission.
+		
+		No license under any patent, copyright, trade secret or other intellectual
+		property right is granted to or conferred upon you by disclosure
+		or delivery of the Materials, either expressly, by implication, inducement,
+		estoppel or otherwise. Any license under such intellectual property rights
+		must be express and approved by Intel in writing.
+	</preamble>
+	<imports>
+		<import>npf</import>
+		<import>npf_f_error</import>
+		<import>npf_f_stats</import>
+	</imports>
+
+	<section name="PHY Instance Management">
+		<section name="PHY Data Types">
+			<typedef name="NPF_F_wmaxPhyHandle_t" type="NPF_uint32_t">
+				<descr>
+					Generic Handle.
+				</descr>
+			</typedef>
+			<enum type="NPF_F_wmaxPhyErrorType_t" brief="Error Type">
+				<descr>
+					Defines the PHY specific error types.
+					This data type is used to indicate the presences and type of an error
+					that occurred while processing an asynchronous operation.
+	 			</descr>
+				<field name="NPF_F_WMAX_PHY_ERROR_NO_ERROR" value="NPF_NO_ERROR" brief="The operation completed successfully."></field>
+				<field name="NPF_F_WMAX_PHY_ERROR_OBJ_EXISTS" value="NPF_F_WMAX_BASE_ERR" brief="PHY creation failed since the requested PHY already exists."></field>
+				<field name="NPF_F_WMAX_PHY_ERROR_NO_RES" brief="The operation failed since there are no free resources (for example memory)."></field>
+				<field name="NPF_F_WMAX_PHY_ERROR_INVALID_PARAMS" brief="The operation failed since the specified parameters are invalid."></field>
+				<field name="NPF_F_WMAX_PHY_ERROR_OBJ_NONEXISTANT" brief="The operation on the PHY failed since the PHY does not exist."></field>
+				<field name="NPF_F_WMAX_PHY_ERROR_OBJ_INVALID_STATE" brief="The operation on an PHY failed since the object state does not allow for the operation."></field>
+				<field name="NPF_F_WMAX_PHY_ERROR_TIME_OUT" brief="The operation failed due to time out."></field>
+				<field name="NPF_F_WMAX_PHY_ERROR_INTERRUPTED" brief="The operation has been interrupted due to another PHY call (for example the PHY has been deleted)."></field>
+				<field name="NPF_F_WMAX_PHY_ERROR_PHY_TYPE" brief="Unsupported PHY type requested (OFDM / OFDMA)."></field>
+				<field name="NPF_F_WMAX_PHY_ERROR_UNKNOWN" brief="The operation failed due to an unknown error."></field>
+			</enum>
+
+			<enum type="NPF_F_wmaxPhyDuplexingType_t" brief="Duplexing Type">
+				<descr>
+					This enum defines the supported duplexing types.
+				</descr>
+				<field name="NPF_F_WMAX_PHY_DUPLEXING_TYPE_TDD" brief="Time Division Duplexing"></field>
+				<field name="NPF_F_WMAX_PHY_DUPLEXING_TYPE_FDD_FULL" brief="Frequency Division Duplexing - FULL"></field>
+				<field name="NPF_F_WMAX_PHY_DUPLEXING_TYPE_FDD_HALF" brief="Frequency Division Duplexing - HALF"></field>
+			</enum>
+
+			<enum type="NPF_F_wmaxPhyType_t" brief="PHY Type">
+				<descr>
+					Identifies kind of PHY.
+				</descr>
+				<field name="NPF_F_WMAX_PHY_TYPE_OFDM" brief="Identifies OFDM PHY."></field>
+				<field name="NPF_F_WMAX_PHY_TYPE_OFDMA" brief="Identifies OFDMA PHY."></field>
+			</enum>
+
+
+			<struct type="NPF_F_wmaxPhyOfdmConfigArgs_t" brief="PHY Configuration Arguments">
+				<field name="bandwidth" type="NPF_uint16_t" brief="bandwidth kHz; valid values: 1750, 3500, 5000, 7000, 10000"></field>
+				<field name="duplexMode" type="NPF_F_wmaxPhyDuplexingType_t" brief="duplex mode(TDD/FDD/..)"></field>
+				<field name="FTTSize" type="NPF_uint16_t" brief="FTT point size; valid values: 256"></field>
+				<field name="cyclicPrefixSize" type="NPF_uint16_t" brief="CP Reciprocal  e.g. 1/32 = 32; valid values: 32, 16, 8, 4"></field>
+				<field name="frameSyncAdv" type="NPF_uint16_t" brief="Amount of time (in units of usec) frame sync interrupt is sent in advance of start of DL frame on air interface"></field>
+ 			</struct>
+
+			<define brief="Phy Ofmda Options Sizes">
+				<descr>
+					Describe the Phy Modulation Ofdma Options Sizes.
+				</descr>
+				<field name="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_DL_SUBCH_SZ" brief="size for phyConfig.ofdmaConfig.dlUsedSubchannels">
+					<value>60</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_DL_SUBCH_AMC_SZ" brief="size for phyConfig.ofdmaConfig.dlAllocatedSubchannelsAMC">
+					<value>48</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_DL_SUBCH_TUSC1_SZ" brief="size for phyConfig.ofdmaConfig.dlAllocatedSubchannelsTUSC1">
+					<value>70</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_DL_SUBCH_TUSC2_SZ" brief="size for phyConfig.ofdmaConfig.dlAllocatedSubchannelsTUSC2">
+					<value>96</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_UL_SUBCH_SZ" brief="size for phyConfig.ofdmaConfig.ulUsedSubchannels">
+					<value>70</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_UL_SUBCH_PUSC_SZ" brief="size for phyConfig.ofdmaConfig.ulAllocatedSubchannelsPUSC">
+					<value>96</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_UL_SUBCH_AMC_SZ" brief="size for phyConfig.ofdmaConfig.ulAllocatedSubchannelsAMC">
+					<value>48</value>
+				</field>
+			</define>
+
+			<struct type="NPF_F_wmaxPhyOfdmaConfigArgs_t" brief="PHY Configuration Arguments">
+				<field name="duplexMode" type="NPF_F_wmaxPhyDuplexingType_t" brief="duplex mode(TDD/FDD)"></field>
+				<field name="cyclicPrefixSize" type="NPF_uint16_t" brief="CP Reciprocal  e.g. 1/32 = 32; valid values: 32, 16, 8, 4"></field>
+				<field name="frameDuration" type="NPF_uint16_t" brief="Frame duration in usec"></field>
+				<field name="HCSCRCGenerationChecking" type="NPF_boolean_t" brief="Flag indicating if the PHY should perform CRC and HCS generation and checking "></field>
+				<field name="dlUsedSubchannels" type="NPF_boolean_t" size="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_DL_SUBCH_SZ" brief="Flags indicating used subchannels in the downlink, FALSE = not available, TRUE = available. Subchannels ranges: 0->59 FFT 2048, 0->29 FFT 1024, 0->14 FFT 512, 0->2 FFT 128"></field>
+				<field name="dlAllocatedSubchannelsAMC" type="NPF_boolean_t" size="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_DL_SUBCH_AMC_SZ" brief="Flags indicating used bands in the downlink for AMC, FALSE = not available, TRUE = available. Subchannels ranges: 0->47 FFT 2048, 0->23 FFT 1024, 0->11 FFT 512, 0->2 FFT 128"></field>
+				<field name="dlAllocatedSubchannelsTUSC1" type="NPF_boolean_t" size="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_DL_SUBCH_TUSC1_SZ" brief="Flags indicating used bands in the downlink for TUSC1, FALSE = not available, TRUE = available. Subchannels ranges: 0->69 FFT 2048, 0->34 FFT 1024, 0->16 FFT 512, 0->3 FFT 128"></field>
+				<field name="dlAllocatedSubchannelsTUSC2" type="NPF_boolean_t" size="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_DL_SUBCH_TUSC2_SZ" brief="Flags indicating used bands in the downlink for TUSC2, FALSE = not available, TRUE = available. Subchannels ranges: 0->95 FFT 2048, 0->47 FFT 1024, 0->23 FFT 512, 0->5 FFT 128"></field>
+				<field name="ulUsedSubchannels" type="NPF_boolean_t" size="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_UL_SUBCH_SZ" brief="Flags indicating used bands in the uplink for PUSC, FALSE = not available, TRUE = available. Subchannels ranges: 0->69 FFT 2048, 0->34 FFT 1024, 0->16 FFT 512, 0->3 FFT 128"></field>
+				<field name="ulAllocatedSubchannelsPUSC" type="NPF_boolean_t" size="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_UL_SUBCH_PUSC_SZ" brief="Flags indicating used subchannels in the uplink for optional PUSC, FALSE = not available, TRUE = available. Subchannels ranges: 0->96 FFT 2048, 0->47 FFT 1024, 0->23 FFT 512, 0->5 FFT 128"></field>
+				<field name="ulAllocatedSubchannelsAMC" type="NPF_boolean_t" size="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_UL_SUBCH_AMC_SZ" brief="Flags indicating used bands in the uplink for AMC, FALSE = not available, TRUE = available. Subchannels ranges: 0->48 FFT 2048, 0->23 FFT 1024, 0->11 FFT 512, 0->2 FFT 128"></field>
+				<field name="initialRangingCodes" type="NPF_uint16_t" brief="Number of CDMA codes for initial ranging."></field>
+				<field name="periodicRangingCodes" type="NPF_uint16_t" brief="Number of CDMA codes for periodic ranging."></field>
+				<field name="bandwidthRequestCodes" type="NPF_uint16_t" brief="Number of CDMA codes for bandwidth request."></field>
+				<field name="handoverRequestCodes" type="NPF_uint16_t" brief="Number of CDMA codes for handover ranging."></field>
+				<field name="startOfRangingCodes" type="NPF_uint16_t" brief="Start number of the available CMDA codes."></field>
+				<field name="frameIndicationAdvance" type="NPF_uint16_t" brief="Amount of time (in units of 100 sec) TXSTART.indication, and the frame sync interrupt, for frame N is sent in advance of frame N beginning transmission on the air interface."></field>
+				<field name="cellID" type="NPF_uint8_t" brief="Cell ID."></field>
+				<field name="segmentID" type="NPF_uint8_t" brief="Segment ID."></field>
+				<field name="preambleIndex" type="NPF_uint16_t" brief="The preamble index for the downlink. N.B The combination of IDCell and SegmentID does
+not always produce a unique preamble index, so the MAC must provide this value aswell."></field>
+				<field name="rssiOffset" type="NPF_uint8_t" brief="RSSI power offset, signed in 0.5dB steps (0 = 0dB). This should be used to adjust reported RSSI power levels to RF unit settings."></field>
+                        </struct>
+			<struct type="NPF_F_wmaxPhyOfdmaUcdDcdArgs_t" brief="PHY Ucd Dcd Arguments">
+				<field name="phyConfigMask" type="NPF_uint32_t" brief="Bit Mask of valid PHY Ucd Dcd / config args."></field>
+				<field name="txFrameNumber" type="NPF_uint8_t" brief="Tx Frame number"></field>
+				<field name="rxFrameNumber" type="NPF_uint8_t" brief="Rx Frame number"></field>
+				<field name="dlUsedSubchannels" type="NPF_boolean_t" size="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_DL_SUBCH_SZ" brief="Flags indicating used subchannels in the downlink, FALSE = not available, TRUE = available. Subchannels ranges: 0->59 FFT 2048, 0->29 FFT 1024, 0->14 FFT 512, 0->2 FFT 128"></field>
+				<field name="dlAllocatedSubchannelsAMC" type="NPF_boolean_t" size="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_DL_SUBCH_AMC_SZ" brief="Flags indicating used bands in the downlink for AMC, FALSE = not available, TRUE = available. Subchannels ranges: 0->47 FFT 2048, 0->23 FFT 1024, 0->11 FFT 512, 0->2 FFT 128"></field>
+				<field name="dlAllocatedSubchannelsTUSC1" type="NPF_boolean_t" size="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_DL_SUBCH_TUSC1_SZ" brief="Flags indicating used bands in the downlink for TUSC1, FALSE = not available, TRUE = available. Subchannels ranges: 0->69 FFT 2048, 0->34 FFT 1024, 0->16 FFT 512, 0->3 FFT 128"></field>
+				<field name="dlAllocatedSubchannelsTUSC2" type="NPF_boolean_t" size="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_DL_SUBCH_TUSC2_SZ" brief="Flags indicating used bands in the downlink for TUSC2, FALSE = not available, TRUE = available. Subchannels ranges: 0->95 FFT 2048, 0->47 FFT 1024, 0->23 FFT 512, 0->5 FFT 128"></field>
+				<field name="ulUsedSubchannels" type="NPF_boolean_t" size="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_UL_SUBCH_SZ" brief="Flags indicating used bands in the uplink for PUSC, FALSE = not available, TRUE = available. Subchannels ranges: 0->69 FFT 2048, 0->34 FFT 1024, 0->16 FFT 512, 0->3 FFT 128"></field>
+				<field name="ulAllocatedSubchannelsPUSC" type="NPF_boolean_t" size="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_UL_SUBCH_PUSC_SZ" brief="Flags indicating used subchannels in the uplink for optional PUSC, FALSE = not available, TRUE = available. Subchannels ranges: 0->96 FFT 2048, 0->47 FFT 1024, 0->23 FFT 512, 0->5 FFT 128"></field>
+				<field name="ulAllocatedSubchannelsAMC" type="NPF_boolean_t" size="NPF_F_WMAX_PHY_OFDMA_CFG_TYPE_UL_SUBCH_AMC_SZ" brief="Flags indicating used bands in the uplink for AMC, FALSE = not available, TRUE = available. Subchannels ranges: 0->48 FFT 2048, 0->23 FFT 1024, 0->11 FFT 512, 0->2 FFT 128"></field>
+				<field name="initialRangingCodes" type="NPF_uint16_t" brief="Number of CDMA codes for initial ranging."></field>
+				<field name="periodicRangingCodes" type="NPF_uint16_t" brief="Number of CDMA codes for periodic ranging."></field>
+				<field name="bandwidthRequestCodes" type="NPF_uint16_t" brief="Number of CDMA codes for bandwidth request."></field>
+				<field name="handoverRequestCodes" type="NPF_uint16_t" brief="Number of CDMA codes for handover ranging."></field>
+				<field name="startOfRangingCodes" type="NPF_uint16_t" brief="Start number of the available CMDA codes."></field>
+                        </struct>
+		</section>
+
+		<section name="PHY Add">
+			<struct type="NPF_F_wmaxPhyAddArgs_t" brief="Add PHY Instance Arguments">
+				<descr>
+					This structure defines the PHY ID Adding a PHY instance.
+				</descr>
+					<field name="deviceID" type="NPF_uint8_t" brief="Phy device ID"></field>
+			</struct>
+			
+			<func name="NPF_F_wmaxPhyAdd" type="NPF_error_t" brief="Add PHY Instance" xdrid="RPC_WMAX_PHY_ADD">
+				<descr>
+					This function adds a PHY instance
+				</descr>
+				<param io="in" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+					<descr>
+						Identifies the callback function to be called when the operation completes
+					</descr>
+				</param>
+				<param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+					<descr>
+						A unique application invocation context that will be supplied to the callback function
+					</descr>
+				</param>
+				<param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+					<descr>
+						Defines whether a callback will be called after completing the action requested by the function call.
+					</descr>
+				</param>
+				<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+					<descr>
+						Identifies the forwarding element where the action will be executed.  This handle is obtained during RPC connection establishment.
+					</descr>
+				</param>
+				<param io="in" type="NPF_F_wmaxPhyAddArgs_t *" name="phyAddArgs">
+					<descr>
+						PHY Instance Add Arguments
+					</descr>
+				</param>
+				<return>
+					<descr>
+						Error code indicating whether function call was successful.
+					</descr>
+					<retval name="NPF_NO_ERROR">
+						<descr>
+							The operation is in progress.
+						</descr>
+					</retval>
+					<retval name="NPF_E_BAD_CALLBACK_HANDLE">
+						<descr>
+							The callback handle is invalid.
+					</descr>
+					</retval>
+					<retval name="NPF_E_UNKNOWN">
+						<descr>
+							The operation cannot be completed successfully because
+							of problems encountered when handling the input parameters.
+						</descr>
+					</retval>
+				</return>
+				<callback>
+					<descr>
+						If errorReporting is set to ALWAYS, a callback is invoked to
+						indicate that the operation has been completed. The callback
+						is identified by NPF_F_WMAX_PHY_ASYNC_RESPONSE_ADD.
+					</descr>
+					<retval name="NPF_NO_ERROR" brief="Operation completed successfully."></retval>
+					<retval name="NPF_F_WMAX_PHY_ERROR_INVALID_PARAMS" brief="Invalid parameter."></retval>
+				</callback>
+			</func>
+
+			<define brief="Phy Duplex Options">
+				<descr>
+					These bits describe the Phy Duplex Options.
+					See NPF_F_wmaxPhyOfdmCapabilites_t.duplexOptionsMask / NPF_F_wmaxPhyOfdmaCapabilites_t.duplexOptionsMask
+				</descr>
+				<field name="NPF_F_WMAX_PHY_DUPLEXING_TDD" brief="TDD supported.">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_DUPLEXING_TYPE_TDD)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DUPLEXING_FDD_FULL" brief="FDD Full supported.">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_DUPLEXING_TYPE_FDD_FULL)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DUPLEXING_FDD_HALF" brief="FDD Half supported.">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_DUPLEXING_TYPE_FDD_HALF)</value>
+				</field>
+			</define>
+
+			<define brief="Phy FFT Size Options">
+				<descr>
+					These bits describe the FFT size options.
+					See NPF_F_wmaxPhyOfdmCapabilites_t.FFTOptionsMask / NPF_F_wmaxPhyOfdmaCapabilites_t.FFTOptionsMask
+				</descr>
+				<field name="NPF_F_WMAX_PHY_FFT_SZ_128" brief="FFT Size 128 supported.">
+					<value>(1 &lt;&lt; 7)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_FFT_SZ_256" brief="FFT Size 256 supported.">
+					<value>(1 &lt;&lt; 8)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_FFT_SZ_512" brief="FFT Size 512 supported.">
+					<value>(1 &lt;&lt; 9)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_FFT_SZ_1024" brief="FFT Size 1024 supported.">
+					<value>(1 &lt;&lt; 10)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_FFT_SZ_2048" brief="FFT Size 2048 supported.">
+					<value>(1 &lt;&lt; 11)</value>
+				</field>
+			</define>
+
+
+			<define brief="Phy Bandwidth Options">
+				<descr>
+					These bits describe the Phy bandwidth Options.
+					See NPF_F_wmaxPhyOfdmaCapabilites_t.bandwidthOptionsMask
+				</descr>
+				<field name="NPF_F_WMAX_PHY_BW_1_75" brief="1.75">
+					<value>(1 &lt;&lt; 0)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_BW_3_5" brief="3.5">
+					<value>(1 &lt;&lt; 1)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_BW_5_0" brief="5">
+					<value>(1 &lt;&lt; 2)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_BW_7_0" brief="7">
+					<value>(1 &lt;&lt; 3)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_BW_10_0" brief="10">
+					<value>(1 &lt;&lt; 4)</value>
+				</field>
+			</define>
+
+			<define brief="Phy Frame duration Options">
+				<descr>
+					These bits describe the Phy frame duration Options.
+					See NPF_F_wmaxPhyOfdmaCapabilites_t.fdOptionsMask
+				</descr>
+				<field name="NPF_F_WMAX_PHY_FD_2_5" brief="2.5">
+					<value>(1 &lt;&lt; 0)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_FD_4_0" brief="4">
+					<value>(1 &lt;&lt; 1)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_FD_5_0" brief="5">
+					<value>(1 &lt;&lt; 2)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_FD_8_0" brief="8">
+					<value>(1 &lt;&lt; 3)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_FD_10_0" brief="10">
+					<value>(1 &lt;&lt; 4)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_FD_12_5" brief="12.5">
+					<value>(1 &lt;&lt; 5)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_FD_20_0" brief="20">
+					<value>(1 &lt;&lt; 6)</value>
+				</field>
+			</define>
+
+
+			<define brief="Phy Modulation Options">
+				<descr>
+					These bits describe the Phy Modulation Options.
+					See NPF_F_wmaxPhyOfdmCapabilites_t.modulationOptionsMask
+				</descr>
+				<field name="NPF_F_WMAX_PHY_MOD_64_QAM" brief="QAM 64 supported.">
+					<value>(1 &lt;&lt; 0)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_MOD_BTC" brief="BTC supported.">
+					<value>(1 &lt;&lt; 1)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_MOD_CTC" brief="CTC supported.">
+					<value>(1 &lt;&lt; 2)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_MOD_STC" brief="STC supported.">
+					<value>(1 &lt;&lt; 3)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_MOD_HARQ" brief="H-ARQ supported.">
+					<value>(1 &lt;&lt; 4)</value>
+				</field>
+			</define>
+
+			<define brief="Phy Rate IDs">
+				<descr>
+					These bits describe the Phy Rate ID Options (table 224).
+					See NPF_F_wmaxPhyOfdmCapabilites_t.rateIdOptionsMask
+				</descr>
+				<field name="NPF_F_WMAX_PHY_RATE_ID_BPSK_1_2" brief="rate ID BPSK 1/2 supported.">
+					<value>(1 &lt;&lt; 0)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_RATE_ID_QPSK_1_2" brief="rate ID QPSK 1/2 supported.">
+					<value>(1 &lt;&lt; 1)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_RATE_ID_QPSK_3_4" brief="rate ID QPSK 3/4 supported.">
+					<value>(1 &lt;&lt; 2)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_RATE_ID_QAM16_1_2" brief="rate ID QAM-16 1/2 supported.">
+					<value>(1 &lt;&lt; 3)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_RATE_ID_QAM16_3_4" brief="rate ID QAM-16 3/4 supported.">
+					<value>(1 &lt;&lt; 4)</value>
+				</field>
+			</define>
+
+
+			<define brief="Phy FEC type and  Modulation Options">
+				<descr>
+					These bits describe the Phy FEC type and Modulation Options.
+					See NPF_F_wmaxPhyOfdmaCapabilites_t.modulationOptionsMask
+				</descr>
+                                <field name="NPF_F_WMAX_PHY_MOD_QPSK_CC12" brief="QPSK (CC) 1/2">
+					<value>(1 &lt;&lt; 0)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QPSK_CC34" brief="QPSK (CC) 3/4">
+					<value>(1 &lt;&lt; 1)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_16_CC12" brief="16-QAM (CC) 1/2">
+					<value>(1 &lt;&lt; 2)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_16_CC34" brief="16-QAM (CC) 3/4">
+					<value>(1 &lt;&lt; 3)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_CC12" brief="64-QAM (CC) 1/2">
+					<value>(1 &lt;&lt; 4)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_CC23" brief="64-QAM (CC) 2/3">
+					<value>(1 &lt;&lt; 5)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_CC34" brief="64-QAM (CC) 3/4">
+					<value>(1 &lt;&lt; 6)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QPSK_BTC12" brief="QPSK (BTC) 1/2">
+					<value>(1 &lt;&lt; 7)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QPSK_BTC34_23" brief="QPSK (BTC) 3/4">
+					<value>(1 &lt;&lt; 8)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_16_BTC35" brief="16-QAM (BTC) 3/5">
+					<value>(1 &lt;&lt; 9)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_16_BTC45" brief="16-QAM (BTC) 4/5">
+					<value>(1 &lt;&lt; 10)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_BTC23_58" brief="64-QAM (BTC) 5/8">
+					<value>(1 &lt;&lt; 11)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_BTC56_45" brief="64-QAM (BTC) 4/5">
+					<value>(1 &lt;&lt; 12)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QPSK_CTC12" brief="QPSK (CTC) 1/2">
+					<value>(1 &lt;&lt; 13)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_RESERVED" brief="RESERVED">
+					<value>(1 &lt;&lt; 14)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QPSK_CTC34" brief="QPSK (CTC) 3/4">
+					<value>(1 &lt;&lt; 15)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_16_CTC12" brief="16-QAM (CTC) 1/2">
+					<value>(1 &lt;&lt; 16)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_16_CTC34" brief="16-QAM (CTC) 3/4">
+					<value>(1 &lt;&lt; 17)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_CTC12" brief="64-QAM (CTC) 1/2">
+					<value>(1 &lt;&lt; 18)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_CTC23" brief="64-QAM (CTC) 2/3">
+					<value>(1 &lt;&lt; 19)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_CTC34" brief="64-QAM (CTC) 3/4">
+					<value>(1 &lt;&lt; 20)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_CTC56" brief="64-QAM (CTC) 5/6">
+					<value>(1 &lt;&lt; 21)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QPSK_ZTCC12" brief="QPSK (ZT CC) 1/2">
+					<value>(1 &lt;&lt; 22)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QPSK_ZTCC34" brief="QPSK (ZT CC) 3/4">
+					<value>(1 &lt;&lt; 23)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_16_ZTCC12" brief="16-QAM (ZT CC) 1/2">
+					<value>(1 &lt;&lt; 24)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_16_ZTCC34" brief="16-QAM (ZT CC) 3/4">
+					<value>(1 &lt;&lt; 25)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_ZTCC12" brief="64-QAM (ZT CC) 1/2">
+					<value>(1 &lt;&lt; 26)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_ZTCC23" brief="64-QAM (ZT CC) 2/3">
+					<value>(1 &lt;&lt; 27)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_ZTCC34" brief="64-QAM (ZT CC) 3/4">
+					<value>(1 &lt;&lt; 28)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QPSK_LDPC12" brief="QPSK (LDPC) 1/2">
+					<value>(1 &lt;&lt; 29)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QPSK_LDPC23A" brief="QPSK (LDPC) 2/3 A code">
+					<value>(1 &lt;&lt; 30)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QPSK_LDPC34A" brief="QPSK (LDPC) 3/4 A code">
+					<value>(1 &lt;&lt; 31)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_16_LDPC12" brief="16-QAM (LDPC) 1/2">
+					<value>(1 &lt;&lt; 32)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_16_LDPC23A" brief="16-QAM (LDPC) 2/3 A code">
+					<value>(1 &lt;&lt; 33)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_16_LDPC34A" brief="16-QAM (LDPC) 3/4 A code">
+					<value>(1 &lt;&lt; 34)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_LDPC12" brief="64-QAM (LDPC) 1/2">
+					<value>(1 &lt;&lt; 35)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_LDPC23A" brief="64-QAM (LDPC) 2/3 A code">
+					<value>(1 &lt;&lt; 36)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_LDPC34A" brief="64-QAM (LDPC) 3/4 A code">
+					<value>(1 &lt;&lt; 37)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QPSK_LDPC23B" brief="QPSK (LDPC) 2/3 B code">
+					<value>(1 &lt;&lt; 38)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QPSK_LDPC34B" brief="QPSK (LDPC) 3/4 B code">
+					<value>(1 &lt;&lt; 39)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_16_LDPC23B" brief="16-QAM (LDPC) 2/3 B code">
+					<value>(1 &lt;&lt; 40)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_16_LDPC34B" brief="16-QAM (LDPC) 3/4 B code">
+					<value>(1 &lt;&lt; 41)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_LDPC23B" brief="64-QAM (LDPC) 2/3 B code">
+					<value>(1 &lt;&lt; 42)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_LDPC34B" brief="64-QAM (LDPC) 3/4 B code">
+					<value>(1 &lt;&lt; 43)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QPSK_CCOI12" brief="QPSK (CC optional interleaver) 1/2">
+					<value>(1 &lt;&lt; 44)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QPSK_CCOI34" brief="QPSK (CC optional interleaver) 3/4">
+					<value>(1 &lt;&lt; 45)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_16_CCOI12" brief="16-QAM (CC optional interleaver) 1/2">
+					<value>(1 &lt;&lt; 46)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_16_CCOI34" brief="16-QAM (CC optional interleaver) 3/4">
+					<value>(1 &lt;&lt; 47)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_CCOI23" brief="64-QAM (CC optional interleaver) 2/3">
+					<value>(1 &lt;&lt; 48)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_CCOI34" brief="64-QAM (CC optional interleaver) 3/4">
+					<value>(1 &lt;&lt; 49)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QPSK_LDPC56" brief="QPSK (LDPC) 5/6">
+					<value>(1 &lt;&lt; 50)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_16_LDPC56" brief="16-QAM (LDPC) 5/6">
+					<value>(1 &lt;&lt; 51)</value>
+				</field>
+                                <field name="NPF_F_WMAX_PHY_MOD_QAM_64_LDPC56" brief="64-QAM (LDPC) 5/6">
+					<value>(1 &lt;&lt; 52)</value>
+				</field>
+			</define>
+
+			<define brief="Phy downlink subcarrier alocation options">
+				<descr>
+					These bits describe the downlink subcarrier allocations options (PUSC, FUSC etc).
+					See NPF_F_wmaxPhyOfdmaCapabilites_t.DLSubcarrierAllocationMask
+				</descr>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_PUSC" brief="PUSC">
+					<value>(1 &lt;&lt; 0)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_PUSC_ALL_SUB" brief="PUSC with all subchannels">
+					<value>(1 &lt;&lt; 1)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_PUSC_ALL_PILOTS" brief="PUSC with dedicated pilots">
+					<value>(1 &lt;&lt; 2)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_FUSC" brief="FUSC">
+					<value>(1 &lt;&lt; 3)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_FUSC_ALL" brief="FUSC with dedicated pilots">
+					<value>(1 &lt;&lt; 4)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_OPTIONAL_FUSC" brief="Optional FUSC">
+					<value>(1 &lt;&lt; 5)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_OPTIONAL_FUSC_ALL" brief="Optional FUSC with dedicated pilots">
+					<value>(1 &lt;&lt; 6)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_AMC16" brief="AMC 1x6">
+					<value>(1 &lt;&lt; 7)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_AMC23" brief="AMC 2x3">
+					<value>(1 &lt;&lt; 8)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_AMC32" brief="AMC 3x2">
+					<value>(1 &lt;&lt; 9)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_DEFAULT_AMC" brief="Default AMC (HARQ MAP only)">
+					<value>(1 &lt;&lt; 10)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_AMC16_PILOTS" brief="AMC 1x6 with dedicated pilots">
+					<value>(1 &lt;&lt; 11)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_AMC23_PILOTS" brief="AMC 2x3 with dedicated pilots">
+					<value>(1 &lt;&lt; 12)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_AMC32_PILOTS" brief="AMC 3x2 with dedicated pilots">
+					<value>(1 &lt;&lt; 13)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_PUSC_ASCA" brief="PUSC-ASCA">
+					<value>(1 &lt;&lt; 14)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_TUSC1_PERM" brief="TUSC1 permutation support">
+					<value>(1 &lt;&lt; 15)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_DL_SUBCARRIER_ALLOC_TUSC2_PERM" brief="TUSC2 permutation support">
+					<value>(1 &lt;&lt; 16)</value>
+				</field>
+			</define>
+
+			<define brief="Phy uplink subcarrier alocation options">
+				<descr>
+					These bits describe uplink subcarrier allocations options.
+					See NPF_F_wmaxPhyOfdmaCapabilites_t.ULSubcarrierAllocationMask
+				</descr>
+				<field name="NPF_F_WMAX_PHY_UL_SUBCARRIER_ALLOC_PUSC" brief="PUSC">
+					<value>(1 &lt;&lt; 0)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_UL_SUBCARRIER_ALLOC_OPTIONAL_PUSC" brief="Optional PUSC">
+					<value>(1 &lt;&lt; 1)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_UL_SUBCARRIER_ALLOC_AMC16" brief="AMC 1x6">
+					<value>(1 &lt;&lt; 2)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_UL_SUBCARRIER_ALLOC_AMC23" brief="AMC 2x3">
+					<value>(1 &lt;&lt; 3)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_UL_SUBCARRIER_ALLOC_AMC32" brief="AMC 3x2">
+					<value>(1 &lt;&lt; 4)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_UL_SUBCARRIER_ALLOC_MINI_SUB" brief="mini-subchannel">
+					<value>(1 &lt;&lt; 5)</value>
+				</field>
+			</define>
+
+			<define brief="Phy initial / handover ranging options">
+				<descr>
+					These bits describe zones and number of symbols initial ranging options.
+					See NPF_F_wmaxPhyOfdmaCapabilites_t.initialHORanging
+				</descr>
+				<field name="NPF_F_WMAX_PHY_INIT_HO_RNG_PUSC_2" brief="PUSC zone with 2 symbols">
+					<value>(1 &lt;&lt; 0)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_INIT_HO_RNG_PUSC_4" brief="PUSC zone with 4 symbols">
+					<value>(1 &lt;&lt; 1)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_INIT_HO_RNG_OPTIONAL_PUSC_2" brief="Optional PUSC zone with 2 symbols">
+					<value>(1 &lt;&lt; 2)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_INIT_HO_RNG_OPTIONAL_PUSC_4" brief="Optional PUSC zone with 4 symbols">
+					<value>(1 &lt;&lt; 3)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_INIT_HO_RNG_AMC_2" brief="AMC zone with 2 symbols">
+					<value>(1 &lt;&lt; 4)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_INIT_HO_RNG_AMC_4" brief="AMC zone with 4 symbols">
+					<value>(1 &lt;&lt; 5)</value>
+				</field>
+			</define>
+
+			<define brief="Phy bandwidth request / ranging options">
+				<descr>
+					These bits describe zones and number of symbols bandwidth request ranging options.
+					See NPF_F_wmaxPhyOfdmaCapabilites_t.bandwidthRequestRanging
+				</descr>
+				<field name="NPF_F_WMAX_PHY_INIT_BW_REQ_RNG_PUSC_1" brief="PUSC zone with 1 symbols">
+					<value>(1 &lt;&lt; 0)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_INIT_BW_REQ_RNG_PUSC_3" brief="PUSC zone with 3 symbols">
+					<value>(1 &lt;&lt; 1)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_INIT_BW_REQ_RNG_OPTIONAL_PUSC_1" brief="Optional PUSC zone with 1 symbols">
+					<value>(1 &lt;&lt; 2)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_INIT_BW_REQ_RNG_OPTIONAL_PUSC_3" brief="Optional PUSC zone with 3 symbols">
+					<value>(1 &lt;&lt; 3)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_INIT_BW_REQ_RNG_AMC_1" brief="AMC zone with 1 symbols">
+					<value>(1 &lt;&lt; 4)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_INIT_BW_REQ_RNG_AMC_3" brief="AMC zone with 3 symbols">
+					<value>(1 &lt;&lt; 5)</value>
+				</field>
+			</define>
+
+
+			<struct type="NPF_F_wmaxPhyOfdmCapabilites_t" brief="PHY Capabilities">
+				<field name="duplexOptionsMask" type="NPF_uint8_t" brief="Bit Mask of duplex types(TDD/FDD/..)"></field>
+				<field name="FTTOptionsMask" type="NPF_uint16_t" brief="Bit Mask of FTT point size"></field>
+				<field name="modulationOptionsMask" type="NPF_uint8_t" brief="Bit mask of Modulation Options"></field>
+				<field name="rateIdOptionsMask" type="NPF_uint8_t" brief="Bit mask of Rate Id Options"></field>
+				<field name="stcDiversity" type="NPF_uint8_t" brief="Number of STC Tx antennas (1=no diversity)"></field>
+				<field name="mrcDiversity" type="NPF_uint8_t" brief="Number of MRC Rx antennas (1=no diversity)"></field>
+			</struct>
+
+			<struct type="NPF_F_wmaxPhyOfdmaCapabilites_t" brief="PHY Capabilities">
+				<field name="bwOptionsMask" type="NPF_uint16_t" brief="Bit Mask for Bandwidth"></field>
+				<field name="duplexOptionsMask" type="NPF_uint16_t" brief="Bit Mask of duplex types(TDD/FDD)"></field>
+				<field name="FFTOptionsMask" type="NPF_uint16_t" brief="Bit Mask of FFT point size"></field>
+				<field name="stcDiversity" type="NPF_uint16_t" brief="Number of STC Tx antennas (1=no diversity)"></field>
+				<field name="cpOptionsMask" type="NPF_uint16_t" brief="Bit Mask of Cyclic Prefix options"></field>
+				<field name="fdOptionsMask" type="NPF_uint16_t" brief="Bit Mask of frame duration options"></field>
+				<field name="commonSyncSymbolSupport" type="NPF_boolean_t" brief="Flag indicating if the PHY supports common sync symbol. FALSE = not supported, TRUE=supported."></field>
+				<field name="TTG" type="NPF_uint16_t" brief="TTG"></field>
+				<field name="RTG" type="NPF_uint16_t" brief="RTG"></field>
+				<field name="DLBurstProfilesMask" type="NPF_uint64_t" brief="Bit Mask of downlink FEC code types and modulation"></field>
+				<field name="ULBurstProfilesMask" type="NPF_uint64_t" brief="Bit Mask of uplink FEC code types and modulation"></field>
+				<field name="DLSubcarrierAllocationMask" type="NPF_uint32_t" brief="Bit Mask of downlink subcarrier allocation"></field>
+				<field name="ULSubcarrierAllocationMask" type="NPF_uint32_t" brief="Bit Mask of uplink subcarrier allocation"></field>
+				<field name="initialHORanging" type="NPF_uint8_t" brief="Bit Mask of initial / handover ranging"></field>
+				<field name="bandwidthRequestRanging" type="NPF_uint8_t" brief="Bit Mask of bandwidth request / periodic ranging"></field>
+				<field name="HARQSupport" type="NPF_uint16_t" brief="Flags indicating which optional features of HARQ are supported"></field>
+				<field name="DLAASSupport" type="NPF_uint16_t" brief="Flags indicating which optional features of AAS are supported"></field>
+				<field name="ULAASSupport" type="NPF_uint16_t" brief="Flags indicating which optional features of AAS are supported"></field>
+				<field name="DLMIMOSupport" type="NPF_uint16_t" brief="Flags indicating which optional features of MIMO are supported"></field>
+				<field name="ULMIMOSupport" type="NPF_uint16_t" brief="Flags indicating which optional features of MIMO are supported"></field>
+			</struct>
+
+			<struct type="NPF_F_wmaxPhyAddRspArgs_t" brief="Add PHY Instance Response Arguments">
+				<descr>
+					Asynchronous response for NPF_F_wmaxPhyAdd.
+				</descr>
+				<see>NPF_F_wmaxPhyAdd</see>
+				<field name="deviceID" type="NPF_uint8_t" brief="PHY device ID"></field>
+				<field name="phyHandle" type="NPF_F_wmaxPhyHandle_t" brief="PHY Instance Handle"></field>
+				<selectunion type="NPF_F_wmaxPhySpecificCapabilitesUnion_t" name="phyCaps" brief="PHY capabilities">
+					<selectfield type="NPF_F_wmaxPhyType_t" name="phyType" brief="Type of PHY."></selectfield>
+					<field type="NPF_F_wmaxPhyOfdmCapabilites_t" name="ofdmCaps">
+						<descr>OFDM specific parameters.</descr>
+						<selector>NPF_F_WMAX_PHY_TYPE_OFDM</selector>
+					</field>
+					<field type="NPF_F_wmaxPhyOfdmaCapabilites_t" name="ofdmaCaps">
+						<descr>OFDMA specific parameters.</descr>
+						<selector>NPF_F_WMAX_PHY_TYPE_OFDMA</selector>
+					</field>
+				</selectunion>
+			</struct>
+		</section>
+					
+		<section name="PHY Start">
+			<struct type="NPF_F_wmaxPhyStartArgs_t" brief="Start PHY Instance Arguments">
+				<descr>
+					This structure defines parameters required to start a PHY instance.
+				</descr>
+				<field name="phyHandle" type="NPF_F_wmaxPhyHandle_t" brief="PHY Instance Handle"></field>
+			</struct>
+
+			<func name="NPF_F_wmaxPhyStart" type="NPF_error_t" brief="Start PHY Instance" xdrid="RPC_WMAX_PHY_START">
+				<descr>
+					This function starts a PHY instance.
+				</descr>
+				<param io="in" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+					<descr>
+						Identifies the callback function to be called when the operation completes
+					</descr>
+				</param>
+				<param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+					<descr>
+						A unique application invocation context that will be supplied to the callback function
+					</descr>
+				</param>
+				<param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+					<descr>
+						Defines whether a callback will be called after completing the action requested by the function call.
+					</descr>
+				</param>
+				<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+					<descr>
+						Identifies the forwarding element where the action will be executed.  This handle is obtained during RPC connection establishment.
+					</descr>
+				</param>
+				<param io="in" type="NPF_F_wmaxPhyStartArgs_t *" name="phyStartArgs">
+					<descr>
+						PHY Instance Start Arguments
+					</descr>
+				</param>
+				<return>
+					<descr>
+						Error code indicating whether function call was successful.
+					</descr>
+					<retval name="NPF_NO_ERROR">
+						<descr>
+							The operation is in progress.
+						</descr>
+					</retval>
+					<retval name="NPF_E_BAD_CALLBACK_HANDLE">
+						<descr>
+							The callback handle is invalid.
+					</descr>
+					</retval>
+					<retval name="NPF_E_UNKNOWN">
+						<descr>
+							The operation cannot be completed successfully because
+							of problems encountered when handling the input parameters.
+						</descr>
+					</retval>
+				</return>
+				<callback>
+					<descr>
+						If errorReporting is set to ALWAYS, a callback is invoked to
+						indicate that the operation has been completed. The callback
+						is identified by NPF_F_WMAX_PHY_ASYNC_RESPONSE_START.
+					</descr>
+					<retval name="NPF_NO_ERROR" brief="Operation completed successfully."></retval>
+					<retval name="NPF_F_WMAX_PHY_ERROR_INVALID_PARAMS" brief="Invalid parameter."></retval>
+				</callback>
+			</func>
+		</section>
+					
+		<section name="PHY Stop">
+			<struct type="NPF_F_wmaxPhyStopArgs_t" brief="Stop PHY Instance Arguments">
+				<descr>
+					This structure defines parameters required to stop a PHY instance.
+				</descr>
+				<field name="phyHandle" type="NPF_F_wmaxPhyHandle_t" brief="PHY Instance Handle"></field>
+			</struct>
+			
+			<func name="NPF_F_wmaxPhyStop" type="NPF_error_t" brief="Stop PHY Instance" xdrid="RPC_WMAX_PHY_STOP">
+				<descr>
+					This function stops mac transmission
+				</descr>
+				<param io="in" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+					<descr>
+						Identifies the callback function to be called when the operation completes
+					</descr>
+				</param>
+				<param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+					<descr>
+						A unique application invocation context that will be supplied to the callback function
+					</descr>
+				</param>
+				<param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+					<descr>
+						Defines whether a callback will be called after completing the action requested by the function call.
+					</descr>
+				</param>
+				<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+					<descr>
+						Identifies the forwarding element where the action will be executed.  This handle is obtained during RPC connection establishment.
+					</descr>
+				</param>
+				<param io="in" type="NPF_F_wmaxPhyStopArgs_t *" name="phyStopArgs">
+					<descr>
+						PHY Instance Stop Arguments
+					</descr>
+				</param>
+				<return>
+					<descr>
+						Error code indicating whether function call was successful.
+					</descr>
+					<retval name="NPF_NO_ERROR">
+						<descr>
+							The operation is in progress.
+						</descr>
+					</retval>
+					<retval name="NPF_E_BAD_CALLBACK_HANDLE">
+						<descr>
+							The callback handle is invalid.
+					</descr>
+					</retval>
+					<retval name="NPF_E_UNKNOWN">
+						<descr>
+							The operation cannot be completed successfully because
+							of problems encountered when handling the input parameters.
+						</descr>
+					</retval>
+				</return>
+				<callback>
+					<descr>
+						If errorReporting is set to ALWAYS, a callback is invoked to
+						indicate that the operation has been completed. The callback
+						is identified by NPF_F_WMAX_PHY_ASYNC_RESPONSE_STOP.
+					</descr>
+					<retval name="NPF_NO_ERROR" brief="Operation completed successfully."></retval>
+					<retval name="NPF_F_WMAX_PHY_ERROR_INVALID_PARAMS" brief="Invalid parameter."></retval>
+				</callback>
+			</func>
+		</section>
+
+		<section name="PHY Get Configuration">
+			<struct type="NPF_F_wmaxPhyGetConfigArgs_t" brief="Get PHY Instance Configuration Arguments">
+				<descr>
+					This structure defines PHY parameters that can be changed at run time.
+				</descr>
+				<field name="phyHandle" type="NPF_F_wmaxPhyHandle_t" brief="PHY Instance Handle."></field>
+ 			</struct>
+			<func name="NPF_F_wmaxPhyGetConfig" type="NPF_error_t" brief="Get PHY Instance Configuration" xdrid="RPC_WMAX_PHY_GET_CFG">
+				<descr>
+					This function Gets the configuration for a PHY instance
+				</descr>
+				<param io="in" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+					<descr>
+						Identifies the callback function to be called when the operation completes
+					</descr>
+				</param>
+				<param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+					<descr>
+						A unique application invocation context that will be supplied to the callback function
+					</descr>
+				</param>
+				<param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+					<descr>
+						Defines whether a callback will be called after completing the action requested by the function call.
+					</descr>
+				</param>
+				<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+					<descr>
+						Identifies the forwarding element where the action will be executed.  This handle is obtained during RPC connection establishment.
+					</descr>
+				</param>
+				<param io="in" type="NPF_F_wmaxPhyGetConfigArgs_t *" name="phyGetConfigArgs">
+					<descr>
+						PHY Instance Get Config Arguments
+					</descr>
+				</param>
+				<return>
+					<descr>
+						Error code indicating whether function call was successful.
+					</descr>
+					<retval name="NPF_NO_ERROR">
+						<descr>
+							The operation is in progress.
+						</descr>
+					</retval>
+					<retval name="NPF_E_BAD_CALLBACK_HANDLE">
+						<descr>
+							The callback handle is invalid.
+						</descr>
+					</retval>
+					<retval name="NPF_E_STATE_INACTIVE">
+						<descr>
+							The operation cannot be completed successfully because
+							the add request for this particular parameter must be done with the PHY instance stopped.
+						</descr>
+					</retval>
+					<retval name="NPF_E_UNKNOWN">
+						<descr>
+							The operation cannot be completed successfully because
+							of problems encountered when handling the input parameters.
+						</descr>
+					</retval>
+				</return>
+				<callback>
+					<descr>
+						If errorReporting is Get to ALWAYS, a callback is invoked to
+						indicate that the operation has been completed. The callback
+						is identified by NPF_F_WMAX_PHY_ASYNC_RESPONSE_GET_CONFIG.
+					</descr>
+					<retval name="NPF_NO_ERROR" brief="Operation completed successfully."></retval>
+					<retval name="NPF_F_WMAX_PHY_ERROR_INVALID_PARAMS" brief="Invalid parameter."></retval>
+				</callback>
+			</func>
+			<struct type="NPF_F_wmaxPhyGetConfigRspArgs_t" brief="Get PHY Instance Configuration Response Arguments">
+				<field name="phyHandle" type="NPF_F_wmaxPhyHandle_t" brief="PHY Instance Handle."></field>
+
+				<selectunion type="NPF_F_wmaxPhyGetSpecificConfigUnion_t" name="phyConfig" brief="PHY Config args.">
+					<selectfield type="NPF_F_wmaxPhyType_t" name="phyType" brief="Type of PHY."></selectfield>
+					<field type="NPF_F_wmaxPhyOfdmConfigArgs_t" name="ofdmConfig">
+						<descr>OFDM specific configuration.</descr>
+						<selector>NPF_F_WMAX_PHY_TYPE_OFDM</selector>
+					</field>
+					<field type="NPF_F_wmaxPhyOfdmaConfigArgs_t" name="ofdmaConfig">
+						<descr>OFDMA specific configuration.</descr>
+						<selector>NPF_F_WMAX_PHY_TYPE_OFDMA</selector>
+					</field>
+				</selectunion>
+ 			</struct>
+		</section>
+
+		<section name="PHY Set Configuration">
+			<enum type="NPF_F_wmaxPhyOfdmSetConfigType_t" brief="Phy Ofdm SetConfig Options">
+				<descr>
+					This enum defines the valid SetConfig offsets
+				 </descr>
+				<field name="NPF_F_WMAX_PHY_OFDM_SET_CFG_TYPE_BW"  brief="offset for phyConfig.ofdmConfig.bandwidth"></field>
+				<field name="NPF_F_WMAX_PHY_OFDM_SET_CFG_TYPE_DM"  brief="offset for phyConfig.ofdmConfig.duplexMode"></field>
+				<field name="NPF_F_WMAX_PHY_OFDM_SET_CFG_TYPE_FFT" brief="offset for phyConfig.ofdmConfig.FFTSize"></field>
+				<field name="NPF_F_WMAX_PHY_OFDM_SET_CFG_TYPE_CP"  brief="offset for phyConfig.ofdmConfig.cyclicPrefixSize"></field>
+				<field name="NPF_F_WMAX_PHY_OFDM_SET_CFG_TYPE_FSA" brief="offset for phyConfig.ofdmConfig.frameSyncAdv"></field>
+			</enum>
+			<define brief="Bits for phyConfigMask OFDM">
+				<descr>
+					These bits describe the valid PhySetConfig Ofdm Options.
+					See NPF_F_wmaxPhySetConfigArgs_t.phyConfigMask
+				</descr>
+				<field name="NPF_F_WMAX_PHY_OFDM_SET_CFG_OPT_BW"  brief="set if phyConfig.ofdmConfig.bandwidth valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDM_SET_CFG_TYPE_BW)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDM_SET_CFG_OPT_DM"  brief="set if phyConfig.ofdmConfig.duplexMode valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDM_SET_CFG_TYPE_DM)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDM_SET_CFG_OPT_FFT" brief="set if phyConfig.ofdmConfig.FFTSize valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDM_SET_CFG_TYPE_FFT)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDM_SET_CFG_OPT_CP"  brief="set if phyConfig.ofdmConfig.cyclicPrefixSize valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDM_SET_CFG_TYPE_CP)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDM_SET_CFG_OPT_FSA" brief="set if phyConfig.ofdmConfig.frameSyncAdv valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDM_SET_CFG_TYPE_FSA)</value>
+				</field>
+			</define>
+
+			<enum type="NPF_F_wmaxOfdmaSetConfigType_t" brief="Phy Ofdma SetConfig Options">
+				<descr>
+					This enum defines the valid SetConfig offsets
+				</descr>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_DM"  brief="offset for phyConfig.ofdmaConfig.duplexMode"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_CP"  brief="offset for phyConfig.ofdmaConfig.cyclicPrefixSize"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_FD" brief="offset for phyConfig.ofdmaConfig.frameDuration"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_CRC" brief="offset for phyConfig.ofdmaConfig.HCSCRCGenerationChecking"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_DL_SUBCH" brief="offset for phyConfig.ofdmaConfig.dlUsedSubchannels"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_DL_SUBCH_AMC" brief="offset for phyConfig.ofdmaConfig.dlAllocatedSubchannelsAMC"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_DL_SUBCH_TUSC1" brief="offset for phyConfig.ofdmaConfig.dlAllocatedSubchannelsTUSC1"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_DL_SUBCH_TUSC2" brief="offset for phyConfig.ofdmaConfig.dlAllocatedSubchannelsTUSC2"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_UL_SUBCH" brief="offset for phyConfig.ofdmaConfig.ulUsedSubchannels"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_UL_SUBCH_PUSC" brief="offset for phyConfig.ofdmaConfig.ulAllocatedSubchannelsPUSC"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_UL_SUBCH_AMC" brief="offset for phyConfig.ofdmaConfig.ulAllocatedSubchannelsAMC"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_INI_RNG" brief="offset for phyConfig.ofdmaConfig.initialRangingCodes"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_PER_RNG" brief="offset for phyConfig.ofdmaConfig.periodicRangingCodes"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_BW_REQ_CODES" brief="offset for phyConfig.ofdmaConfig.bandwidthRequestCodes"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_HO_REQ_CODES" brief="offset for phyConfig.ofdmaConfig.handoverRequestCodes"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_START_RNG_CODES" brief="offset for phyConfig.ofdmaConfig.startOfRangingCodes"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_FR_IND_ADV" brief="offset for phyConfig.ofdmaConfig.frameIndicationAdvance"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_CELL_ID" brief="offset for phyConfig.ofdmaConfig.cellID"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_SEGMENT_ID" brief="offset for phyConfig.ofdmaConfig.segmentID"></field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_PREAMBLE_IDX" brief="offset for phyConfig.ofdmaConfig.preambleIndex"></field>
+			</enum>
+
+			<define brief="Bits for phyConfigMask OFDMA">
+				<descr>
+					These bits describe the valid PhySetConfig Ofdma Options.
+					See NPF_F_wmaxPhySetConfigArgs_t.phyConfigMask
+				</descr>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_DM"  brief="set if phyConfig.ofdmaConfig.duplexMode valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_DM)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_CP"  brief="set if phyConfig.ofdmaConfig.cyclicPrefixSize valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_CP)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_FD"  brief="set if phyConfig.ofdmaConfig.frameDuration valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_FD)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_CRC"  brief="set if phyConfig.ofdmaConfig.HCSCRCGenerationChecking valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_CRC)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_DL_SUBCH"  brief="set if phyConfig.ofdmaConfig.dlUsedSubchannels valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_DL_SUBCH)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_DL_SUBCH_AMC"  brief="set if phyConfig.ofdmaConfig.dlAllocatedSubchannelsAMC valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_DL_SUBCH_AMC)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_DL_SUBCH_TUSC1"  brief="set if phyConfig.ofdmaConfig.dlAllocatedSubchannelsTUSC1 valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_DL_SUBCH_TUSC1)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_DL_SUBCH_TUSC2"  brief="set if phyConfig.ofdmaConfig.dlAllocatedSubchannelsTUSC2 valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_DL_SUBCH_TUSC2)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_UL_SUBCH"  brief="set if phyConfig.ofdmaConfig.ulUsedSubchannels valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_UL_SUBCH)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_UL_SUBCH_PUSC"  brief="set if phyConfig.ofdmaConfig.ulAllocatedSubchannelsPUSC valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_UL_SUBCH_PUSC)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_UL_SUBCH_AMC"  brief="set if phyConfig.ofdmaConfig.ulAllocatedSubchannelsAMC valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_UL_SUBCH_AMC)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_INI_RNG"  brief="set if phyConfig.ofdmaConfig.initialRangingCodes valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_INI_RNG)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_PER_RNG"  brief="set if phyConfig.ofdmaConfig.periodicRangingCodes valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_PER_RNG)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_BW_REQ_CODES"  brief="set if phyConfig.ofdmaConfig.bandwidthRequestCodes valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_BW_REQ_CODES)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_HO_REQ_CODES"  brief="set if phyConfig.ofdmaConfig.handoverRequestCodes valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_HO_REQ_CODES)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_START_RNG_CODES"  brief="set if phyConfig.ofdmaConfig.startOfRangingCodes valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_START_RNG_CODES)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_FR_IND_ADV"  brief="set if phyConfig.ofdmaConfig.frameIndicationAdvance valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_FR_IND_ADV)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_CELL_ID"  brief="set if phyConfig.ofdmaConfig.cellID valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_CELL_ID)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_SEGMENT_ID"  brief="set if phyConfig.ofdmaConfig.segmentID valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_SEGMENT_ID)</value>
+				</field>
+				<field name="NPF_F_WMAX_PHY_OFDMA_SET_CFG_OPT_PREAMBLE_IDX"  brief="set if phyConfig.ofdmaConfig.preambleIndex valid">
+					<value>(1 &lt;&lt; NPF_F_WMAX_PHY_OFDMA_SET_CFG_TYPE_PREAMBLE_IDX)</value>
+				</field>
+			</define>
+
+			<struct type="NPF_F_wmaxPhySetConfigArgs_t" brief="Set PHY Instance Configuration Arguments">
+				<descr>
+					This structure defines PHY parameters that can be changed.
+				</descr>
+				<field name="phyHandle" type="NPF_F_wmaxPhyHandle_t" brief="PHY Instance Handle."></field>
+				<field name="phyConfigMask" type="NPF_uint32_t" brief="Bit Mask of valid PHY Config args."></field>
+
+				<selectunion type="NPF_F_wmaxPhySetSpecificConfigUnion_t" name="phyConfig" brief="PHY Config args.">
+					<selectfield type="NPF_F_wmaxPhyType_t" name="phyType" brief="Type of PHY."></selectfield>
+					<field type="NPF_F_wmaxPhyOfdmConfigArgs_t" name="ofdmConfig">
+						<descr>OFDM specific configuration.</descr>
+						<selector>NPF_F_WMAX_PHY_TYPE_OFDM</selector>
+					</field>
+					<field type="NPF_F_wmaxPhyOfdmaConfigArgs_t" name="ofdmaConfig">
+						<descr>OFDMA specific configuration.</descr>
+						<selector>NPF_F_WMAX_PHY_TYPE_OFDMA</selector>
+					</field>
+				</selectunion>
+ 			</struct>
+
+			<func name="NPF_F_wmaxPhySetConfig" type="NPF_error_t" brief="Set PHY Instance Configuration" xdrid="RPC_WMAX_PHY_SET_CFG">
+				<descr>
+					This function sets the configuration for a PHY instance
+				</descr>
+				<param io="in" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+					<descr>
+						Identifies the callback function to be called when the operation completes
+					</descr>
+				</param>
+				<param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+					<descr>
+						A unique application invocation context that will be supplied to the callback function
+					</descr>
+				</param>
+				<param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+					<descr>
+						Defines whether a callback will be called after completing the action requested by the function call.
+					</descr>
+				</param>
+				<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+					<descr>
+						Identifies the forwarding element where the action will be executed.  This handle is obtained during RPC connection establishment.
+					</descr>
+				</param>
+				<param io="in" type="NPF_F_wmaxPhySetConfigArgs_t *" name="phySetConfigArgs">
+					<descr>
+						PHY Instance Set Config Arguments
+					</descr>
+				</param>
+				<return>
+					<descr>
+						Error code indicating whether function call was successful.
+					</descr>
+					<retval name="NPF_NO_ERROR">
+						<descr>
+							The operation is in progress.
+						</descr>
+					</retval>
+					<retval name="NPF_E_BAD_CALLBACK_HANDLE">
+						<descr>
+							The callback handle is invalid.
+						</descr>
+					</retval>
+					<retval name="NPF_E_STATE_INACTIVE">
+						<descr>
+							The operation cannot be completed successfully because
+							the add request for this particular parameter must be done with the PHY instance stopped.
+						</descr>
+					</retval>
+					<retval name="NPF_E_UNKNOWN">
+						<descr>
+							The operation cannot be completed successfully because
+							of problems encountered when handling the input parameters.
+						</descr>
+					</retval>
+				</return>
+				<callback>
+					<descr>
+						If errorReporting is set to ALWAYS, a callback is invoked to
+						indicate that the operation has been completed. The callback
+						is identified by NPF_F_WMAX_PHY_ASYNC_RESPONSE_SET_CONFIG.
+					</descr>
+					<retval name="NPF_NO_ERROR" brief="Operation completed successfully."></retval>
+					<retval name="NPF_F_WMAX_PHY_ERROR_INVALID_PARAMS" brief="Invalid parameter."></retval>
+				</callback>
+			</func>
+		</section>
+				
+		<section name="PHY DCD-REQ UCD-REQ">
+
+			<struct type="NPF_F_wmaxPhyDcdReqUcdReqArgs_t" brief="Send initialization DCD-REQ UCD-REQ Arguments">
+				<descr>
+					This structure defines parameters required to send initialization DCD-REQ and UCD-REQ.
+				</descr>
+				<field name="phyHandle" type="NPF_F_wmaxPhyHandle_t" brief="PHY Instance Handle."></field>
+				<selectunion type="NPF_F_wmaxPhySpecificUcdDcdUnion_t" name="phyUcdDcd" brief="PHY Ucd Dcd">
+					<selectfield type="NPF_F_wmaxPhyType_t" name="phyType" brief="Type of PHY."></selectfield>
+					<field type="NPF_uint32_t" name="unused">
+						<descr>OFDM specific parameters.</descr>
+						<selector>NPF_F_WMAX_PHY_TYPE_OFDM</selector>
+					</field>
+					<field type="NPF_F_wmaxPhyOfdmaUcdDcdArgs_t" name="ofdmaUcdDcd">
+						<descr>OFDMA specific parameters.</descr>
+						<selector>NPF_F_WMAX_PHY_TYPE_OFDMA</selector>
+					</field>
+				</selectunion>
+			</struct>
+			<func name="NPF_F_wmaxPhyDcdReqUcdReq" type="NPF_error_t" brief="Send initialization DCD-REQ UCD-REQ" xdrid="RPC_WMAX_PHY_DCD_REQ_UCD_REQ">
+				<descr>
+					This function sends DCD-REQ and UCD-REQ during PHY initialization
+				</descr>
+				<param io="in" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+					<descr>
+						Identifies the callback function to be called when the operation completes
+					</descr>
+				</param>
+				<param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+					<descr>
+						A unique application invocation context that will be supplied to the callback function
+					</descr>
+				</param>
+				<param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+					<descr>
+						Defines whether a callback will be called after completing the action requested by the function call.
+					</descr>
+				</param>
+				<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+					<descr>
+						Identifies the forwarding element where the action will be executed.  This handle is obtained during RPC connection establishment.
+					</descr>
+				</param>
+				<param io="in" type="NPF_F_wmaxPhyDcdReqUcdReqArgs_t *" name="phyDcdReqUcdReqArgs">
+					<descr>
+						PHY DCD-REQ UCD-REQ Arguments
+					</descr>
+				</param>
+				<return>
+					<descr>
+						Error code indicating whether function call was successful.
+					</descr>
+					<retval name="NPF_NO_ERROR">
+						<descr>
+							The operation is in progress.
+						</descr>
+					</retval>
+					<retval name="NPF_E_BAD_CALLBACK_HANDLE">
+						<descr>
+							The callback handle is invalid.
+						</descr>
+					</retval>
+					<retval name="NPF_E_STATE_INACTIVE">
+						<descr>
+							The operation cannot be completed successfully because
+							the add request for this particular parameter must be done with the PHY instance stopped.
+						</descr>
+					</retval>
+					<retval name="NPF_E_UNKNOWN">
+						<descr>
+							The operation cannot be completed successfully because
+							of problems encountered when handling the input parameters.
+						</descr>
+					</retval>
+				</return>
+				<callback>
+					<descr>
+						If errorReporting is set to ALWAYS, a callback is invoked to
+						indicate that the operation has been completed. The callback
+						is identified by NPF_F_WMAX_PHY_ASYNC_RESPONSE_DCD_REQ_UCD_REQ.
+					</descr>
+					<retval name="NPF_NO_ERROR" brief="Operation completed successfully."></retval>
+					<retval name="NPF_F_WMAX_PHY_ERROR_INVALID_PARAMS" brief="Invalid parameter."></retval>
+				</callback>
+			</func>
+		</section>
+
+
+		<section name="PHY Delete">
+			<struct type="NPF_F_wmaxPhyDeleteArgs_t" brief="Delete PHY Instance Arguments">
+				<descr>
+					This structure defines parameters required to delete a PHY instance.
+				</descr>
+				<field name="phyHandle" type="NPF_F_wmaxPhyHandle_t" brief="PHY Instance Handle."></field>
+			</struct>
+			
+			<func name="NPF_F_wmaxPhyDelete" type="NPF_error_t" brief="Delete PHY Instance" xdrid="RPC_WMAX_PHY_DEL">
+				<descr>
+					This function adds a PHY instance
+				</descr>
+				<param io="in" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+					<descr>
+						Identifies the callback function to be called when the operation completes
+					</descr>
+				</param>
+				<param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+					<descr>
+						A unique application invocation context that will be supplied to the callback function
+					</descr>
+				</param>
+				<param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+					<descr>
+						Defines whether a callback will be called after completing the action requested by the function call.
+					</descr>
+				</param>
+				<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+					<descr>
+						Identifies the forwarding element where the action will be executed.  This handle is obtained during RPC connection establishment.
+					</descr>
+				</param>
+				<param io="in" type="NPF_F_wmaxPhyDeleteArgs_t *" name="phyDeleteArgs">
+					<descr>
+						PHY Instance Delete Arguments
+					</descr>
+				</param>
+				<return>
+					<descr>
+						Error code indicating whether function call was successful.
+					</descr>
+					<retval name="NPF_NO_ERROR">
+						<descr>
+							The operation is in progress.
+						</descr>
+					</retval>
+					<retval name="NPF_E_BAD_CALLBACK_HANDLE">
+						<descr>
+							The callback handle is invalid.
+					</descr>
+					</retval>
+					<retval name="NPF_E_UNKNOWN">
+						<descr>
+							The operation cannot be completed successfully because
+							of problems encountered when handling the input parameters.
+						</descr>
+					</retval>
+				</return>
+				<callback>
+					<descr>
+						If errorReporting is set to ALWAYS, a callback is invoked to
+						indicate that the operation has been completed. The callback
+						is identified by NPF_F_WMAX_PHY_ASYNC_RESPONSE_DEL.
+					</descr>
+					<retval name="NPF_NO_ERROR" brief="Operation completed successfully."></retval>
+					<retval name="NPF_F_WMAX_PHY_ERROR_INVALID_PARAMS" brief="Invalid parameter."></retval>
+				</callback>
+			</func>
+		</section>
+	</section>
+						
+	<section name="Events (no events generated by PHY)">
+
+	</section>
+	
+	<section name="Asynchronous Responses">
+		<enum type="NPF_F_wmaxPhyAsyncResponseType_t" brief="Asynchronous Response Type">
+			<descr>
+				Identifies which PHY function triggered the asynchronous response callback.
+			</descr>
+			<field name="NPF_F_WMAX_PHY_ASYNC_RESPONSE_ADD" brief="Asynchronous response for NPF_F_wmaxPhyAdd."></field>
+			<field name="NPF_F_WMAX_PHY_ASYNC_RESPONSE_GET_CONFIG" brief="Asynchronous response for NPF_F_wmaxPhyGetConfig."></field>
+			<field name="NPF_F_WMAX_PHY_ASYNC_RESPONSE_SET_CONFIG" brief="Asynchronous response for NPF_F_wmaxPhySetConfig."></field>
+			<field name="NPF_F_WMAX_PHY_ASYNC_RESPONSE_START" brief="Asynchronous response for NPF_F_wmaxPhyStart."></field>
+			<field name="NPF_F_WMAX_PHY_ASYNC_RESPONSE_STOP" brief="Asynchronous response for NPF_F_wmaxPhyStop."></field>
+			<field name="NPF_F_WMAX_PHY_ASYNC_RESPONSE_DEL" brief="Asynchronous response for NPF_F_wmaxPhyDelete."></field>
+			<field name="NPF_F_WMAX_PHY_ASYNC_RESPONSE_DCD_REQ_UCD_REQ" brief="Asynchronous response for NPF_F_wmaxPhyDcdReqUcdReq."></field>
+		</enum>
+
+		<struct type="NPF_F_wmaxPhyAsyncResponseData_t" brief="PHY Function Response Arguments Data">
+			<selectunion type="NPF_F_wmaxPhyAsyncResponseDataUnion_t" name="u">
+				<selectfield type="NPF_F_wmaxPhyAsyncResponseType_t" name="asyncResponseType" brief="Asynchronous Response Callback Type."></selectfield>
+				<field type="NPF_F_wmaxPhyAddRspArgs_t" name="phyAddRspAsyncRspArgs">
+					<descr>Asynchronous response for NPF_F_wmaxPhyAdd function.</descr>
+					<selector>NPF_F_WMAX_PHY_ASYNC_RESPONSE_ADD</selector>
+				</field>
+				<field type="NPF_F_wmaxPhyGetConfigRspArgs_t" name="phyGetConfigAsyncRspArgs">
+					<descr>Asynchronous response for NPF_F_wmaxPhyStatsGet function.</descr>
+					<selector>NPF_F_WMAX_PHY_ASYNC_RESPONSE_GET_CONFIG</selector>
+				</field>
+				<field type="NPF_uint32_t" name="unused" brief="Asynchronous responses not returning additional arguments.">
+					<descr></descr>
+					<selector>NPF_F_WMAX_PHY_ASYNC_RESPONSE_SET_CONFIG</selector>
+					<selector>NPF_F_WMAX_PHY_ASYNC_RESPONSE_START</selector>
+					<selector>NPF_F_WMAX_PHY_ASYNC_RESPONSE_STOP</selector>
+					<selector>NPF_F_WMAX_PHY_ASYNC_RESPONSE_DEL</selector>
+					<selector>NPF_F_WMAX_PHY_ASYNC_RESPONSE_DCD_REQ_UCD_REQ</selector>
+				</field>
+			</selectunion>
+		</struct>
+
+		<enum type="NPF_F_wmaxPhyObjType_t" brief="PHY Object Types">
+			<descr>
+				Identifies handle types that may be passed from the PHY Fapi
+			</descr>
+			<field name="NPF_F_WMAX_PHY_OBJ_TYPE_PHY" brief="PHY Entity"></field>
+		</enum>
+
+		<struct type="NPF_F_wmaxPhyObjectId_t" brief="PHY Object Identifier">
+			<selectunion name="u" type="NPF_F_wmaxPhyObjIdUnion_t">
+				<selectfield type="NPF_F_wmaxPhyObjType_t" name="objType" brief="Object Type"></selectfield>
+				<field name="phyHandle" type="NPF_F_wmaxPhyHandle_t">
+					<descr>PHY Handle.</descr>
+					<selector>NPF_F_WMAX_PHY_OBJ_TYPE_PHY</selector>
+				</field>
+			</selectunion>
+		</struct>
+		
+		<struct type="NPF_F_wmaxPhyAsyncResponse_t" brief="Asynchronous Function Response">
+			<descr>
+				This structure contains a PHY function completion event record.
+				Each completion event record contains the object identifier associated with the PHY FAPI function, the return code and an optional structure containing additional information.
+			</descr>
+			<field name="errorType" type="NPF_F_wmaxPhyErrorType_t" brief="Error code."></field>
+			<field name="objHandle" type="NPF_F_wmaxPhyObjectId_t" brief="The object that the function call was associated with"></field>
+			<field name="asyncResponseData" type="NPF_F_wmaxPhyAsyncResponseData_t" brief="Optional information returned along with certain asynchronous responses."></field>
+		</struct>
+		
+		<struct type="NPF_F_wmaxPhyAsyncResponseCallbackData_t" brief="Asynchronous Response Callback Data">
+			<descr>
+				The structure contains the asynchronous response data passed back to FAPI clients using callbacks.
+				The callback function receives this structure containing one or more asynchronous responses from a single function call.
+				There is one element for each completed request, regardless of whether they were successful: the responseArray contains responseNum pointers to structures of the type NPF_F_wmaxPhyAsyncResponseCallback_t.
+				Callback function invocations are repeated until all requests are complete.
+				Responses are not repeated for request elements already indicated as complete in earlier callback function invocations.
+			</descr>
+			<field name="type" type="NPF_F_wmaxPhyAsyncResponseType_t" brief="Asynchronous Response Type"></field>
+			<field name="allOK" type="NPF_boolean_t" brief="TRUE if all FAPI requests completed OK."></field>
+			<vector name="asynchResponses" type="NPF_F_wmaxPhyAsyncResponse_t"  brief="List of Asynchronous Responses">
+				<descr>
+					Array of response structures containing responseNum entries.
+				</descr>
+				<length name="asynchResponsesNum" type="NPF_uint32_t" brief="Number of Asynchronous Responses."></length>
+			</vector>
+		</struct>
+		
+		<functype name="NPF_F_wmaxPhyAsyncResponseCallback_t" type="void" class="callback" brief="Asynchronous Response Callback Prototype">
+			<descr>
+				A function with this signature must be registered by the application (using NPF_F_wmaxPhyCallbackRegister) to process solicited responses.
+			</descr>
+			<param io="in" type="NPF_userContext_t" name="context">
+				<descr>
+						The context item that was supplied by the application when the PHY FAPI function call was invoked.
+ 				</descr>
+			</param>
+			<param io="in" type="NPF_correlator_t" name="correlator">
+				<descr>
+					A unique application invocation context that was supplied during calling a function call.
+				</descr>
+			</param>
+			<param io="in" type="NPF_F_wmaxPhyAsyncResponseCallbackData_t" name="asyncResponseCallbackData">
+				<descr>
+ 		 	 		Asynchronous response callback data. 
+			 	</descr>
+			</param>
+		</functype>
+		
+		<func name="NPF_F_wmaxPhyAsyncResponseCallbackRegister" type="NPF_error_t" class="cback_register" brief="Register Asynchronous Response Callback">
+			<descr>
+				This function is used to register a callback function to receive notifications of PHY asynchronous responses.
+				The function allows the application to register a asynchronous response callback function for the related callback category and to associate a unique callback handle and application context.
+				Multiple callback functions can be registered using this function.
+				The callback function is identified by a userContext and asyncResponseFunc pair.
+				For each pair, a unique callbackHandle is assigned for future
+				reference. Because the callback function is identified by both userContext and
+				asyncResponseFunc, duplicate registration of the same callback function with a different
+				userContext is allowed. Also, the same userContext can be shared among different
+				callback functions. Duplicate registration of the same pair of userContext and asyncResponseFunc
+				has no effect; it will output a handle that is already assigned to the pair
+				and return NPF_E_ALREADY_REGISTERED.
+			</descr>
+			<param io="in" type="NPF_userContext_t" name="userContext">
+				<descr>
+					The context item provided to the request callback routine when it is invoked.
+				</descr>
+			</param>
+			<param io="in" type="NPF_F_wmaxPhyAsyncResponseCallback_t" name="asyncResponseFunc">
+				<descr>
+					The pointer to the notification callback function to be called.
+				</descr>
+			</param>
+			<param io="out" type="NPF_callbackHandle_t *" name="callbackHandle">
+				<descr>
+					A unique identifier related to this registration.
+				</descr>
+			</param>
+			<return>
+				<descr>Error code indicating function success.</descr>
+				<retval name="NPF_NO_ERROR">
+					<descr>The registration completed successfully.</descr>
+				</retval>
+				<retval name="NPF_E_BAD_CALLBACK_FUNCTION">
+					<descr>
+					The registration was invoked with a function pointer parameter that was invalid.
+					</descr>
+				</retval>
+				<retval name="NPF_E_CALLBACK_ALREADY_REGISTERED">
+					<descr>
+						The registration was invoked with 
+						a pair composed of a function pointer and a user context which was previously 
+						used for an identical registration.
+					</descr>
+				</retval>
+				<retval name="NPF_E_UNKNOWN">
+					<descr>Used to indicate other errors not listed above.</descr>
+				</retval>
+			</return>
+		</func>
+		
+		<func name="NPF_F_wmaxPhyAsyncResponseCallbackDeregister" type="NPF_error_t" class="cback_deregister" brief="Deregister Asynchronous Response Callback" xdrid="RPC_WMAX_PHY_DEREGISTER_ASYNC_REQUEST_CALLBACK">
+			<descr>
+				This function is used to deregister a request callback handler, which was previously
+				registered to receive callback notifications of PHY protocol request statuses.
+				It may be invoked by any application no longer interested in receiving status notifications.
+				Note: This function operates in a synchronous manner. There may be a timing window where
+				outstanding callback continue to be delivered to the callback routine after the de-registration
+				function has been invoked. It is the responsibility of implementation to guarantee that the request callback
+				function is not called after the deregister function has returned.
+			</descr>
+			<param io="in" type="NPF_callbackHandle_t" name="callbackHandle">
+				<descr>
+					The unique identifier returned to the application when the
+					request callback routine was registered.
+				</descr>
+			</param>
+			<return>
+				<descr>
+					Error code indicating function success.
+				</descr>
+				<retval name="NPF_NO_ERROR">
+					<descr>The operation completed successfully.</descr>
+				</retval>
+				<retval name="NPF_E_BAD_CALLBACK_HANDLE">
+					<descr>
+						A function was invoked with a callback handle that did not
+						correspond to a valid NPF callback handle as returned by a registration function.
+					</descr>
+				</retval>
+				<retval name="NPF_E_UNKNOWN">
+					<descr>
+						Indicates other errors.
+					</descr>
+				</retval>
+			</return>
+		</func>
+	</section>
+	
+</api>

@@ -1,0 +1,1130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="2.0" xmlns:edmx="http://schemas.microsoft.com/ado/2008/10/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="gredbModel.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2008" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
+        <EntityContainer Name="gredbModelStoreContainer">
+          <EntitySet Name="BasicMnemonics" EntityType="gredbModel.Store.BasicMnemonics" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="BengaliDefinitions" EntityType="gredbModel.Store.BengaliDefinitions" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="DefinitionsNetHtml" EntityType="gredbModel.Store.DefinitionsNetHtml" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="EtymologyHtml" EntityType="gredbModel.Store.EtymologyHtml" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="FeaturedMnemonics" EntityType="gredbModel.Store.FeaturedMnemonics" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="GoogleDictionaryHtml" EntityType="gredbModel.Store.GoogleDictionaryHtml" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="GooglePhrase" EntityType="gredbModel.Store.GooglePhrase" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="GoogleSynonyms" EntityType="gredbModel.Store.GoogleSynonyms" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="GreWordAffinity" EntityType="gredbModel.Store.GreWordAffinity" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="GreWordDefinitions" EntityType="gredbModel.Store.GreWordDefinitions" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="GreWords" EntityType="gredbModel.Store.GreWords" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="GreWordSynonyms" EntityType="gredbModel.Store.GreWordSynonyms" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="ListedWords" EntityType="gredbModel.Store.ListedWords" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="ListName" EntityType="gredbModel.Store.ListName" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="MnemonicsDictionaryHtml" EntityType="gredbModel.Store.MnemonicsDictionaryHtml" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="SynonymsNetHtml" EntityType="gredbModel.Store.SynonymsNetHtml" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="UnfinishedWords" EntityType="gredbModel.Store.UnfinishedWords" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="WebUrl" EntityType="gredbModel.Store.WebUrl" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="WordDefinitions" EntityType="gredbModel.Store.WordDefinitions" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="WordEtymology" EntityType="gredbModel.Store.WordEtymology" store:Type="Tables" Schema="dbo" />
+          <AssociationSet Name="FK_BasicMnemonics_GreWords" Association="gredbModel.Store.FK_BasicMnemonics_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="BasicMnemonics" EntitySet="BasicMnemonics" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BengaliDefinitions_GreWords" Association="gredbModel.Store.FK_BengaliDefinitions_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="BengaliDefinitions" EntitySet="BengaliDefinitions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Definitions_GreWords" Association="gredbModel.Store.FK_Definitions_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="WordDefinitions" EntitySet="WordDefinitions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Etymology_GreWords" Association="gredbModel.Store.FK_Etymology_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="WordEtymology" EntitySet="WordEtymology" />
+          </AssociationSet>
+          <AssociationSet Name="FK_FeaturedMnemonics_GreWords" Association="gredbModel.Store.FK_FeaturedMnemonics_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="FeaturedMnemonics" EntitySet="FeaturedMnemonics" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GooglePhrase_GreWords" Association="gredbModel.Store.FK_GooglePhrase_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="GooglePhrase" EntitySet="GooglePhrase" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GoogleSynonyms_GreWords" Association="gredbModel.Store.FK_GoogleSynonyms_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="GoogleSynonyms" EntitySet="GoogleSynonyms" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GreWordAffinity_GreWords" Association="gredbModel.Store.FK_GreWordAffinity_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="GreWordAffinity" EntitySet="GreWordAffinity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GreWordAffinity_GreWords1" Association="gredbModel.Store.FK_GreWordAffinity_GreWords1">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="GreWordAffinity" EntitySet="GreWordAffinity" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GreWordLists_WordList" Association="gredbModel.Store.FK_GreWordLists_WordList">
+            <End Role="ListName" EntitySet="ListName" />
+            <End Role="ListedWords" EntitySet="ListedWords" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GreWordSynonyms_GreWords" Association="gredbModel.Store.FK_GreWordSynonyms_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="GreWordSynonyms" EntitySet="GreWordSynonyms" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GreWordSynonymsNet_GreWords" Association="gredbModel.Store.FK_GreWordSynonymsNet_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="GreWordDefinitions" EntitySet="GreWordDefinitions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WordLists_GreWords" Association="gredbModel.Store.FK_WordLists_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="ListedWords" EntitySet="ListedWords" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="BasicMnemonics">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Mnemonic" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Helpful" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="NotHelpful" Type="nvarchar" Nullable="false" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="BengaliDefinitions">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Bengali" Type="nvarchar" Nullable="false" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="DefinitionsNetHtml">
+          <Key>
+            <PropertyRef Name="Word" />
+          </Key>
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Html" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="EtymologyHtml">
+          <Key>
+            <PropertyRef Name="Word" />
+          </Key>
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Html" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="FeaturedMnemonics">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Mnemonic" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="GoogleDictionaryHtml">
+          <Key>
+            <PropertyRef Name="Word" />
+          </Key>
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Html" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="GooglePhrase">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="EnglishPhrase" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="BengaliPhrase" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="GoogleSynonyms">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Synonym" Type="nvarchar" Nullable="false" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="GreWordAffinity">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Related" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Affinity" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="GreWordDefinitions">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Serial" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="PartsOfSpeech" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="SimilarWords" Type="nvarchar(max)" />
+          <Property Name="Definitions" Type="nvarchar(max)" />
+          <Property Name="Sentences" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="GreWords">
+          <Key>
+            <PropertyRef Name="Word" />
+          </Key>
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Hardness" Type="int" Nullable="false" />
+          <Property Name="Comment" Type="nvarchar(max)" />
+          <Property Name="Bookmarked" Type="bit" Nullable="false" />
+          <Property Name="Remembered" Type="int" Nullable="false" />
+          <Property Name="Forgotten" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="GreWordSynonyms">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Serial" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="PartsOfSpeech" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="SimilarWords" Type="nvarchar(max)" />
+          <Property Name="Definitions" Type="nvarchar(max)" />
+          <Property Name="Synonyms" Type="nvarchar(max)" />
+          <Property Name="Antonyms" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="ListedWords">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="ListId" Type="bigint" Nullable="false" />
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Difficulty" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ListName">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="nvarchar" Nullable="false" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="MnemonicsDictionaryHtml">
+          <Key>
+            <PropertyRef Name="Word" />
+          </Key>
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Html" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="SynonymsNetHtml">
+          <Key>
+            <PropertyRef Name="Word" />
+          </Key>
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Html" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="UnfinishedWords">
+          <Key>
+            <PropertyRef Name="Word" />
+          </Key>
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="WebUrl">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="WebTitle" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Url" Type="nvarchar" Nullable="false" MaxLength="255" />
+          <Property Name="ImageIndex" Type="int" Nullable="false" />
+          <Property Name="Priority" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="WordDefinitions">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Definition" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Image" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Tag" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="WordEtymology">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="nvarchar" Nullable="false" MaxLength="50" />
+          <Property Name="Etymology" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_BasicMnemonics_GreWords">
+          <End Role="GreWords" Type="gredbModel.Store.GreWords" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="BasicMnemonics" Type="gredbModel.Store.BasicMnemonics" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="BasicMnemonics">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BengaliDefinitions_GreWords">
+          <End Role="GreWords" Type="gredbModel.Store.GreWords" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="BengaliDefinitions" Type="gredbModel.Store.BengaliDefinitions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="BengaliDefinitions">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Definitions_GreWords">
+          <End Role="GreWords" Type="gredbModel.Store.GreWords" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="WordDefinitions" Type="gredbModel.Store.WordDefinitions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="WordDefinitions">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Etymology_GreWords">
+          <End Role="GreWords" Type="gredbModel.Store.GreWords" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="WordEtymology" Type="gredbModel.Store.WordEtymology" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="WordEtymology">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_FeaturedMnemonics_GreWords">
+          <End Role="GreWords" Type="gredbModel.Store.GreWords" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="FeaturedMnemonics" Type="gredbModel.Store.FeaturedMnemonics" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="FeaturedMnemonics">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GooglePhrase_GreWords">
+          <End Role="GreWords" Type="gredbModel.Store.GreWords" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="GooglePhrase" Type="gredbModel.Store.GooglePhrase" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="GooglePhrase">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GoogleSynonyms_GreWords">
+          <End Role="GreWords" Type="gredbModel.Store.GreWords" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="GoogleSynonyms" Type="gredbModel.Store.GoogleSynonyms" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="GoogleSynonyms">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GreWordAffinity_GreWords">
+          <End Role="GreWords" Type="gredbModel.Store.GreWords" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="GreWordAffinity" Type="gredbModel.Store.GreWordAffinity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="GreWordAffinity">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GreWordAffinity_GreWords1">
+          <End Role="GreWords" Type="gredbModel.Store.GreWords" Multiplicity="1" />
+          <End Role="GreWordAffinity" Type="gredbModel.Store.GreWordAffinity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="GreWordAffinity">
+              <PropertyRef Name="Related" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GreWordLists_WordList">
+          <End Role="ListName" Type="gredbModel.Store.ListName" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ListedWords" Type="gredbModel.Store.ListedWords" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ListName">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="ListedWords">
+              <PropertyRef Name="ListId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GreWordSynonyms_GreWords">
+          <End Role="GreWords" Type="gredbModel.Store.GreWords" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="GreWordSynonyms" Type="gredbModel.Store.GreWordSynonyms" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="GreWordSynonyms">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GreWordSynonymsNet_GreWords">
+          <End Role="GreWords" Type="gredbModel.Store.GreWords" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="GreWordDefinitions" Type="gredbModel.Store.GreWordDefinitions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="GreWordDefinitions">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WordLists_GreWords">
+          <End Role="GreWords" Type="gredbModel.Store.GreWords" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ListedWords" Type="gredbModel.Store.ListedWords" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="ListedWords">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Function Name="RemoveDuplicateBengaliWord" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="RemoveHtml" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="gredbModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+        <EntityContainer Name="gredbEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="BasicMnemonics" EntityType="gredbModel.BasicMnemonic" />
+          <EntitySet Name="BengaliDefinitions" EntityType="gredbModel.BengaliDefinition" />
+          <EntitySet Name="DefinitionsNetHtmls" EntityType="gredbModel.DefinitionsNetHtml" />
+          <EntitySet Name="EtymologyHtmls" EntityType="gredbModel.EtymologyHtml" />
+          <EntitySet Name="FeaturedMnemonics" EntityType="gredbModel.FeaturedMnemonic" />
+          <EntitySet Name="GoogleDictionaryHtmls" EntityType="gredbModel.GoogleDictionaryHtml" />
+          <EntitySet Name="GooglePhrases" EntityType="gredbModel.GooglePhrase" />
+          <EntitySet Name="GoogleSynonyms" EntityType="gredbModel.GoogleSynonym" />
+          <EntitySet Name="GreWordAffinities" EntityType="gredbModel.GreWordAffinity" />
+          <EntitySet Name="GreWordDefinitions" EntityType="gredbModel.GreWordDefinition" />
+          <EntitySet Name="GreWords" EntityType="gredbModel.GreWord" />
+          <EntitySet Name="GreWordSynonyms" EntityType="gredbModel.GreWordSynonym" />
+          <EntitySet Name="ListedWords" EntityType="gredbModel.ListedWord" />
+          <EntitySet Name="ListNames" EntityType="gredbModel.ListName" />
+          <EntitySet Name="MnemonicsDictionaryHtmls" EntityType="gredbModel.MnemonicsDictionaryHtml" />
+          <EntitySet Name="SynonymsNetHtmls" EntityType="gredbModel.SynonymsNetHtml" />
+          <EntitySet Name="UnfinishedWords" EntityType="gredbModel.UnfinishedWord" />
+          <EntitySet Name="WebUrls" EntityType="gredbModel.WebUrl" />
+          <EntitySet Name="WordDefinitions" EntityType="gredbModel.WordDefinition" />
+          <EntitySet Name="WordEtymologies" EntityType="gredbModel.WordEtymology" />
+          <AssociationSet Name="FK_BasicMnemonics_GreWords" Association="gredbModel.FK_BasicMnemonics_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="BasicMnemonics" EntitySet="BasicMnemonics" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BengaliDefinitions_GreWords" Association="gredbModel.FK_BengaliDefinitions_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="BengaliDefinitions" EntitySet="BengaliDefinitions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_FeaturedMnemonics_GreWords" Association="gredbModel.FK_FeaturedMnemonics_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="FeaturedMnemonics" EntitySet="FeaturedMnemonics" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GooglePhrase_GreWords" Association="gredbModel.FK_GooglePhrase_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="GooglePhrase" EntitySet="GooglePhrases" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GoogleSynonyms_GreWords" Association="gredbModel.FK_GoogleSynonyms_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="GoogleSynonyms" EntitySet="GoogleSynonyms" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GreWordAffinity_GreWords" Association="gredbModel.FK_GreWordAffinity_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="GreWordAffinity" EntitySet="GreWordAffinities" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GreWordAffinity_GreWords1" Association="gredbModel.FK_GreWordAffinity_GreWords1">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="GreWordAffinity" EntitySet="GreWordAffinities" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GreWordSynonymsNet_GreWords" Association="gredbModel.FK_GreWordSynonymsNet_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="GreWordDefinitions" EntitySet="GreWordDefinitions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Definitions_GreWords" Association="gredbModel.FK_Definitions_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="WordDefinitions" EntitySet="WordDefinitions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Etymology_GreWords" Association="gredbModel.FK_Etymology_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="WordEtymology" EntitySet="WordEtymologies" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GreWordSynonyms_GreWords" Association="gredbModel.FK_GreWordSynonyms_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="GreWordSynonyms" EntitySet="GreWordSynonyms" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WordLists_GreWords" Association="gredbModel.FK_WordLists_GreWords">
+            <End Role="GreWords" EntitySet="GreWords" />
+            <End Role="ListedWords" EntitySet="ListedWords" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GreWordLists_WordList" Association="gredbModel.FK_GreWordLists_WordList">
+            <End Role="ListName" EntitySet="ListNames" />
+            <End Role="ListedWords" EntitySet="ListedWords" />
+          </AssociationSet>
+          <FunctionImport Name="RemoveHtml" />
+          <FunctionImport Name="RemoveDuplicateBengaliWord" />
+        </EntityContainer>
+        <EntityType Name="BasicMnemonic">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Mnemonic" Type="String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <Property Name="Helpful" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="NotHelpful" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <NavigationProperty Name="GreWord" Relationship="gredbModel.FK_BasicMnemonics_GreWords" FromRole="BasicMnemonics" ToRole="GreWords" />
+        </EntityType>
+        <EntityType Name="BengaliDefinition">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Bengali" Type="String" Nullable="false" MaxLength="255" Unicode="true" FixedLength="false" />
+          <NavigationProperty Name="GreWord" Relationship="gredbModel.FK_BengaliDefinitions_GreWords" FromRole="BengaliDefinitions" ToRole="GreWords" />
+        </EntityType>
+        <EntityType Name="DefinitionsNetHtml">
+          <Key>
+            <PropertyRef Name="Word" />
+          </Key>
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Html" Type="String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+        </EntityType>
+        <EntityType Name="EtymologyHtml">
+          <Key>
+            <PropertyRef Name="Word" />
+          </Key>
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Html" Type="String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+        </EntityType>
+        <EntityType Name="FeaturedMnemonic">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Mnemonic" Type="String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <NavigationProperty Name="GreWord" Relationship="gredbModel.FK_FeaturedMnemonics_GreWords" FromRole="FeaturedMnemonics" ToRole="GreWords" />
+        </EntityType>
+        <EntityType Name="GoogleDictionaryHtml">
+          <Key>
+            <PropertyRef Name="Word" />
+          </Key>
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Html" Type="String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+        </EntityType>
+        <EntityType Name="GooglePhrase">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="EnglishPhrase" Type="String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <Property Name="BengaliPhrase" Type="String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <NavigationProperty Name="GreWord" Relationship="gredbModel.FK_GooglePhrase_GreWords" FromRole="GooglePhrase" ToRole="GreWords" />
+        </EntityType>
+        <EntityType Name="GoogleSynonym">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Synonym" Type="String" Nullable="false" MaxLength="255" Unicode="true" FixedLength="false" />
+          <NavigationProperty Name="GreWord" Relationship="gredbModel.FK_GoogleSynonyms_GreWords" FromRole="GoogleSynonyms" ToRole="GreWords" />
+        </EntityType>
+        <EntityType Name="GreWordAffinity">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Related" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Affinity" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="GreWord" Relationship="gredbModel.FK_GreWordAffinity_GreWords" FromRole="GreWordAffinity" ToRole="GreWords" />
+          <NavigationProperty Name="RelevantWord" Relationship="gredbModel.FK_GreWordAffinity_GreWords1" FromRole="GreWordAffinity" ToRole="GreWords" />
+        </EntityType>
+        <EntityType Name="GreWordDefinition">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Serial" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="PartsOfSpeech" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="SimilarWords" Type="String" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <Property Name="Definitions" Type="String" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <Property Name="Sentences" Type="String" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <NavigationProperty Name="GreWord" Relationship="gredbModel.FK_GreWordSynonymsNet_GreWords" FromRole="GreWordDefinitions" ToRole="GreWords" />
+        </EntityType>
+        <EntityType Name="GreWord">
+          <Key>
+            <PropertyRef Name="Word" />
+          </Key>
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Hardness" Type="Int32" Nullable="false" />
+          <Property Name="Comment" Type="String" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <Property Name="Bookmarked" Type="Boolean" Nullable="false" />
+          <Property Name="Remembered" Type="Int32" Nullable="false" />
+          <Property Name="Forgotten" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="BasicMnemonics" Relationship="gredbModel.FK_BasicMnemonics_GreWords" FromRole="GreWords" ToRole="BasicMnemonics" />
+          <NavigationProperty Name="BengaliDefinitions" Relationship="gredbModel.FK_BengaliDefinitions_GreWords" FromRole="GreWords" ToRole="BengaliDefinitions" />
+          <NavigationProperty Name="FeaturedMnemonics" Relationship="gredbModel.FK_FeaturedMnemonics_GreWords" FromRole="GreWords" ToRole="FeaturedMnemonics" />
+          <NavigationProperty Name="GooglePhrases" Relationship="gredbModel.FK_GooglePhrase_GreWords" FromRole="GreWords" ToRole="GooglePhrase" />
+          <NavigationProperty Name="GoogleSynonyms" Relationship="gredbModel.FK_GoogleSynonyms_GreWords" FromRole="GreWords" ToRole="GoogleSynonyms" />
+          <NavigationProperty Name="GreWordAffinities" Relationship="gredbModel.FK_GreWordAffinity_GreWords" FromRole="GreWords" ToRole="GreWordAffinity" />
+          <NavigationProperty Name="GreWordAffinities1" Relationship="gredbModel.FK_GreWordAffinity_GreWords1" FromRole="GreWords" ToRole="GreWordAffinity" />
+          <NavigationProperty Name="GreWordDefinitions" Relationship="gredbModel.FK_GreWordSynonymsNet_GreWords" FromRole="GreWords" ToRole="GreWordDefinitions" />
+          <NavigationProperty Name="WordDefinitions" Relationship="gredbModel.FK_Definitions_GreWords" FromRole="GreWords" ToRole="WordDefinitions" />
+          <NavigationProperty Name="WordEtymologies" Relationship="gredbModel.FK_Etymology_GreWords" FromRole="GreWords" ToRole="WordEtymology" />
+          <NavigationProperty Name="GreWordSynonyms" Relationship="gredbModel.FK_GreWordSynonyms_GreWords" FromRole="GreWords" ToRole="GreWordSynonyms" />
+          <NavigationProperty Name="ListedWords" Relationship="gredbModel.FK_WordLists_GreWords" FromRole="GreWords" ToRole="ListedWords" />
+        </EntityType>
+        <EntityType Name="GreWordSynonym">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Serial" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="PartsOfSpeech" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="SimilarWords" Type="String" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <Property Name="Definitions" Type="String" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <Property Name="Synonyms" Type="String" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <Property Name="Antonyms" Type="String" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <NavigationProperty Name="GreWord" Relationship="gredbModel.FK_GreWordSynonyms_GreWords" FromRole="GreWordSynonyms" ToRole="GreWords" />
+        </EntityType>
+        <EntityType Name="ListedWord">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ListId" Type="Int64" Nullable="false" />
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Difficulty" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="GreWord" Relationship="gredbModel.FK_WordLists_GreWords" FromRole="ListedWords" ToRole="GreWords" />
+          <NavigationProperty Name="ListName" Relationship="gredbModel.FK_GreWordLists_WordList" FromRole="ListedWords" ToRole="ListName" />
+        </EntityType>
+        <EntityType Name="ListName">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <NavigationProperty Name="ListedWords" Relationship="gredbModel.FK_GreWordLists_WordList" FromRole="ListName" ToRole="ListedWords" />
+        </EntityType>
+        <EntityType Name="MnemonicsDictionaryHtml">
+          <Key>
+            <PropertyRef Name="Word" />
+          </Key>
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Html" Type="String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+        </EntityType>
+        <EntityType Name="SynonymsNetHtml">
+          <Key>
+            <PropertyRef Name="Word" />
+          </Key>
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Html" Type="String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+        </EntityType>
+        <EntityType Name="UnfinishedWord">
+          <Key>
+            <PropertyRef Name="Word" />
+          </Key>
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+        </EntityType>
+        <EntityType Name="WebUrl">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="WebTitle" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Url" Type="String" Nullable="false" MaxLength="255" Unicode="true" FixedLength="false" />
+          <Property Name="ImageIndex" Type="Int32" Nullable="false" />
+          <Property Name="Priority" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="WordDefinition">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Definition" Type="String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <Property Name="Image" Type="String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <Property Name="Tag" Type="String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <NavigationProperty Name="GreWord" Relationship="gredbModel.FK_Definitions_GreWords" FromRole="WordDefinitions" ToRole="GreWords" />
+        </EntityType>
+        <EntityType Name="WordEtymology">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Word" Type="String" Nullable="false" MaxLength="50" Unicode="true" FixedLength="false" />
+          <Property Name="Etymology" Type="String" Nullable="false" MaxLength="Max" Unicode="true" FixedLength="false" />
+          <NavigationProperty Name="GreWord" Relationship="gredbModel.FK_Etymology_GreWords" FromRole="WordEtymology" ToRole="GreWords" />
+        </EntityType>
+        <Association Name="FK_BasicMnemonics_GreWords">
+          <End Role="GreWords" Type="gredbModel.GreWord" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="BasicMnemonics" Type="gredbModel.BasicMnemonic" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="BasicMnemonics">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BengaliDefinitions_GreWords">
+          <End Role="GreWords" Type="gredbModel.GreWord" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="BengaliDefinitions" Type="gredbModel.BengaliDefinition" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="BengaliDefinitions">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_FeaturedMnemonics_GreWords">
+          <End Role="GreWords" Type="gredbModel.GreWord" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="FeaturedMnemonics" Type="gredbModel.FeaturedMnemonic" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="FeaturedMnemonics">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GooglePhrase_GreWords">
+          <End Role="GreWords" Type="gredbModel.GreWord" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="GooglePhrase" Type="gredbModel.GooglePhrase" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="GooglePhrase">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GoogleSynonyms_GreWords">
+          <End Role="GreWords" Type="gredbModel.GreWord" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="GoogleSynonyms" Type="gredbModel.GoogleSynonym" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="GoogleSynonyms">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GreWordAffinity_GreWords">
+          <End Role="GreWords" Type="gredbModel.GreWord" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="GreWordAffinity" Type="gredbModel.GreWordAffinity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="GreWordAffinity">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GreWordAffinity_GreWords1">
+          <End Role="GreWords" Type="gredbModel.GreWord" Multiplicity="1" />
+          <End Role="GreWordAffinity" Type="gredbModel.GreWordAffinity" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="GreWordAffinity">
+              <PropertyRef Name="Related" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GreWordSynonymsNet_GreWords">
+          <End Role="GreWords" Type="gredbModel.GreWord" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="GreWordDefinitions" Type="gredbModel.GreWordDefinition" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="GreWordDefinitions">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Definitions_GreWords">
+          <End Role="GreWords" Type="gredbModel.GreWord" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="WordDefinitions" Type="gredbModel.WordDefinition" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="WordDefinitions">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Etymology_GreWords">
+          <End Role="GreWords" Type="gredbModel.GreWord" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="WordEtymology" Type="gredbModel.WordEtymology" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="WordEtymology">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GreWordSynonyms_GreWords">
+          <End Role="GreWords" Type="gredbModel.GreWord" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="GreWordSynonyms" Type="gredbModel.GreWordSynonym" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="GreWordSynonyms">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WordLists_GreWords">
+          <End Role="GreWords" Type="gredbModel.GreWord" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ListedWords" Type="gredbModel.ListedWord" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GreWords">
+              <PropertyRef Name="Word" />
+            </Principal>
+            <Dependent Role="ListedWords">
+              <PropertyRef Name="Word" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GreWordLists_WordList">
+          <End Role="ListName" Type="gredbModel.ListName" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ListedWords" Type="gredbModel.ListedWord" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ListName">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="ListedWords">
+              <PropertyRef Name="ListId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="gredbModelStoreContainer" CdmEntityContainer="gredbEntities">
+          <EntitySetMapping Name="BasicMnemonics"><EntityTypeMapping TypeName="gredbModel.BasicMnemonic"><MappingFragment StoreEntitySet="BasicMnemonics">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="Mnemonic" ColumnName="Mnemonic" />
+            <ScalarProperty Name="Helpful" ColumnName="Helpful" />
+            <ScalarProperty Name="NotHelpful" ColumnName="NotHelpful" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="BengaliDefinitions"><EntityTypeMapping TypeName="gredbModel.BengaliDefinition"><MappingFragment StoreEntitySet="BengaliDefinitions">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="Bengali" ColumnName="Bengali" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="DefinitionsNetHtmls"><EntityTypeMapping TypeName="gredbModel.DefinitionsNetHtml"><MappingFragment StoreEntitySet="DefinitionsNetHtml">
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="Html" ColumnName="Html" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="EtymologyHtmls"><EntityTypeMapping TypeName="gredbModel.EtymologyHtml"><MappingFragment StoreEntitySet="EtymologyHtml">
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="Html" ColumnName="Html" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="FeaturedMnemonics"><EntityTypeMapping TypeName="gredbModel.FeaturedMnemonic"><MappingFragment StoreEntitySet="FeaturedMnemonics">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="Mnemonic" ColumnName="Mnemonic" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="GoogleDictionaryHtmls"><EntityTypeMapping TypeName="gredbModel.GoogleDictionaryHtml"><MappingFragment StoreEntitySet="GoogleDictionaryHtml">
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="Html" ColumnName="Html" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="GooglePhrases"><EntityTypeMapping TypeName="gredbModel.GooglePhrase"><MappingFragment StoreEntitySet="GooglePhrase">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="EnglishPhrase" ColumnName="EnglishPhrase" />
+            <ScalarProperty Name="BengaliPhrase" ColumnName="BengaliPhrase" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="GoogleSynonyms"><EntityTypeMapping TypeName="gredbModel.GoogleSynonym"><MappingFragment StoreEntitySet="GoogleSynonyms">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="Synonym" ColumnName="Synonym" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="GreWordAffinities"><EntityTypeMapping TypeName="gredbModel.GreWordAffinity"><MappingFragment StoreEntitySet="GreWordAffinity">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="Related" ColumnName="Related" />
+            <ScalarProperty Name="Affinity" ColumnName="Affinity" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="GreWordDefinitions"><EntityTypeMapping TypeName="gredbModel.GreWordDefinition"><MappingFragment StoreEntitySet="GreWordDefinitions">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="Serial" ColumnName="Serial" />
+            <ScalarProperty Name="PartsOfSpeech" ColumnName="PartsOfSpeech" />
+            <ScalarProperty Name="SimilarWords" ColumnName="SimilarWords" />
+            <ScalarProperty Name="Definitions" ColumnName="Definitions" />
+            <ScalarProperty Name="Sentences" ColumnName="Sentences" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="GreWords"><EntityTypeMapping TypeName="gredbModel.GreWord"><MappingFragment StoreEntitySet="GreWords">
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="Hardness" ColumnName="Hardness" />
+            <ScalarProperty Name="Comment" ColumnName="Comment" />
+            <ScalarProperty Name="Bookmarked" ColumnName="Bookmarked" />
+            <ScalarProperty Name="Remembered" ColumnName="Remembered" />
+            <ScalarProperty Name="Forgotten" ColumnName="Forgotten" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="GreWordSynonyms"><EntityTypeMapping TypeName="gredbModel.GreWordSynonym"><MappingFragment StoreEntitySet="GreWordSynonyms">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="Serial" ColumnName="Serial" />
+            <ScalarProperty Name="PartsOfSpeech" ColumnName="PartsOfSpeech" />
+            <ScalarProperty Name="SimilarWords" ColumnName="SimilarWords" />
+            <ScalarProperty Name="Definitions" ColumnName="Definitions" />
+            <ScalarProperty Name="Synonyms" ColumnName="Synonyms" />
+            <ScalarProperty Name="Antonyms" ColumnName="Antonyms" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="ListedWords"><EntityTypeMapping TypeName="gredbModel.ListedWord"><MappingFragment StoreEntitySet="ListedWords">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="ListId" ColumnName="ListId" />
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="Difficulty" ColumnName="Difficulty" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="ListNames"><EntityTypeMapping TypeName="gredbModel.ListName"><MappingFragment StoreEntitySet="ListName">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="Name" ColumnName="Name" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="MnemonicsDictionaryHtmls"><EntityTypeMapping TypeName="gredbModel.MnemonicsDictionaryHtml"><MappingFragment StoreEntitySet="MnemonicsDictionaryHtml">
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="Html" ColumnName="Html" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="SynonymsNetHtmls"><EntityTypeMapping TypeName="gredbModel.SynonymsNetHtml"><MappingFragment StoreEntitySet="SynonymsNetHtml">
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="Html" ColumnName="Html" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="UnfinishedWords"><EntityTypeMapping TypeName="gredbModel.UnfinishedWord"><MappingFragment StoreEntitySet="UnfinishedWords">
+            <ScalarProperty Name="Word" ColumnName="Word" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="WebUrls"><EntityTypeMapping TypeName="gredbModel.WebUrl"><MappingFragment StoreEntitySet="WebUrl">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="WebTitle" ColumnName="WebTitle" />
+            <ScalarProperty Name="Url" ColumnName="Url" />
+            <ScalarProperty Name="ImageIndex" ColumnName="ImageIndex" />
+            <ScalarProperty Name="Priority" ColumnName="Priority" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="WordDefinitions"><EntityTypeMapping TypeName="gredbModel.WordDefinition"><MappingFragment StoreEntitySet="WordDefinitions">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="Definition" ColumnName="Definition" />
+            <ScalarProperty Name="Image" ColumnName="Image" />
+            <ScalarProperty Name="Tag" ColumnName="Tag" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="WordEtymologies"><EntityTypeMapping TypeName="gredbModel.WordEtymology"><MappingFragment StoreEntitySet="WordEtymology">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="Word" ColumnName="Word" />
+            <ScalarProperty Name="Etymology" ColumnName="Etymology" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="RemoveHtml" FunctionName="gredbModel.Store.RemoveHtml" />
+          <FunctionImportMapping FunctionImportName="RemoveDuplicateBengaliWord" FunctionName="gredbModel.Store.RemoveDuplicateBengaliWord" />
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2008/10/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="True" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams>
+      <Diagram Name="GreDb">
+        <EntityTypeShape EntityType="gredbModel.BasicMnemonic" Width="1.5" PointX="3" PointY="3.875" Height="2.1725878906249996" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.BengaliDefinition" Width="1.5" PointX="3" PointY="6.75" Height="1.7879850260416674" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.DefinitionsNetHtml" Width="1.5" PointX="0.75" PointY="0.75" Height="1.4033821614583326" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.EtymologyHtml" Width="1.5" PointX="2.75" PointY="0.75" Height="1.4033821614583335" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.FeaturedMnemonic" Width="1.5" PointX="3" PointY="9.25" Height="1.7879850260416674" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.GoogleDictionaryHtml" Width="1.5" PointX="4.75" PointY="0.75" Height="1.4033821614583326" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.GooglePhrase" Width="1.5" PointX="3" PointY="11.875" Height="1.9802864583333317" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.GoogleSynonym" Width="1.5" PointX="3" PointY="14.5" Height="1.7879850260416674" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.GreWordAffinity" Width="1.5" PointX="3" PointY="17.125" Height="2.172587890624996" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.GreWordDefinition" Width="1.5" PointX="3" PointY="20" Height="2.5571907552083317" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.GreWord" Width="1.5" PointX="0.75" PointY="15.375" Height="4.4802050781250031" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.GreWordSynonym" Width="1.5" PointX="3" PointY="23.375" Height="2.7494921875000031" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.ListedWord" Width="1.5" PointX="6" PointY="16.625" Height="2.172587890624996" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.ListName" Width="1.5" PointX="3.75" PointY="26.875" Height="1.5956835937500031" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.MnemonicsDictionaryHtml" Width="1.5" PointX="5.75" PointY="3.75" Height="1.4033821614583388" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.SynonymsNetHtml" Width="1.5" PointX="6.75" PointY="0.75" Height="1.4033821614583388" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.UnfinishedWord" Width="1.5" PointX="5.75" PointY="6.75" Height="1.2110807291666674" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.WebUrl" Width="1.5" PointX="7.75" PointY="3.75" Height="1.9802864583333388" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.WordDefinition" Width="1.5" PointX="3" PointY="29.75" Height="2.1725878906250031" IsExpanded="true" />
+        <EntityTypeShape EntityType="gredbModel.WordEtymology" Width="1.5" PointX="3" PointY="32.625" Height="1.7879850260416674" IsExpanded="true" />
+        <AssociationConnector Association="gredbModel.FK_BasicMnemonics_GreWords" ManuallyRouted="false">
+          <ConnectorPoint PointX="1.5" PointY="15.375" />
+          <ConnectorPoint PointX="1.5" PointY="4.9612939453125" />
+          <ConnectorPoint PointX="3" PointY="4.9612939453125" />
+        </AssociationConnector>
+        <AssociationConnector Association="gredbModel.FK_BengaliDefinitions_GreWords" ManuallyRouted="false">
+          <ConnectorPoint PointX="1.9062525" PointY="15.375" />
+          <ConnectorPoint PointX="1.9062525" PointY="7.6439925130208337" />
+          <ConnectorPoint PointX="3" PointY="7.6439925130208337" />
+        </AssociationConnector>
+        <AssociationConnector Association="gredbModel.FK_FeaturedMnemonics_GreWords" ManuallyRouted="false">
+          <ConnectorPoint PointX="1.0937475" PointY="15.375" />
+          <ConnectorPoint PointX="1.0937475" PointY="10.143992513020834" />
+          <ConnectorPoint PointX="1.4166666666666667" PointY="10.143992513020834" />
+          <ConnectorPoint PointX="1.5833333333333333" PointY="10.143992513020834" />
+          <ConnectorPoint PointX="1.8229191666666667" PointY="10.143992513020834" />
+          <ConnectorPoint PointX="1.9895858333333332" PointY="10.143992513020834" />
+          <ConnectorPoint PointX="3" PointY="10.143992513020834" />
+        </AssociationConnector>
+        <AssociationConnector Association="gredbModel.FK_GooglePhrase_GreWords" ManuallyRouted="false">
+          <ConnectorPoint PointX="2.10937875" PointY="15.375" />
+          <ConnectorPoint PointX="2.10937875" PointY="12.865143229166666" />
+          <ConnectorPoint PointX="3" PointY="12.865143229166666" />
+        </AssociationConnector>
+        <AssociationConnector Association="gredbModel.FK_GoogleSynonyms_GreWords" ManuallyRouted="false">
+          <ConnectorPoint PointX="2.25" PointY="15.831492513020834" />
+          <ConnectorPoint PointX="3" PointY="15.831492513020834" />
+        </AssociationConnector>
+        <AssociationConnector Association="gredbModel.FK_GreWordAffinity_GreWords" ManuallyRouted="false">
+          <ConnectorPoint PointX="2.25" PointY="18.211293945312498" />
+          <ConnectorPoint PointX="3" PointY="18.211293945312498" />
+        </AssociationConnector>
+        <AssociationConnector Association="gredbModel.FK_GreWordAffinity_GreWords1" ManuallyRouted="false">
+          <ConnectorPoint PointX="2.25" PointY="17.605646972656249" />
+          <ConnectorPoint PointX="3" PointY="17.605646972656249" />
+        </AssociationConnector>
+        <AssociationConnector Association="gredbModel.FK_GreWordSynonymsNet_GreWords" ManuallyRouted="false">
+          <ConnectorPoint PointX="1.5" PointY="19.855205078125003" />
+          <ConnectorPoint PointX="1.5" PointY="21.278595377604166" />
+          <ConnectorPoint PointX="1.8229191666666667" PointY="21.278595377604166" />
+          <ConnectorPoint PointX="1.9895858333333332" PointY="21.278595377604166" />
+          <ConnectorPoint PointX="2.0260454166666664" PointY="21.278595377604166" />
+          <ConnectorPoint PointX="2.1927120833333333" PointY="21.278595377604166" />
+          <ConnectorPoint PointX="3" PointY="21.278595377604166" />
+        </AssociationConnector>
+        <AssociationConnector Association="gredbModel.FK_Definitions_GreWords" ManuallyRouted="false">
+          <ConnectorPoint PointX="1.9062525" PointY="19.855205078125003" />
+          <ConnectorPoint PointX="1.9062525" PointY="30.8362939453125" />
+          <ConnectorPoint PointX="3" PointY="30.8362939453125" />
+        </AssociationConnector>
+        <AssociationConnector Association="gredbModel.FK_Etymology_GreWords" ManuallyRouted="false">
+          <ConnectorPoint PointX="1.0937475" PointY="19.855205078125003" />
+          <ConnectorPoint PointX="1.0937475" PointY="33.518992513020834" />
+          <ConnectorPoint PointX="3" PointY="33.518992513020834" />
+        </AssociationConnector>
+        <AssociationConnector Association="gredbModel.FK_GreWordSynonyms_GreWords" ManuallyRouted="false">
+          <ConnectorPoint PointX="2.10937875" PointY="19.855205078125003" />
+          <ConnectorPoint PointX="2.10937875" PointY="24.74974609375" />
+          <ConnectorPoint PointX="3" PointY="24.74974609375" />
+        </AssociationConnector>
+        <AssociationConnector Association="gredbModel.FK_WordLists_GreWords" ManuallyRouted="false">
+          <ConnectorPoint PointX="2.25" PointY="16.84375" />
+          <ConnectorPoint PointX="6" PointY="16.84375" />
+        </AssociationConnector>
+        <AssociationConnector Association="gredbModel.FK_GreWordLists_WordList" ManuallyRouted="false">
+          <ConnectorPoint PointX="4.90625" PointY="26.875" />
+          <ConnectorPoint PointX="4.90625" PointY="16.9843775" />
+          <ConnectorPoint PointX="6" PointY="16.9843775" />
+        </AssociationConnector>
+      </Diagram>
+    </Diagrams>
+  </Designer>
+</edmx:Edmx>

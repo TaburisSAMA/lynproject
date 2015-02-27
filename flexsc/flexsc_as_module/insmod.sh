@@ -1,0 +1,1 @@
+ sudo insmod flexsc_module_all.ko

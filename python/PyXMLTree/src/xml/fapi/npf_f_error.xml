@@ -1,0 +1,186 @@
+<!DOCTYPE api SYSTEM "../xmlfapi.dtd">
+<api name='npf_f_error'>
+<preamble>
+  INTEL CONFIDENTIAL
+
+  Copyright 2000 - 2003 Intel Corporation All Rights Reserved.
+
+  The source code contained or described herein and all documents related to
+  the source code ("Material") are owned by Intel Corporation or its 
+  suppliers or licensors.
+
+  Title to the Material remains with Intel Corporation or its suppliers and
+  licensors. The Material contains trade secrets and proprietary and
+  confidential information of Intel or its suppliers and licensors.
+  The Material is protected by worldwide copyright and trade secret laws and
+  treaty provisions. No part of the Material may be used, copied, reproduced,
+  modified, published, uploaded, posted, transmitted, distributed,
+  or disclosed in any way without Intel's prior express written permission.
+
+  No license under any patent, copyright, trade secret or other intellectual
+  property right is granted to or conferred upon you by disclosure
+  or delivery of the Materials, either expressly, by implication, inducement,
+  estoppel or otherwise. Any license under such intellectual property rights
+  must be express and approved by Intel in writing.
+</preamble>
+  
+<imports>
+<import>npf</import>
+</imports>
+
+<section name='Data Types Reference'>
+
+<section name='Error Ranges'>
+
+<define>
+<descr>Base NPF Functional API Errors.</descr>
+<field name="NPF_F_BASE_ERR">
+<value>(NPF_INTERFACES_MAX_ERR        +1)</value>
+<depends>NPF_INTERFACES_MAX_ERR</depends>
+</field>
+<field name="NPF_F_MAX_ERR">
+<value>(NPF_F_BASE_ERR                +99)</value>
+<depends>NPF_F_BASE_ERR</depends>
+</field>
+</define>
+
+<define>
+<descr>
+Common NPF Functional API Errors.
+</descr>
+<field name="NPF_F_ERROR_MSG_LIBRARY">
+<descr>Failure in Message Support Library.</descr>
+<value>(NPF_F_BASE_ERR                +1)</value>
+<depends>NPF_F_BASE_ERR</depends>
+</field>
+<field name="NPF_F_FUNCTION_NOT_SUPPORTED">
+<descr>Function not supported.</descr>
+<value>(NPF_F_BASE_ERR                +2)</value>
+<depends>NPF_F_BASE_ERR</depends>
+</field>
+<field name="NPF_F_INVALID_OPERATION">
+<descr>Invalid operation.</descr>
+<value>(NPF_F_BASE_ERR                +3)</value>
+<depends>NPF_F_BASE_ERR</depends>
+</field>
+<field name="NPF_F_INVALID_BIND_NBR">
+<descr>Invalid bind neighbor.</descr>
+<value>(NPF_F_BASE_ERR                +4)</value>
+<depends>NPF_F_BASE_ERR</depends>
+</field>
+<field name="NPF_F_BAD_PARAM">
+<descr>Bad parameter.</descr>
+<value>(NPF_F_BASE_ERR                +5)</value>
+<depends>NPF_F_BASE_ERR</depends>
+</field>
+<field name="NPF_F_NO_MEM">
+<descr>No memory.</descr>
+<value>(NPF_F_BASE_ERR                +6)</value>
+<depends>NPF_F_BASE_ERR</depends>
+</field>
+<field name="NPF_F_NO_RESOURCE">
+<descr>Resources exhausted.</descr>
+<value>(NPF_F_BASE_ERR                +7)</value>
+<depends>NPF_F_BASE_ERR</depends>
+</field>
+</define>
+
+<define>
+<descr>
+NPF Functional APIs Error Ranges.
+</descr>
+<field name="NPF_F_WMAX_BASE_ERR">
+<value>(NPF_F_MAX_ERR                 +1)</value>
+<depends>NPF_F_MAX_ERR</depends>
+</field>
+<field name="NPF_F_WMAX_MAX_ERR">
+<value>(NPF_F_WMAX_BASE_ERR             +99)</value>
+<depends>NPF_F_WMAX_BASE_ERR</depends>
+</field>
+</define>
+
+<define>
+<descr>
+NPF Functional APIs Error Ranges.
+</descr>
+<field name="NPF_F_BSCP_BSN_BASE_ERR">
+<value>(NPF_F_WMAX_MAX_ERR                 +1)</value>
+<depends>NPF_F_WMAX_MAX_ERR</depends>
+</field>
+<field name="NPF_F_BSCP_BSN_MAX_ERR">
+<value>(NPF_F_BSCP_BSN_BASE_ERR             +99)</value>
+<depends>NPF_F_BSCP_BSN_BASE_ERR</depends>
+</field>
+</define>
+
+<define>
+<descr>
+NPF Functional APIs Error Ranges.
+</descr>
+<field name="NPF_F_WMAX_CS_BASE_ERR">
+<value>(NPF_F_BSCP_BSN_MAX_ERR           +1)</value>
+<depends>NPF_F_BSCP_BSN_MAX_ERR</depends>
+</field>
+<field name="NPF_F_WMAX_CS_MAX_ERR">
+<value>(NPF_F_WMAX_CS_BASE_ERR             +99)</value>
+<depends>NPF_F_WMAX_CS_BASE_ERR</depends>
+</field>
+</define>
+
+<define>
+<descr>
+NPF Functional APIs Error Ranges.
+</descr>
+<field name="NPF_F_SYSINFO_BASE_ERR">
+<value>(NPF_F_WMAX_CS_MAX_ERR           +1)</value>
+<depends>NPF_F_WMAX_CS_MAX_ERR</depends>
+</field>
+<field name="NPF_F_SYSINFO_MAX_ERR">
+<value>(NPF_F_SYSINFO_BASE_ERR             +99)</value>
+<depends>NPF_F_SYSINFO_BASE_ERR</depends>
+</field>
+</define>
+
+<define>
+<descr>
+NPF Functional APIs Error Ranges.
+</descr>
+<field name="NPF_F_SSU_BASE_ERR">
+<value>(NPF_F_SYSINFO_MAX_ERR            +1)</value>
+<depends>NPF_F_SYSINFO_MAX_ERR</depends>
+</field>
+<field name="NPF_F_SSU_MAX_ERR">
+<value>(NPF_F_SSU_BASE_ERR            +99)</value>
+<depends>NPF_F_SSU_BASE_ERR</depends>
+</field>
+<field name="NPF_F_MGMT_BASE_ERR">
+<value>(NPF_F_SSU_MAX_ERR            +1)</value>
+<depends>NPF_F_SSU_MAX_ERR</depends>
+</field>
+<field name="NPF_F_MGMT_MAX_ERR">
+<value>(NPF_F_MGMT_BASE_ERR            +99)</value>
+<depends>NPF_F_MGMT_BASE_ERR</depends>
+</field>
+</define>
+
+
+<define>
+<descr>
+NPF Functional APIs Error Ranges.
+</descr>
+<field name="NPF_F_IF_BASE_ERR">
+<value>(NPF_F_MGMT_MAX_ERR           +1)</value>
+<depends>NPF_F_MGMT_MAX_ERR</depends>
+</field>
+<field name="NPF_F_IF_MAX_ERR">
+<value>(NPF_F_IF_BASE_ERR             +99)</value>
+<depends>NPF_F_IF_BASE_ERR</depends>
+</field>
+</define>
+
+
+</section>
+
+</section>
+
+</api>

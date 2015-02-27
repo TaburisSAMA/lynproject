@@ -1,0 +1,274 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{CB48658C-74D6-4FC7-9AFE-56A748CB39D0}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>GREWordStudy</RootNamespace>
+    <AssemblyName>GREWordStudy</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>GREWordStudy.Program</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>GREWordStudy.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DotNetMagic, Version=6.0.0.0, Culture=neutral, PublicKeyToken=9bf68ea376edccab, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>library\DotNetMagic.DLL</HintPath>
+    </Reference>
+    <Reference Include="HibernatingRhinos.Profiler.Appender.v4.0">
+      <HintPath>D:\Downloads\Compressed\EntityFramework.Profiler-Build-747\HibernatingRhinos.Profiler.Appender.v4.0.dll</HintPath>
+    </Reference>
+    <Reference Include="ObjectListView">
+      <HintPath>library\ObjectListView.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.Entity">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Security" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="ThirstyCrow.WinForms.Controls, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>library\ThirstyCrow.WinForms.Controls.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Collector\GoogleDictionaryCollector.cs" />
+    <Compile Include="Collector\HttpFetcher.cs" />
+    <Compile Include="Collector\GREWordCollectorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Collector\GREWordCollectorForm.Designer.cs">
+      <DependentUpon>GREWordCollectorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Collector\ParserHelper.cs" />
+    <Compile Include="Collector\SingleWordCollectorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Collector\SingleWordCollectorForm.Designer.cs">
+      <DependentUpon>SingleWordCollectorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\Browser\GREWebBrowser.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Common\Browser\GREWebBrowser.Designer.cs">
+      <DependentUpon>GREWebBrowser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\DataGridViewPhotoHelper.cs" />
+    <Compile Include="Model\GreDb.Designer.cs">
+      <DependentUpon>GreDb.edmx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Include="Model\GreWord.cs" />
+    <Compile Include="Model\PlainWord.cs" />
+    <Compile Include="Study\GreWordStudyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Study\GreWordStudyForm.Designer.cs">
+      <DependentUpon>GreWordStudyForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\ListViewColumnSorter.cs" />
+    <Compile Include="Common\Browser\MaxBrowser.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Common\Browser\MaxBrowser.Designer.cs">
+      <DependentUpon>MaxBrowser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Study\StickyBrowser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Study\StickyBrowser.Designer.cs">
+      <DependentUpon>StickyBrowser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Study\StickyNoteForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Study\StickyNoteForm.Designer.cs">
+      <DependentUpon>StickyNoteForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Study\WebUrlsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Study\WebUrlsForm.Designer.cs">
+      <DependentUpon>WebUrlsForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Collector\GREWordCollectorForm.resx">
+      <DependentUpon>GREWordCollectorForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Collector\SingleWordCollectorForm.resx">
+      <DependentUpon>SingleWordCollectorForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Study\GreWordStudyForm.resx">
+      <DependentUpon>GreWordStudyForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\Browser\MaxBrowser.resx">
+      <DependentUpon>MaxBrowser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="Study\StickyBrowser.resx">
+      <DependentUpon>StickyBrowser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Study\StickyNoteForm.resx">
+      <DependentUpon>StickyNoteForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Study\WebUrlsForm.resx">
+      <DependentUpon>WebUrlsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\DataSources\GREWordStudy.Model.gredbEntities.datasource" />
+    <None Include="Properties\DataSources\GREWordStudy.Model.WebUrl.datasource" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CommonUtility\CommonUtility.csproj">
+      <Project>{0AC3BA9B-02E3-4FEC-A17E-59AB365DCCB2}</Project>
+      <Name>CommonUtility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ShellLib\ShellLib.csproj">
+      <Project>{773B1EF8-E5F0-45CA-96E8-20AE06716026}</Project>
+      <Name>ShellLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.VisualBasic.PowerPacks.10.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft Visual Basic PowerPacks 10.0</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="GREWordStudy.ico" />
+    <Content Include="library\DotNetMagic.DLL" />
+    <Content Include="library\ObjectListView.dll" />
+    <Content Include="library\ThirstyCrow.WinForms.Controls.dll" />
+    <None Include="Resources\1285273987_iphone.png" />
+    <None Include="Resources\1285274185_ie.png" />
+    <None Include="Resources\1285273934_001_391.png" />
+    <None Include="Resources\1285274214_player_stop.png" />
+    <None Include="Resources\1285274285_globe blue.png" />
+    <None Include="Resources\1285273934_001_39.png" />
+    <None Include="Resources\1285273906_media-playback-stop.png" />
+    <None Include="Resources\1285273890_media-playback-start.png" />
+    <None Include="Resources\document-save-as.png" />
+    <None Include="Resources\no.png" />
+    <None Include="Resources\yes.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EntityDeploy Include="Model\GreDb.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>GreDb.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

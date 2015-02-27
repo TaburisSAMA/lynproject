@@ -1,0 +1,97 @@
+MYTEST-EXAMPLE-MIB2 DEFINITIONS ::= BEGIN
+
+IMPORTS
+    netSnmpExamples
+        FROM NET-SNMP-EXAMPLES-MIB
+    AGENT-CAPABILITIES, OBJECT-GROUP
+        FROM SNMPv2-CONF
+    MODULE-IDENTITY, OBJECT-IDENTITY, OBJECT-TYPE
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION
+        FROM SNMPv2-TC
+    ;
+
+testModule2 MODULE-IDENTITY
+    LAST-UPDATED  "200607272316Z" -- July 27, 2006
+    ORGANIZATION
+        ""
+    CONTACT-INFO
+        ""
+    DESCRIPTION
+        ""
+    ::= { netSnmpExamples 12 }
+
+MibtestEntry2 ::= SEQUENCE
+{
+    mibtestIndex         INTEGER,
+    mibtestColumnInteger INTEGER,
+    mibtestColumnOctet   OCTET STRING
+}
+
+mibtestTable2 OBJECT-TYPE
+    SYNTAX        SEQUENCE OF MibtestEntry2
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        ""
+    ::= { testModule2 1 }
+
+mibtestEntry2 OBJECT-TYPE
+    SYNTAX        MibtestEntry2
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        ""
+    INDEX
+        { mibtestIndex }
+    ::= { mibtestTable2 1 }
+
+mibtestIndex OBJECT-TYPE
+    SYNTAX        INTEGER
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        "Index of mibtestTable For this test, there should be a fix number
+         of rows in the this table. The table is hard coded to contain 3
+         rows."
+    ::= { mibtestEntry2 1 }
+
+mibtestColumnInteger OBJECT-TYPE
+    SYNTAX        INTEGER
+    MAX-ACCESS    read-write
+    STATUS        current
+    DESCRIPTION
+        "Test column 1"
+    ::= { mibtestEntry2 2 }
+
+mibtestColumnOctet OBJECT-TYPE
+    SYNTAX        OCTET STRING (SIZE(0..255))
+    MAX-ACCESS    read-write
+    STATUS        current
+    DESCRIPTION
+        "column 2"
+    ::= { mibtestEntry2 3 }
+
+mibtestScalarGroup OBJECT-IDENTITY
+    STATUS        current
+    DESCRIPTION
+        "Group of scalar objects"
+    ::= { testModule2 2 }
+
+mibtestScalarInteger OBJECT-TYPE
+    SYNTAX        Integer32
+    MAX-ACCESS    read-write
+    STATUS        current
+    DESCRIPTION
+        "integer object in the scalar group."
+    ::= { mibtestScalarGroup 1 }
+
+mibtestScalarOctet OBJECT-TYPE
+    SYNTAX        OCTET STRING
+    MAX-ACCESS    read-write
+    STATUS        current
+    DESCRIPTION
+        "Octet string scalar object."
+    ::= { mibtestScalarGroup 2 }
+
+END

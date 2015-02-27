@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- *****************************************************************
+
+INTEL CONFIDENTIAL
+
+Copyright 2000 - 2003 Intel Corporation All Rights Reserved.
+
+The source code contained or described herein and all documents related to
+the source code ("Material") are owned by Intel Corporation or its 
+suppliers or licensors.
+
+Title to the Material remains with Intel Corporation or its suppliers and
+licensors. The Material contains trade secrets and proprietary and
+confidential information of Intel or its suppliers and licensors.
+The Material is protected by worldwide copyright and trade secret laws and
+treaty provisions. No part of the Material may be used, copied, reproduced,
+modified, published, uploaded, posted, transmitted, distributed,
+or disclosed in any way without Intel's prior express written permission.
+
+No license under any patent, copyright, trade secret or other intellectual
+property right is granted to or conferred upon you by disclosure
+or delivery of the Materials, either expressly, by implication, inducement,
+estoppel or otherwise. Any license under such intellectual property rights
+must be express and approved by Intel in writing.  
+
+ ***************************************************************** -->
+<!ELEMENT api (preamble, imports, (section | enum | struct | define | func | 
+               typedef | functype | vector | optional)+)>
+   <!ATTLIST api 
+              name CDATA #REQUIRED
+              id CDATA #IMPLIED>
+   <!ELEMENT preamble (#PCDATA)>
+   <!ELEMENT imports (import+, optional?)>
+   <!ELEMENT import (#PCDATA)>
+   <!ELEMENT section (section*, (enum | struct | define | func | typedef | 
+                                 functype | vector | optional)*) >
+   <!ATTLIST section
+              name CDATA #REQUIRED>
+   <!ELEMENT enum (descr*, see*, ref*, field+, optional?)>
+   <!ATTLIST enum
+              name CDATA #IMPLIED
+              type CDATA #REQUIRED
+              brief CDATA #IMPLIED>
+
+   <!ELEMENT struct (descr*, range?, see*, ref*, (field | selectunion | vector | optional)*)>
+   <!ATTLIST struct
+              name CDATA #IMPLIED
+              type CDATA #REQUIRED
+              brief CDATA #IMPLIED>
+
+   <!ELEMENT selectunion (descr*, see*, ref*, selectfield, field+, optional?)>
+   <!ATTLIST selectunion
+              name CDATA #REQUIRED
+              type CDATA #REQUIRED
+              brief CDATA #IMPLIED>
+
+   <!ELEMENT selectfield (descr*, see*, ref*)>
+   <!ATTLIST selectfield
+              name CDATA #REQUIRED
+              type CDATA #REQUIRED
+              brief CDATA #IMPLIED>
+
+   <!ELEMENT vector (descr*, see*, ref*, length)>
+   <!ATTLIST vector 
+              name CDATA #REQUIRED
+              type CDATA #REQUIRED
+              brief CDATA #IMPLIED>
+
+   <!ELEMENT define (descr*, see*, ref*, field+)>
+   <!ATTLIST define
+              brief CDATA #IMPLIED>
+
+   <!ELEMENT func (descr*, see*, ref*, param+, return?, callback?)>
+   <!ATTLIST func
+              name CDATA #REQUIRED
+              type CDATA #REQUIRED
+              brief CDATA #IMPLIED
+              xdrid CDATA #IMPLIED
+              impl (yes | no) "yes">
+
+   <!ELEMENT typedef (descr*, range?, see*, ref*)>
+   <!ATTLIST typedef
+              name CDATA #REQUIRED
+              type CDATA #REQUIRED
+              brief CDATA #IMPLIED>
+
+   <!ELEMENT functype (descr*, see*, ref*, param+, return?, callback?)>
+   <!ATTLIST functype
+              name CDATA #REQUIRED
+              type CDATA #REQUIRED
+              brief CDATA #IMPLIED
+              class (simple | callback | event) "simple">
+
+   <!ELEMENT descr (#PCDATA)>
+   <!ATTLIST descr
+              fixed (yes | no) "no">
+
+   <!ELEMENT field (descr*, range?, default?, selector*, value?, depends?)>
+   <!ATTLIST field
+              type CDATA #IMPLIED
+              name CDATA #REQUIRED
+              value CDATA #IMPLIED
+              depends CDATA #IMPLIED
+              brief CDATA #IMPLIED
+              size CDATA #IMPLIED>
+
+   <!ELEMENT range (#PCDATA)>
+   <!ELEMENT default (#PCDATA)>
+   <!ELEMENT see (#PCDATA)>
+   <!ELEMENT ref (#PCDATA)>
+   <!ATTLIST ref
+              href CDATA #IMPLIED>
+   <!ELEMENT selector (#PCDATA)>
+   <!ATTLIST selector
+              default (yes | no) "no">
+   <!ELEMENT length (descr*, range?) >
+   <!ATTLIST length
+              type CDATA #REQUIRED
+              name CDATA #REQUIRED
+              brief CDATA #IMPLIED>
+
+   <!ELEMENT optional (descr*, (field | vector | import | section | enum | struct | define | func | 
+                                typedef | functype )*) >
+   <!ATTLIST optional
+              name CDATA #REQUIRED>
+
+   <!ELEMENT return (descr*, retval*)>
+   <!ELEMENT callback (descr*, retval*)>
+
+   <!ELEMENT retval (descr*) >
+   <!ATTLIST retval
+              name CDATA #REQUIRED
+              brief CDATA #IMPLIED>
+
+
+   <!ELEMENT param (descr*, length?)?>
+   <!ATTLIST param
+              io (in | out | inout) #REQUIRED
+              type CDATA #REQUIRED
+              name CDATA #REQUIRED
+              class (simple | vector) "simple"
+              xdr (yes | no) "yes"
+              brief CDATA #IMPLIED>
+              
+   <!ELEMENT value (#PCDATA)>
+     <!ELEMENT depends (#PCDATA)>
+
+
+
+

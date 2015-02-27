@@ -1,0 +1,802 @@
+<!DOCTYPE api SYSTEM "../xmlfapi.dtd">
+<api name='npf_f_sysinfo'>
+	<preamble>
+        INTEL CONFIDENTIAL
+
+        Copyright 2000 - 2003 Intel Corporation All Rights Reserved.
+
+        The source code contained or described herein and all documents related to
+        the source code ("Material") are owned by Intel Corporation or its
+        suppliers or licensors.
+
+        Title to the Material remains with Intel Corporation or its suppliers and
+        licensors. The Material contains trade secrets and proprietary and
+        confidential information of Intel or its suppliers and licensors.
+        The Material is protected by worldwide copyright and trade secret laws and
+        treaty provisions. No part of the Material may be used, copied, reproduced,
+        modified, published, uploaded, posted, transmitted, distributed,
+        or disclosed in any way without Intel's prior express written permission.
+
+        No license under any patent, copyright, trade secret or other intellectual
+        property right is granted to or conferred upon you by disclosure
+        or delivery of the Materials, either expressly, by implication, inducement,
+        estoppel or otherwise. Any license under such intellectual property rights
+        must be express and approved by Intel in writing.
+    </preamble>
+	<imports>
+		<import>npf</import>
+		<import>npf_f_stats</import>
+		<import>npf_f_error</import>
+	</imports>
+	<section name='System Information API'>
+		<section name='General Data Types'>
+			<enum type='NPF_F_sysInfoErrorType_t'>
+				<descr>
+                        Error Codes.
+                        This data type is used to indicate the occurrence and type of an error while processing an asynchronous
+                        operation.
+                    </descr>
+				<field name="NPF_F_SYSINFO_NO_ERROR" value="NPF_NO_ERROR">
+					<descr>The operation completed successfully.</descr>
+				</field>
+				<field name="NPF_F_SYSINFO_E_UNKNOWN_ERROR" value="NPF_E_UNKNOWN">
+					<descr>Unknown or unpredicted failure occurred.</descr>
+				</field>
+				<field name="NPF_F_SYSINFO_E_BAD_PARAM" value="NPF_F_BAD_PARAM">
+					<descr>Invalid parameter defining configuration.</descr>
+				</field>
+				<field name="NPF_F_SYSINFO_E_APP_NOT_READY" value="NPF_F_SYSINFO_BASE_ERR">
+					<descr>Application isn't fully initialized - not ready to operate.</descr>
+				</field>
+			</enum>
+		</section>
+		<section name='Statistics'>
+			<section name='Statistics Data Types'>
+				<define>
+					<descr>
+                        System Information Statistics Flags.
+                        These definitions allow user to address specific System information statistics
+                        (as defined in NPF_F_sysInfoStats_t) when using NPF_F_sysInfoStatsGet()
+                        and NPF_F_sysInfoStatsConfig() routines.
+                    </descr>
+				<see>NPF_F_sysInfoStats_t</see>
+				<field name='NPF_F_SYSINFO_STATS_UENGINE_LOAD' brief="Micreoengine load statistics">
+					<value>(0x01 &lt;&lt; 0)</value>
+				</field>
+				<field name='NPF_F_SYSINFO_STATS_UENGINE_TOTAL_CSTORE' brief="Total microengine code store information">
+					<value>(0x01 &lt;&lt; 1)</value>
+				</field>
+				<field name='NPF_F_SYSINFO_STATS_UENGINE_FREE_CSTORE' brief="Free microengine code store information">
+					<value>(0x01 &lt;&lt; 2)</value>
+				</field>
+				<field name='NPF_F_SYSINFO_STATS_XSCALE_LOAD' brief="Xsclae load statistic">
+					<value>(0x01 &lt;&lt; 3)</value>
+				</field>
+				<field name='NPF_F_SYSINFO_STATS_TOTAL_MSG_SRAM' brief="Total MSG (internal) SRAM memory.">
+					<value>(0x01 &lt;&lt; 4)</value>
+				</field>
+				<field name='NPF_F_SYSINFO_STATS_FREE_MSG_SRAM' brief="Free MSG (internal) SRAM memory">
+					<value>(0x01 &lt;&lt; 5)</value>
+				</field>
+				<field name='NPF_F_SYSINFO_STATS_TOTAL_EXT_SRAM' brief="Total external SRAM memory information.">
+					<value>(0x01 &lt;&lt; 6)</value>
+				</field>
+				<field name='NPF_F_SYSINFO_STATS_FREE_EXT_SRAM' brief="Free external SRAM memory information">
+					<value>(0x01 &lt;&lt; 7)</value>
+				</field>
+				<field name='NPF_F_SYSINFO_STATS_TOTAL_OS_DRAM' brief="Total operating system DRAM memory information">
+					<value>(0x01 &lt;&lt; 8)</value>
+				</field>
+				<field name='NPF_F_SYSINFO_STATS_FREE_OS_DRAM' brief="Free operating system DRAM memory information">
+					<value>(0x01 &lt;&lt; 9)</value>
+				</field>
+				<field name='NPF_F_SYSINFO_STATS_TOTAL_ME_DRAM' brief="Total microengine DRAM memory information">
+					<value>(0x01 &lt;&lt; 10)</value>
+				</field>
+				<field name='NPF_F_SYSINFO_STATS_FREE_ME_DRAM' brief="Free microengine DRAM memory information">
+					<value>(0x01 &lt;&lt; 11)</value>
+				</field>
+				<field name='NPF_F_SYSINFO_STATS_TOTAL_SCRATCH' brief="Total Scratch memory information">
+					<value>(0x01 &lt;&lt; 12)</value>
+				</field>
+				<field name='NPF_F_SYSINFO_STATS_FREE_SCRATCH' brief="Free Scratch memory information">
+					<value>(0x01 &lt;&lt; 13)</value>
+				</field>
+			</define>
+			<struct type='NPF_F_sysInfoUEngineStats_t'>
+				<descr>
+                        Microengine Information Statistics.
+                        This structure contains statistics collected from the single microengine.
+                    </descr>
+				<see>NPF_F_sysInfoStats_t</see>
+				<field type='NPF_uint64_t' name='uEngineLoad' brief='Microengine load.' />
+				<field type='NPF_uint16_t' name='totalCStore' brief='Total control store.' />
+				<field type='NPF_uint16_t' name='freeCStore' brief='Free control store.' />
+			</struct>
+			<struct type='NPF_F_sysInfoStats_t'>
+				<descr>
+                        System Information Statistics.
+                        This structure contains statistics collected by the System Information Core Component.
+                        When collecting a given statistic is disabled, the content of coresponding field is
+                        unspecified.
+                    </descr>
+				<see>NPF_F_sysInfoStatsGet</see>
+				<see>NPF_F_sysInfoStatsConfig</see>
+				<see>NPF_F_statsConfig_t</see>
+				<vector type='NPF_F_sysInfoUEngineStats_t' name='uEngineStatsArray'>
+					<descr>Micro-engine stats array. Statistics for all micro-engines are reported.</descr>
+					<length type='NPF_uint32_t' name='uEngineNum'>
+						<descr>Number of micro-engines.</descr>
+					</length>
+				</vector>
+				<field type='NPF_uint64_t' name='xScaleLoad1' brief='XScale load for 1 minute.' />
+				<field type='NPF_uint64_t' name='xScaleLoad5' brief='XScale load for 5 minutes.' />
+				<field type='NPF_uint64_t' name='xScaleLoad15' brief='XScale load for 15 minutes.' />
+				<field type='NPF_uint64_t' name='totalMsgSram' brief='Total MSG (internal) SRAM memory.' />
+				<field type='NPF_uint64_t' name='freeMsgSram' brief='Free MSG (internal) SRAM memory.' />
+				<field type='NPF_uint64_t' name='totalExtSram' brief='Total external SRAM memory.' />
+				<field type='NPF_uint64_t' name='freeExtSram' brief='Free external SRAM memory.' />
+				<field type='NPF_uint64_t' name='totalOsDram' brief='Total operating system DRAM memory.' />
+				<field type='NPF_uint64_t' name='freeOsDram' brief='Free operating system DRAM memory.' />
+				<field type='NPF_uint64_t' name='totalMeDram' brief='Total microengine DRAM memory.' />
+				<field type='NPF_uint64_t' name='freeMeDram' brief='Free microengine DRAM memory.' />
+				<field type='NPF_uint64_t' name='totalScratch' brief='Total Scratch memory.' />
+				<field type='NPF_uint64_t' name='freeScratch' brief='Free Scratch memory.' />
+			</struct>
+		</section>
+		<section name='Statistic Functions'>
+			<func type='NPF_error_t' name='NPF_F_sysInfoStatsConfig' xdrid="RPC_SYSINFO_FAPI_STATS_CONFIG">
+				<descr>
+                        Configure Statistics Function.
+                        This function configures what kind of the statistics should be
+                        collected.
+                    </descr>
+				<see>NPF_F_statsConfig_t</see>
+				<param io='in' type='NPF_callbackHandle_t' name='callbackHandle' xdr='no'>
+					<descr>The unique identifier provided to the application
+                            when the completion callback routine was registered.</descr>
+				</param>
+				<param io='in' type='NPF_correlator_t' name='correlator' xdr='no'>
+					<descr>The unique application invocation context that will
+                            be supplied to the asynchronous completion callback routine.</descr>
+				</param>
+				<param io='in' type='NPF_errorReporting_t' name='errorReporting' xdr='no'>
+					<descr>Indicates whether the application requires an asynchronous completion callback 
+                            for this API function call.</descr>
+				</param>
+				<param io='in' type='NPF_FEHandle_t' name='feHandle' xdr='no'>
+					<descr>Forwarding element handle.</descr>
+				</param>
+				<param io='in' type='NPF_F_statsConfig_t*' name='statsConfig'>
+					<descr>The structure describing the configuration of the statistics.</descr>
+				</param>
+				<return>
+					<descr>Possible return values are:</descr>
+					<retval name='NPF_NO_ERROR'>
+						<descr>The operation is in progress.</descr>
+					</retval>
+					<retval name='NPF_F_E_UNKNOWN'>
+						<descr>Operation did not complete successfully because of problems 
+                                encountered when handling input parameters.</descr>
+					</retval>
+					<retval name='NPF_E_BAD_CALLBACK_HANDLE'>
+						<descr>The callback handle is invalid.</descr>
+					</retval>
+				</return>
+				<callback>
+					<descr>
+                            The returned callback is of type NPF_F_SYSINFO_STATS_CONFIG. Apart from
+                            error code no other data field is set in asynchronous response.
+                            Possible return codes are:
+                        </descr>
+					<retval name='NPF_NO_ERROR'>
+						<descr>Operation completed successfully.</descr>
+					</retval>
+					<retval name='NPF_F_BAD_PARAM'>
+						<descr>Invalid parameter defining statistics configuration.</descr>
+					</retval>
+				</callback>
+			</func>
+			<func type='NPF_error_t' name='NPF_F_sysInfoStatsGet' xdrid="RPC_SYSINFO_FAPI_STATS_GET">
+				<descr>
+                        Get Statistics Function.
+                        This function reads the statistics. The statistics
+                        are returned by the callback function.
+                    </descr>
+				<see>NPF_F_statsConfig_t</see>
+				<param io='in' type='NPF_callbackHandle_t' name='callbackHandle' xdr='no'>
+					<descr>The unique identifier provided to the application
+                            when the completion callback routine was registered.</descr>
+				</param>
+				<param io='in' type='NPF_correlator_t' name='correlator' xdr='no'>
+					<descr>The unique application invocation context that will
+                            be supplied to the asynchronous completion callback routine.</descr>
+				</param>
+				<param io='in' type='NPF_errorReporting_t' name='errorReporting' xdr='no'>
+					<descr>Indicates whether the application requires an asynchronous completion callback 
+                            for this API function call. Must be set to NPF_REPORT_ALL.</descr>
+				</param>
+				<param io='in' type='NPF_FEHandle_t' name='feHandle' xdr='no'>
+					<descr>Forwarding element handle.</descr>
+				</param>
+				<param io='in' type='NPF_uint64_t' name='resetMask'>
+					<descr>Mask to decide which statistics should be reset after reading.</descr>
+				</param>
+				<return>
+					<descr>Possible return values are:</descr>
+					<retval name='NPF_NO_ERROR'>
+						<descr>The operation is in progress.</descr>
+					</retval>
+					<retval name='NPF_F_E_UNKNOWN'>
+						<descr>Operation did not complete successfully because of problems encountered
+                                when handling input parameters.</descr>
+					</retval>
+					<retval name='NPF_E_BAD_CALLBACK_HANDLE'>
+						<descr>The callback handle is invalid.</descr>
+					</retval>
+				</return>
+				<callback>
+					<descr>
+                            The returned callback is of type NPF_F_SYSINFO_STATS_GET.
+                            The current values of the statistics are returned via this callback.
+                            Possible return codes are:
+                        </descr>
+					<retval name='NPF_NO_ERROR'>
+						<descr>Operation completed successfully.</descr>
+					</retval>
+				</callback>
+			</func>
+		</section>
+		</section>
+		<section name="Network Processor Keep-Alive Support">
+			<func name="NPF_F_sysInfoNpKARequest" type="NPF_error_t" xdrid="RPC_SYSINFO_FAPI_NP_KA_REQUEST">
+				<descr>
+                        Keep Alive Request.
+                        This primitive is used to check whether the colocated network processor is operational.
+                        If this is the case, the registered callback function is invoked as soon as the reply from
+                        the network processor arrives.
+                    </descr>
+				<param io="in" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+					<descr>
+                            The unique identifier provided to the application when
+                            the completion callback routine was registered.
+                        </descr>
+				</param>
+				<param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+					<descr>
+                            A unique application invocation context that will be supplied to the asynchronous
+                            completion callback routine.
+                        </descr>
+				</param>
+				<param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+					<descr>
+                            An indication of whether the application desires to receive an asynchronous
+                            completion callback for this API function call.
+                        </descr>
+				</param>
+				<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+					<descr> Forwarding element handle. </descr>
+				</param>
+				<return>
+					<descr>Possible return values are:</descr>
+					<retval name="NPF_NO_ERROR" brief="The requested operation is in progress." />
+					<retval name="NPF_E_BAD_CALLBACK_HANDLE" brief="An invalid handle was passed." />
+					<retval name="NPF_E_UNKNOWN">
+						<descr>
+                                The request did not complete successfully because of problems encountered when handling input parameters.
+                            </descr>
+					</retval>
+				</return>
+				<callback>
+					<descr>
+                            The returned callback is of type NPF_F_SYSINFO_NP_KA_REQUEST. 
+                            If the callback function is invoked, it indicates that 
+                            the network processor is operational. Apart from 
+                            error code no other data field is set in asynchronous response. 
+                            Possible return codes are:
+                        </descr>
+					<retval name='NPF_NO_ERROR'>
+						<descr>Operation completed successfully.</descr>
+					</retval>
+				</callback>
+			</func>
+		</section>
+		<section name="WP Trace management">
+		<enum type="NPF_F_sysInfoTraceOutput_t" 
+ 	           name="NPF_F_sysInfoTraceOutput_n" 
+ 	           brief="Trace output types.">
+  	          <descr>
+			Defines logging mechanism used by WiMAX BS application. 
+		  </descr>
+  	          <field name="NPF_F_SYSINFO_TRACE_CONSOLE" 
+  	              brief="Print on console.">
+  	          </field>
+                  <field name="NPF_F_SYSINFO_TRACE_UDP" 
+  	              brief="Send over UDP.">
+  	          </field>
+                  <field name="NPF_F_SYSINFO_TRACE_UDP_SYSLOG_EMULATION" 
+  	              brief="Send over UDP. Use syslog format for transmission">
+  	          </field>
+  	          <field name="NPF_F_SYSINFO_TRACE_SYSLOG" 
+   	             brief="Send to system syslog daemon.">
+   	         </field>
+                </enum>
+                <enum type="NPF_F_sysInfoTraceConsoleType_t" 
+ 	           name="NPF_F_sysInfoTraceOutput_n" 
+ 	           brief="Console output types.">
+  	          <descr>
+				Defines how all traces should be printed on console. 
+		  </descr>
+  	          <field name="NPF_F_SYSINFO_TRACE_STDOUT" 
+  	              brief="Use trace queue. Default setting.">
+  	          </field>
+  	          <field name="NPF_F_SYSINFO_TRACE_STDERR" 
+   	             brief="Use common printf (no trace queue used).">
+   	         </field>
+   	  	</enum>
+                <struct type="NPF_F_sysInfoTraceUdpAddress_t" 
+		            brief="Specifies UDP configuration for trace output.">   
+		            <descr> This structure specifies IP address and UDP port used to send traces</descr>
+   		             <field type="NPF_IPv4Address_t" name="ipAddress" 
+   		                 brief="Parameters for UDP  output">
+   		                 <descr>IP address of remote trace server </descr>
+ 		               </field>
+                             <field type="NPF_uint16_t" name="dstPort" 
+   		                 brief="Parameters for UDP output">
+   		                 <descr>UDP port </descr>
+ 		               </field>
+                </struct>
+		<struct type="NPF_F_sysInfoTraceOutputConfig_t" 
+		            brief="Specifies configuration of WP trace output.">
+		            <descr> This structure specifies trace output.. </descr>
+		            <selectunion type="NPF_F_sysInfoTraceOutputConfig_union" name="u">
+ 		               <selectfield type="NPF_F_sysInfoTraceOutput_t" name="output" 
+ 		                   brief="Trace output.">
+ 		               </selectfield>
+ 		               <field type="NPF_F_sysInfoTraceConsoleType_t" name="consoleType" 
+  		                  brief="Parameters for console output">
+  				       <descr> NPF_F_SYSINFO_TRACE_STDOUT is default. </descr>
+   		                 <selector>NPF_F_SYSINFO_TRACE_CONSOLE</selector>
+   		             </field>
+                             <field type="NPF_F_sysInfoTraceUdpAddress_t" name="udpArgs" 
+  		                  brief="Parameters UDP connection to send traces.">
+  				       <descr> Defines an IP address and dest. port. </descr>
+   		                 <selector>NPF_F_SYSINFO_TRACE_UDP</selector>
+   		             </field>
+   		             <field type="NPF_IPv4Address_t" name="remoteSyslogAddress" 
+   		                 brief="Ip address of a remote syslog server">
+   		                 <descr>IP address of remote syslog server </descr>
+                                  <selector>NPF_F_SYSINFO_TRACE_UDP_SYSLOG_EMULATION</selector>
+  		                  <selector>NPF_F_SYSINFO_TRACE_SYSLOG</selector>
+ 		               </field>
+ 		           </selectunion>
+ 		       </struct>
+			<func name="NPF_F_sysInfoTraceOutputSet" type="NPF_error_t" xdrid="RPC_SYSINFO_FAPI_TRACE_OUTPUT_SET">
+				<descr>
+                        This function is used to set application's trace destignation
+                    </descr>
+				<param io="in" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+					<descr>
+                            The unique identifier provided to the application when
+                            the completion callback routine was registered.
+                        </descr>
+				</param>
+				<param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+					<descr>
+                            A unique application invocation context that will be supplied to the asynchronous
+                            completion callback routine.
+                        </descr>
+				</param>
+				<param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+					<descr>
+                            An indication of whether the application desires to receive an asynchronous
+                            completion callback for this API function call.
+                        </descr>
+				</param>
+				<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+					<descr> Forwarding element handle. </descr>
+				</param>
+				<param io="in" type="NPF_F_sysInfoTraceOutputConfig_t" name="traceOutputSetArgs" xdr="yes">
+					<descr> Forwarding element handle. </descr>
+				</param>				<return>
+					<descr>Possible return values are:</descr>
+					<retval name="NPF_NO_ERROR" brief="The requested operation is in progress." />
+					<retval name="NPF_E_BAD_CALLBACK_HANDLE" brief="An invalid handle was passed." />
+					<retval name="NPF_E_UNKNOWN">
+						<descr>
+                                The request did not complete successfully because of problems encountered when handling input parameters.
+                            </descr>
+					</retval>
+				</return>
+				<callback>
+					<descr>
+                            The returned callback is of type NPF_F_SYSINFO_TRACE_OUTPUT_SET. 
+                            Possible return codes are:
+                        </descr>
+					<retval name='NPF_NO_ERROR'>
+						<descr>Operation completed successfully.</descr>
+					</retval>
+                                        <retval name='NPF_F_SYSINFO_E_BAD_PARAM'>
+						<descr>Operation failed.</descr>
+					</retval>
+				</callback>
+			</func>
+		</section>
+		<section name="Free Memory Events Setup">
+			<func type="NPF_error_t" name="NPF_F_sysInfoFreeMemoryEventSetup" xdrid="RPC_SYSINFO_FAPI_FREE_MEMORY_EVENT_SETUP">
+				<descr>
+                        
+                        Free Memory Events Setup.
+                        This function configures free memory event reporting. When free memory 
+                        goes below the low memory threshold, the memory low event is reported. 
+                        When free memory goes above the normal memory threshold, 
+                        the memory normal event is reported. 
+                        The low memory event threshold is by default set to five percent. 
+                        The normal memory event threshold is by default set to ten percent. 
+                        The normal memory event threshold cannot be smaller than low memory event threshold.
+
+                    </descr>
+				<see>NPF_F_sysInfoEventType_t</see>
+				<param io="in" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+					<descr>The unique identifier provided to the application
+                            when the completion callback routine was registered.</descr>
+				</param>
+				<param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+					<descr>The unique application invocation context that will be
+                            supplied to the asynchronous completion callback routine.</descr>
+				</param>
+				<param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+					<descr>Indicates whether the application requires an asynchronous completion callback
+                            for this API function invocation.</descr>
+				</param>
+				<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+					<descr>Forwarding element handle.</descr>
+				</param>
+				<param io="in" type="NPF_uint8_t" name="lowMemoryThreshold">
+					<descr>Low memory threshold, percent of the total memory available.</descr>
+				</param>
+				<param io="in" type="NPF_uint8_t" name="normalMemoryThreshold">
+					<descr>Normal memory threshold, percent of the total memory available.</descr>
+				</param>
+				<return>
+					<descr>Possible return values are:</descr>
+					<retval name="NPF_NO_ERROR">
+						<descr>The operation is in progress.</descr>
+					</retval>
+					<retval name="NPF_E_UNKNOWN">
+						<descr>The operation did not complete successfully because of problems
+                                encountered when handling input parameters.</descr>
+					</retval>
+					<retval name="NPF_E_BAD_CALLBACK_HANDLE">
+						<descr>The entries were not added to the table because the callback handle was invalid.</descr>
+					</retval>
+				</return>
+				<callback>
+					<descr>The returned callback is of type NPF_F_SYSINFO_FREE_MEMORY_EVENT_SETUP.
+                            The callback returns one response.
+                            Possible return codes are:</descr>
+					<retval name="NPF_NO_ERROR">
+						<descr>Operation completed successfully.</descr>
+					</retval>
+					<retval name="NPF_F_BAD_PARAM">
+						<descr>Normal memory threshold is smaller than low memory threshold.</descr>
+					</retval>
+				</callback>
+			</func>
+		</section>
+		<section name='Callback Support'>
+			<section name='Callback Specific Data Structures'>
+				<enum type='NPF_F_sysInfoCallbackType_t' brief='Completion Callback Type'>
+					<descr>
+                        This enumeration lists types of System Information CC callback types. Callback
+                        type is used in callback data to identify the FAPI function and its
+                        response.
+                    </descr>
+					<field name='NPF_F_SYSINFO_STATS_CONFIG' brief='Statistics Config callback.' />
+					<field name='NPF_F_SYSINFO_STATS_GET' brief='Statistics Get callback.' />
+					<field name='NPF_F_SYSINFO_NP_KA_REQUEST' brief='Network Processor Keep Alive Request.' />
+					<field name='NPF_F_SYSINFO_FREE_MEMORY_EVENT_SETUP' brief="Free Memory Event Setup callback." />
+					<field name='NPF_F_SYSINFO_TRACE_OUTPUT_SET' brief="Trace output set callback." />
+				</enum>
+				<struct type='NPF_F_sysInfoAsyncResponse_t'>
+					<descr>
+                        Asynchronous Response Structure.
+                        The asynchronous response data structure is used during callbacks in
+                        response to API invocations. This structure contains an error/success
+                        code, other optional information that correlates the response to an element
+                        in a request array, and in some cases a function-specific structure.
+                        One or more of these is passed to the callback function as an array within
+                        the NPF_F_sysInfoCallbackData_t structure.
+                    </descr>
+					<field type='NPF_F_sysInfoErrorType_t' name='error'>
+						<descr>Response error code.</descr>
+					</field>
+					<selectunion name="u" type='SysInfoasyncResponse_t'>
+						<descr>Response union with callback specific data.</descr>
+						<selectfield type='NPF_F_sysInfoCallbackType_t' name='type'>
+							<descr>
+                                Indicates callback type and discriminates union type. Replicated from
+                                NPF_F_sysInfoCallbackData_t. Member required for remote transport
+                                to correctly convey union content.
+                            </descr>
+						</selectfield>
+						<field type='NPF_F_sysInfoStats_t*' name='stats'>
+							<descr>Statistics collected by SysInfo.</descr>
+							<selector>NPF_F_SYSINFO_STATS_GET</selector>
+						</field>
+						<field type='NPF_uint32_t' name='unused'>
+							<descr>Reserved</descr>
+							<selector default="yes"></selector>
+						</field>
+					</selectunion>
+				</struct>
+				<struct type='NPF_F_sysInfoCallbackData_t'>
+					<descr>
+                        Completion Callback Structure.
+                        This structure defines the callback data that contains the information on
+                        the completed function call. System Information CC completion callback
+                        function returns this structure and callback type (type field) is used to
+                        identify the function for which the callback was generated. The callback
+                        function receives callback data structure containing one or more
+                        asynchronous responses from a single function call.
+                    </descr>
+					<field type='NPF_F_sysInfoCallbackType_t' name='type'>
+						<descr>Indicates callback type.</descr>
+					</field>
+					<field type='NPF_boolean_t' name='allOK'>
+						<descr>Indicates that all responses are OK.</descr>
+					</field>
+					<vector type='NPF_F_sysInfoAsyncResponse_t' name='respArray'>
+						<descr>Pointer to array of responses.</descr>
+						<length type='NPF_uint32_t' name='resp'>
+							<descr>Number of responses in array.</descr>
+						</length>
+					</vector>
+				</struct>
+				<functype name='NPF_F_sysInfoCallbackFunc_t' type='void' class="callback">
+					<descr>
+                        Completion Callback Function.
+                        This function is used for handling asynchronous responses. This callback
+                        function is for the application to register an asynchronous response handling
+                        routine to the System Information FAPI implementation. This callback function is
+                        intended to be implemented by the application, and be registered to the System
+                        Information FAPI implementation through the NPF_F_sysInfoRegister() function.
+                    </descr>
+					<param io="in" type="NPF_userContext_t" name="context">
+						<descr>
+                            The context item that was supplied by the application when the
+                            completion callback routine was registered.
+                        </descr>
+					</param>
+					<param io="in" type="NPF_correlator_t" name="correlator">
+						<descr>
+                            The correlator item that was supplied by the application when
+                            the System Information FAPI function call was invoked.
+                        </descr>
+					</param>
+					<param io="in" type="NPF_F_sysInfoCallbackData_t" name="data">
+						<descr>
+                            The response information related to the particular callback type.
+                        </descr>
+					</param>
+					<return>
+						<descr>None.</descr>
+					</return>
+				</functype>
+			</section>
+			<section name='Callback Registration Functions'>
+				<func type='NPF_error_t' name='NPF_F_sysInfoRegister' class="cback_register">
+					<descr>
+                        Callback Registration.
+                        This function is used to register callback completion function associated with
+                        System Information FAPI configuration functions. The function allows the application
+                        to register a completion callback function for the related callback category,
+                        and to associate a unique callback handle as well as application context.
+                        Upper layers may register multiple callback functions using this function.
+                        The callback function is identified by the pair of userContext and callbackFunc,
+                        and for each individual pair, a unique callbackHandle will be assigned for future
+                        reference. Because the callback function is identified by both userContext and
+                        callbackFunc, duplicate registration of the same callback function with a different
+                        userContext is allowed. Also, the same userContext can be shared among different
+                        callback functions. Duplicate registration of the same userContext and callbackFunc
+                        pair has no effect, and will output a handle that is already assigned to the pair,
+                        and will return NPF_E_ALREADY_REGISTERED.
+                    </descr>
+					<param io='in' type='NPF_userContext_t' name='userContext'>
+						<descr>
+                            User defined context provided at the callback registration time.
+                            The exact value will be provided back to the registered completion
+                            callback function as its first parameter when it is called.
+                            Upper layers can assign any value to the userContext and the
+                            value is completely opaque to System Information FAPI implementation.
+                        </descr>
+					</param>
+					<param io='in' type='NPF_F_sysInfoCallbackFunc_t' name='callbackFunc'>
+						<descr>The pointer to the completion callback function to be registered.</descr>
+					</param>
+					<param io='out' type='NPF_callbackHandle_t*' name='callbackHandle'>
+						<descr>
+                            Returned callback handle. A unique identifier assigned for
+                            the registered userContext and callbackFunc pair. The upper layer
+                            will use this handle to specify which callback function to be called
+                            when invoking asynchronous System Information FAPI functions. It will also
+                            be used when deregistering the userContext and callbackFunc pair.
+                        </descr>
+					</param>
+					<return>
+						<descr>Possible return values are:</descr>
+						<retval name='NPF_NO_ERROR'>
+							<descr>Indicates successful registration.</descr>
+						</retval>
+						<retval name='NPF_E_BAD_CALLBACK_FUNCTION'>
+							<descr>Indicates invalid parameter for callback function.</descr>
+						</retval>
+						<retval name='NPF_E_CALLBACK_ALREADY_REGISTERED'>
+							<descr>Indicates duplicated registration.</descr>
+						</retval>
+						<retval name='NPF_E_UNKNOWN'>
+							<descr>Indicates error other than above.</descr>
+						</retval>
+					</return>
+				</func>
+				<func type='NPF_error_t' name='NPF_F_sysInfoDeregister' class="cback_deregister">
+					<descr>
+                        Callback Deregistration.
+                        This function is used to deregister completion callback function associated with
+                        System Information FAPI configuration functions. The function allows the application to
+                        deregister the callback function that is associated with this callback handle.
+                    </descr>
+					<param io='in' type='NPF_callbackHandle_t' name='callbackHandle'>
+						<descr>Handle of the callback function to be deregistered.</descr>
+					</param>
+					<return>
+						<descr>Possible return values are:</descr>
+						<retval name='NPF_NO_ERROR'>
+							<descr>Indicates successful deregistration.</descr>
+						</retval>
+						<retval name='NPF_E_BAD_CALLBACK_HANDLE'>
+							<descr>Indicates passing invalid handle.</descr>
+						</retval>
+						<retval name='NPF_E_UNKNOWN'>
+							<descr>Indicates error other than above.</descr>
+						</retval>
+					</return>
+				</func>
+			</section>
+		</section>
+		<section name="Events">
+			<section name="Event Data Types">
+				<enum type="NPF_F_sysInfoEventType_t" brief="Event Types.">
+					<descr>
+                        This enumeration is used by the event handler to distinguish event types.
+                    </descr>
+					<field name="NPF_F_SYSINFO_CC_INITIALIZED" value="1">
+						<descr>Indicates that all Core Components are initialized. 
+                            This event is also sent when a client registers and Core Components 
+                            are already initialized. </descr>
+					</field>
+					<field name="NPF_F_SYSINFO_FREE_MEMORY_LOW">
+						<descr>
+                            Indicates free memory low event.
+                        </descr>
+					</field>
+					<field name="NPF_F_SYSINFO_FREE_MEMORY_NORMAL">
+						<descr>
+                            Indicates free memory normal event.
+                        </descr>
+					</field>
+				</enum>
+				<struct type="NPF_F_sysInfoEventData_t" brief="Event Data Information.">
+					<descr>
+                        This structure consists of event type and the possible event data.                         
+                    </descr>					
+						<field type="NPF_F_sysInfoEventType_t" name="eventType" brief="Event type."></field>
+				</struct>
+				
+				<struct type="NPF_F_sysInfoEventArray_t" brief="Event Array.">
+					<descr>
+                        This structure is used to store information about events. 
+                        It specifies the number of events and includes a pointer to the array of events. 
+                        It is passed to the application-defined event callback function 
+                        to notify about one or more events. 
+                    </descr>
+					<vector type="NPF_F_sysInfoEventData_t" name="eventData">
+						<descr>Pointer to the array of events.</descr>
+						<length type="NPF_uint32_t" name="numEventData" brief="Number of events in the array." />
+					</vector>
+				</struct>
+				<functype name="NPF_F_sysInfoEventCallFunc_t" type="void" class="event">
+					<descr>
+                        Event Callback Function.
+                        This function is an event notification function (handler) used for handling events. 
+                        This callback function is intended to be implemented by the application, 
+                        and to be registered to the System Information FAPI implementation through the 
+                        NPF_F_sysInfoEventRegister() function.
+                    </descr>
+					<param io="in" type="NPF_userContext_t" name="userContext">
+						<descr>User-defined context provided at callback registration time.</descr>
+					</param>
+					<param io="in" type="NPF_F_sysInfoEventArray_t" name="eventArray">
+						<descr>Events array containing information about one or more events.</descr>
+					</param>
+					<return>
+						<descr>None.</descr>
+					</return>
+				</functype>
+			</section>
+			<section name='Event Registration Functions'>
+				<func type='NPF_error_t' name='NPF_F_sysInfoEventRegister' class="event_register" xdrid="RPC_SYSINFO_FAPI_EVENT_REGISTER">
+					<descr>
+							Event Callback Registration.
+							This function is used to register a status event handler 
+							to receive notifications of events related to System Information functionality. 
+							This function operates in a synchronous manner.
+						</descr>
+					<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+						<descr>
+								Identifies the forwarding element in which the callback function is registered.
+							</descr>
+					</param>
+					<param io='in' type='NPF_userContext_t' name='userContext' xdr="no">
+						<descr>The context item provided to the event callback routine when it is invoked.</descr>
+					</param>
+					<param io='in' type='NPF_F_sysInfoEventCallFunc_t' name='eventCallFunc' xdr="no">
+						<descr>The function pointer to the event callback function to be called for events.</descr>
+					</param>
+					<param io='out' type='NPF_callbackHandle_t*' name='callbackHandle' xdr="no">
+						<descr>The unique identifier related to this registration.</descr>
+					</param>
+					<return>
+						<descr>Possible return values are:</descr>
+						<retval name='NPF_NO_ERROR'>
+							<descr>The registration completed successfully.</descr>
+						</retval>
+						<retval name='NPF_E_BAD_CALLBACK_FUNCTION'>
+							<descr>The registration was invoked with a function pointer parameter that was invalid.</descr>
+						</retval>
+						<retval name='NPF_E_CALLBACK_ALREADY_REGISTERED'>
+							<descr>The registration was invoked with a pair composed of a function pointer and a user context 
+									that was previously used for an identical registration.</descr>
+						</retval>
+						<retval name='NPF_E_UNKNOWN'>
+							<descr>Used to indicate other errors.</descr>
+						</retval>
+						<retval name='NPF_F_SYSINFO_E_APP_NOT_READY'>
+							<descr>Application isn't fully initialized - not ready to operate. Call this function again later.</descr>
+						</retval>									
+					</return>
+				</func>
+				<func type='NPF_error_t' name='NPF_F_sysInfoEventDeregister' class="event_deregister"
+					xdrid="RPC_SYSINFO_FAPI_EVENT_DEREGISTER">
+					<descr>
+							Event Callback Deregistration.
+							This function is used to deregister an event handler that was previously 
+							registered to receive notifications of events for System Information functionality. 
+							It can be invoked by any application no longer interested in receiving status events. 
+							Note: This function operates in synchronously. There may be a timing window in 
+							which outstanding events continue to be delivered to the event routine after the 
+							deregistration function has been invoked. It is the implementations responsibility 
+							to guarantee that the event function is not called after the deregister function has returned.
+						</descr>
+					<param io='in' type='NPF_callbackHandle_t' name='callbackHandle' xdr="no">
+						<descr>The unique identifier returned to the application when the event callback 
+								routine was registered.</descr>
+					</param>
+					<return>
+						<descr>Possible return values are:</descr>
+						<retval name='NPF_NO_ERROR'>
+							<descr>The operation completed successfully.</descr>
+						</retval>
+						<retval name='NPF_E_BAD_CALLBACK_HANDLE'>
+							<descr>A function was invoked with a callback handle that did not
+									correspond to a valid NPF callback handle as returned by a registration function.</descr>
+						</retval>
+						<retval name='NPF_E_UNKNOWN'>
+							<descr>Used to indicate other errors.</descr>
+						</retval>
+					</return>
+				</func>
+			</section>
+		</section>
+	</section>
+</api>

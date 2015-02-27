@@ -1,0 +1,49 @@
+h1, h2, h3, h4 {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+h1 {
+	color: #006800;
+	font-size: 24px;
+}
+
+h2 {
+	color: #666666;
+	font-size: 20px;
+}
+
+h3 {
+	color: #006800;
+	font-size: 16px;
+}
+
+h4 {
+	color: #666666;
+	font-size: 14px;
+}
+
+pre {
+	color: #633d00;
+	font-family: Courier New, Courier, mono;
+	background-color: #DFEFFF;
+	padding: 5px;
+  border: 0px;
+}
+
+td {
+	background-color: #EFEFEF;
+}
+
+td.code {
+	color: #DFEFFF;
+	background-color: #DFEFFF;
+	padding: 4px;
+}
+
+th {
+	font-size: 12px;
+	background-color: #F9BC06;
+	vertical-align: top;
+	text-align: left;
+}
+

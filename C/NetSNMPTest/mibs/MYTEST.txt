@@ -1,0 +1,89 @@
+MYTEST DEFINITIONS ::= BEGIN
+
+IMPORTS
+    netSnmpExamples
+        FROM NET-SNMP-EXAMPLES-MIB
+    MODULE-COMPLIANCE, NOTIFICATION-GROUP, OBJECT-GROUP
+        FROM SNMPv2-CONF
+    MODULE-IDENTITY, NOTIFICATION-TYPE, OBJECT-IDENTITY, OBJECT-TYPE
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION,
+    RowStatus, TruthValue,
+    TimeStamp, DateAndTime        
+        FROM SNMPv2-TC
+    ;
+
+mytestMIB MODULE-IDENTITY
+    LAST-UPDATED  "200609281929Z" -- September 28, 2006
+    ORGANIZATION
+        "Max Inc."
+    CONTACT-INFO
+        "Maksud"
+    DESCRIPTION
+        "Private property of Max Inc."
+    ::= { netSnmpExamples 70 }
+
+MytestEntry ::= SEQUENCE
+{
+    mytestIndex     Integer32,
+    mytestColumn1   Integer32,
+    mytestRowStatus RowStatus
+}
+
+mytestNotifications OBJECT IDENTIFIER ::= { mytestMIB 0 }
+
+mytestObjects OBJECT IDENTIFIER ::= { mytestMIB 1 }
+
+mytestStats OBJECT IDENTIFIER ::= { mytestObjects 1 }
+
+mytestConfig OBJECT IDENTIFIER ::= { mytestObjects 2 }
+
+mytestTable OBJECT-TYPE
+    SYNTAX        SEQUENCE OF MytestEntry
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        ""
+    ::= { mytestObjects 3 }
+
+mytestEntry OBJECT-TYPE
+    SYNTAX        MytestEntry
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        ""
+    INDEX
+        { mytestIndex }
+    ::= { mytestTable 1 }
+
+mytestIndex OBJECT-TYPE
+    SYNTAX        Integer32
+    MAX-ACCESS    not-accessible
+    STATUS        current
+    DESCRIPTION
+        ""
+    ::= { mytestEntry 1 }
+
+mytestColumn1 OBJECT-TYPE
+    SYNTAX        Integer32
+    MAX-ACCESS    read-create
+    STATUS        current
+    DESCRIPTION
+        ""
+    ::= { mytestEntry 2 }
+
+mytestRowStatus OBJECT-TYPE
+    SYNTAX        RowStatus
+    MAX-ACCESS    read-create
+    STATUS        current
+    DESCRIPTION
+        ""
+    ::= { mytestEntry 3 }
+
+mytestConformance OBJECT IDENTIFIER ::= { mytestMIB 2 }
+
+mytestCompliances OBJECT IDENTIFIER ::= { mytestConformance 1 }
+
+mytestGroups OBJECT IDENTIFIER ::= { mytestConformance 2 }
+
+END

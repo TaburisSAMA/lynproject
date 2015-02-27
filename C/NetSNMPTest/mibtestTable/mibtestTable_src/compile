@@ -1,0 +1,31 @@
+CC=gcc
+
+NETSNMPCONFIG=net-snmp-config
+
+
+NETSNMPCFLAGS := $(shell $(NETSNMPCONFIG) --base-cflags)
+NETSNMPLIBS := $(shell $(NETSNMPCONFIG) --agent-libs)
+
+
+LIBS=$(NETSNMPLIBS)
+
+
+STRICT_FLAGS = -Wall -Wstrict-prototypes
+CFLAGS=-I. $(NETSNMPCFLAGS) $(STRICT_FLAGS)
+
+OBJS_DIR = ../obj
+
+MIBTESTTABLE_SRC = $(TABLE_PREFIX)_data_get.c \
+		$(TABLE_PREFIX)_data_set.c \
+		$(TABLE_PREFIX)_data_access.c \
+		$(TABLE_PREFIX).c \
+		$(TABLE_PREFIX)_subagent.c \
+		$(TABLE_PREFIX)_interface.c
+
+MIBTESTTABLE_OBJ = $(foreach file,$(MIBTESTTABLE_SRC),$(OBJS_DIR)/$(file:.c=.o))
+
+mibtestTable: $(OBJS)
+
+$(OBJS):$(OBJS_DIR)/%.o:%.c
+	@echo
+	$(CC) $(CFLAGS) -c $< -o $@

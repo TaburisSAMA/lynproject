@@ -1,0 +1,2681 @@
+<?xml version="1.0"?>
+<api name='npf_f_oam'>
+    <preamble>
+        INTEL CONFIDENTIAL
+        
+        Copyright 2000 - 2006 Intel Corporation All Rights Reserved.
+        
+        The source code contained or described herein and all documents related to
+        the source code ("Material") are owned by Intel Corporation or its
+        suppliers or licensors.
+        
+        Title to the Material remains with Intel Corporation or its suppliers and
+        licensors. The Material contains trade secrets and proprietary and
+        confidential information of Intel or its suppliers and licensors.
+        The Material is protected by worldwide copyright and trade secret laws and
+        treaty provisions. No part of the Material may be used, copied, reproduced,
+        modified, published, uploaded, posted, transmitted, distributed,
+        or disclosed in any way without Intel's prior express written permission.
+        
+        No license under any patent, copyright, trade secret or other intellectual
+        property right is granted to or conferred upon you by disclosure
+        or delivery of the Materials, either expressly, by implication, inducement,
+        estoppel or otherwise. Any license under such intellectual property rights
+        must be express and approved by Intel in writing.
+    </preamble>
+    
+    <imports>
+        <import>npf</import>
+        <import>npf_f_error</import>
+    </imports>
+    
+    <section name="Management, Maintenance and Diagnostic API">
+        
+        <section name="Management, Maintenance and Diagnostic Data Types Reference">
+            
+            <section name="General">
+                
+                <enum type="NPF_F_mgmtErrorType_t">
+                    <descr>
+                        Error Codes.
+                        This data type is used to indicate the occurrence and type of an error while processing an asynchronous
+                        operation.
+                    </descr>
+                    <field name="NPF_F_MGMT_NO_ERROR" value="NPF_NO_ERROR">
+                        <descr>The operation completed successfully.</descr>
+                    </field>
+                    <field name="NPF_F_MGMT_E_RESOURCE_UNAVAILABLE" value="NPF_F_MGMT_BASE_ERR">
+                        <descr>The operation failed since the required resource is not available.</descr>
+                    </field>
+                    <field name="NPF_F_MGMT_E_RESERVED_1">
+                        <descr>Reserved error code 1</descr>
+                    </field>
+                    <field name="NPF_F_MGMT_E_INVALID_PORT">
+                        <descr>The operation failed because of passing invalid port number
+                        - the port does not exist</descr>
+                    </field>
+                    <field name="NPF_F_MGMT_E_INVALID_VLAN">
+                        <descr>The operation failed because of passing invalid VLAN number
+                        - the VLAN does not exist</descr>
+                    </field>
+                    <field name="NPF_F_MGMT_E_UNKNOWN_ERROR">
+                        <descr>The operation failed because unknown or unpredicted failure occurred.</descr>
+                    </field>
+                    <field name="NPF_F_MGMT_E_BAD_PARAM">
+                        <descr>The operation failed because of passing invalid parameters.</descr>
+                    </field>
+                    <field name="NPF_F_MGMT_E_INTERNAL">
+                        <descr>The operation failed because of internal hardware problem.</descr>
+                    </field>
+                    <field name="NPF_F_MGMT_E_CFG_INVALID_ID">
+                        <descr>The operation failed because the configuration set ID is invalid.</descr>
+                    </field>
+                    <field name="NPF_F_MGMT_E_CFG_INVALID_ACTION">
+                        <descr>The operation failed because the specified action is not allowed for this configuration set.</descr>
+                    </field>
+                    <field name="NPF_F_MGMT_E_CFG_TOO_MANY">
+                        <descr>The operation failed because the number of stored configuration sets has reached the limit.
+                        The maximum number of configuration sets is 100.</descr>
+                    </field>
+                </enum>
+                
+                <typedef name="NPF_F_mgmtTimer_t" type="NPF_uint32_t" brief="Configuration Timer">
+                    <descr>
+                        This data type specifies the time in seconds for the timer guarding connectivity with the
+                        device. If set to 0, the timer guarding changes in configuration is disabled. (Default = 120
+                        seconds.)
+                    </descr>
+                </typedef>
+                
+                
+            </section>
+            
+            <section name="System Identification">
+                
+                <struct type="NPF_F_mgmtModuleType_t" brief="Hardware Module Type">
+                    <descr>
+                        This structure contains the hardware module type that is reported to
+                        the control plane application.
+                        This field returns a variable-length string retrieved from the FRU EEPROM.
+                    </descr>
+                    <vector name="moduleType" type="NPF_char8_t" brief="Module type string">
+                        <length type="NPF_uint32_t" name="moduleTypeLen" brief="Length of module type string">
+                        </length>
+                    </vector>
+                </struct>
+                
+                <struct type="NPF_F_mgmtVendor_t" brief="Vendor Name">
+                    <descr>
+                        This structure contains the vendor name or description of the hardware module where the
+                        Glenfield application is installed. This field returns a variable-length string retrieved from the
+                        FRU EEPROM.
+                    </descr>
+                    <vector name="vendor" type="NPF_char8_t" brief="Vendor string">
+                        <length type="NPF_uint32_t" name="vendorLen" brief="Length of vendor string">
+                        </length>
+                    </vector>
+                </struct>
+                
+                <struct type="NPF_F_mgmtProductCode_t" brief="Product Code">
+                    <descr>
+                        This structure contains the manufacturer-specific product code of the module where the Glenfield
+                        application is installed. This field returns a variable-length string retrieved from the FRU
+                        EEPROM.
+                    </descr>
+                    <vector name="productCode" type="NPF_char8_t" brief="Product code string">
+                        <length type="NPF_uint32_t" name="productCodeLen" brief="Length of product code string">
+                        </length>
+                    </vector>
+                </struct>
+                
+                <struct type="NPF_F_mgmtSerialNo_t" brief="Module Serial Number">
+                    <descr>
+                        This structure contains the serial number of the module where the
+                        Glenfield application is installed. This field returns a variable-length
+                        string retrieved from the FRU EEPROM.
+                    </descr>
+                    <vector name="serialNo" type="NPF_char8_t" brief="Serial number string">
+                        <length type="NPF_uint32_t" name="serialNoLen" brief="Length of serial number string">
+                        </length>
+                    </vector>
+                </struct>
+                                
+                <struct type="NPF_F_mgmtHwInfo_t" brief="Module Identification Information">
+                    <descr>
+                        This structure returns the hardware module identification information retrieved from the FRU
+                        EEPROM or the IPMI subsystem.
+                    </descr>
+                    <see> NPF_F_mgmtHwInfoGet</see>
+                    <field type="NPF_F_mgmtModuleType_t"  name="hwModType"        brief="H/w module type"/>
+                    <field type="NPF_F_mgmtVendor_t"      name="hwModVendor"      brief="Vendor name"/>
+                    <field type="NPF_F_mgmtProductCode_t" name="hwModProductCode" brief="Product code"/>
+                    <field type="NPF_F_mgmtSerialNo_t"    name="hwModSerialNo"    brief="Module serial number"/>
+                </struct>
+                
+            </section>
+            
+            <section name="Configuration Management">
+                <enum type="NPF_F_mgmtCfgState_t" brief="Configuration State">
+                    <descr>
+                        The Glenfield BBM can store multiple configuration sets. Each configuration set has one of the
+                        following states: active, inactive, one-shot, or one-shot running.
+                    </descr>
+                    <field name="NPF_F_CFG_STATE_ACTIVE" brief="Active configuration">
+                        <descr>
+                            Active configuration -- an active (validated) configuration stored in the file.
+                            Only one configuration set can be in the active state.
+                        </descr>
+                    </field>
+                    <field name="NPF_F_CFG_STATE_INACTIVE" brief="Inactive configuration">
+                        <descr>
+                            Inactive configuration -- the configuration is inactive.
+                        </descr>
+                    </field>
+                    <field name="NPF_F_CFG_STATE_ONESHOT" brief="Configuration record marked for one-shot test">
+                        <descr>
+                            Configuration record marked for one-shot test - an inactive configuration marked for
+                            one-shot test.
+                            This configuration is loaded at the next system reboot.
+                        </descr>
+                    </field>
+                    <field name="NPF_F_CFG_STATE_ONESHOT_RUNNING" brief="Configuration loaded running in one-shot test mode">
+                        <descr>
+                            Configuration loaded and running in one-shot test mode -- the state entered by one-shot
+                            test configuration after system reboot
+                            The running one-shot configuration must be explicitly validated using the FAPI. Otherwise, it
+                            automatically reverts to an inactive state after next reboot.
+                        </descr>
+                    </field>
+                </enum>
+                
+                <enum type="NPF_F_mgmtCfgRuntimeState_t" brief="Runtime Configuration State">
+                    <descr>
+                        This enum defines the runtime configuration state. This is a set of configuration parameters
+                        actually used by system that are stored in the configuration file.
+                    </descr>
+                    <field name="NPF_F_CFG_RUNTIME_STATE_SAVED" brief="Runtime configuration is Saved">
+                        <descr>
+                            Runtime configuration is saved.
+                            The runtime configuration was not modified since the last system reboot or configuration
+                            save action.
+                        </descr>
+                    </field>
+                    <field name="NPF_F_CFG_RUNTIME_STATE_NOT_SAVED" brief="Runtime configuration not saved">
+                        <descr>
+                            Runtime configuration not saved.
+                            The runtime configuration was modified since the last device restart or configuration
+                            save operation.
+                        </descr>
+                    </field>
+                </enum>
+                
+                <define brief="Reserved Identifiers for Configuration Sections">
+                    <descr>
+                        These are values that represent special configuration set names. These names
+                        cannot be assigned as configuration IDs.
+                    </descr>
+                    <field name="NPF_F_MGMT_CFG_ID_RUNTIME" brief="Runtime configuration set">
+                        <value>"Runtime"</value>
+                    </field>
+                </define>
+                
+                <enum type="NPF_F_mgmtCfgProtocol_t" brief="Configuration File Transfer Protocol">
+                    <descr>
+                        This enum specifies the transfer protocol used to download/upload the configuration
+                        file.
+                    </descr>
+                    <field name="NPF_F_MGMT_PROTO_NFS" brief="Use NFS to download/upload the configuration file."/>
+                    <field name="NPF_F_MGMT_PROTO_TFTP" brief="Use TFTP to download/upload the configuration file."/>
+                </enum>
+                <struct type="NPF_F_mgmtCfgId_t" brief="Configuration ID">
+                    <descr>
+                        This structure contains the identifier for a configuration set, which
+                        is a variable-length string. (The configuration set is a section in an internal XML file used for
+                        storing configurations.)
+                    </descr>
+                    <vector name="cfgId" type="NPF_char8_t" brief="Configuration ID string">
+                        <length type="NPF_uint32_t" name="cfgIdLen" brief="Length of configuration ID string">
+                        </length>
+                    </vector>
+                </struct>
+                
+                <struct type="NPF_F_mgmtCfgIdArray_t" brief="Configuration ID Array">
+                    <descr>
+                        This structure is an array of configuration set ids.
+                        The array is used as parameters to the NPF_F_mgmtCfgGetInfo() function.
+                    </descr>
+                    <see>NPF_F_mgmtCfgGetInfo()</see>
+                    <vector type="NPF_F_mgmtCfgId_t" name="idArray" brief="Configuration set id array">
+                        <length type="NPF_uint32_t" name="arrayLen" brief="Length of configuration set id array"/>
+                    </vector>
+                </struct>
+                
+                <struct type="NPF_F_mgmtCfgDescr_t" brief="Configuration Description">
+                    <descr>
+                        This structure contains a description of a Glenfield configuration set returned
+                        as a variable length string. (The configuration set is a section in an internal
+                        XML file used for storing configurations.)
+                    </descr>
+                    <vector name="cfgDescr" type="NPF_char8_t" brief="Configuration description string">
+                        <length type="NPF_uint32_t" name="cfgDescrLen" brief="Length of the configuration description string">
+                        </length>
+                    </vector>
+                </struct>
+                
+                <struct type="NPF_F_mgmtCfgData_t" brief="Configuration Data">
+                    <descr>
+                        This structure specifies the contents of a Glenfield BBM configuration set.
+                        It returns a variable-length string.
+                    </descr>
+                    <vector name="cfgData" type="NPF_char8_t" brief="Configuration data string">
+                        <length type="NPF_uint32_t" name="cfgDataLen" brief="Length of the configuration data string">
+                        </length>
+                    </vector>
+                </struct>
+                <struct type="NPF_F_mgmtCfgRemotePath_t" brief="Path to Configuration File">
+                    <descr>
+                        This structure contains the path to the remote Glenfield BBM configuration file
+                        returned as a variable-length string.
+                    </descr>
+                    <vector name="cfgPath" type="NPF_char8_t" brief="Configuration file path string">
+                        <length type="NPF_uint32_t" name="cfgPathLen" brief="Length of the configuration file path string">
+                        </length>
+                    </vector>
+                </struct>
+                <struct type="NPF_F_mgmtCfgRemoteLoc_t" brief="Remote Location of Configuration File">
+                    <descr>
+                        This structure defines contains the remote location of a remote configuration file.
+                    </descr>
+                    <see>
+                    </see>
+                    <field type="NPF_uint32_t" name="ipAddr"   brief="IP address of the remote configuration server"/>
+                    <field type="NPF_F_mgmtCfgRemotePath_t" name="path"   brief="Path to the configuration file"/>
+                    <field type="NPF_F_mgmtCfgProtocol_t" name="protocol" brief="Transport protocol to download/upload the configuration file"/>
+                </struct>
+                
+                <struct type="NPF_F_mgmtCfgInfo_t" brief="Configuration State Information">
+                    <descr>
+                        This structure returns detailed information about the configuration set - its name
+                        description and state.
+                    </descr>
+                    <field type="NPF_F_mgmtCfgId_t" name="cfgId"   brief="Configuration set id"/>
+                    <field type="NPF_F_mgmtCfgDescr_t" name="cfgDescr"   brief="Configuration set description"/>
+                    <field type="NPF_F_mgmtCfgState_t" name="cfgState" brief="The state of the configuration set"/>
+                </struct>
+                
+                <struct type="NPF_F_mgmtCfgInfoArray_t" brief="Configuration Information Array">
+                    <descr>
+                        This structure contains an array of configuration information structures.
+                        The array is returned in a callback for NPF_F_mgmtCfgGetInfo().
+                    </descr>
+                    <see>NPF_F_mgmtCfgGetInfo()</see>
+                    <vector type="NPF_F_mgmtCfgInfo_t" name="infoArray" brief="Configuration info array">
+                        <length type="NPF_uint32_t" name="arrayLen" brief="Length of the configuration info array"/>
+                    </vector>
+                </struct>
+            </section>
+            
+            <section name="Gigabit Ethernet Switch Management">
+                
+                <enum type="NPF_F_mgmtGswPortId_t" brief="Gigabit Ethernet Switch Port ID">
+                    <descr>
+                        This enumeration lists all manageable gigabit Ethernet switch ports.
+                    </descr>
+                    <field name="NPF_MGMT_GSW_BP0" brief="BP0 - port 0 connected to backplane"/>
+                    <field name="NPF_MGMT_GSW_BP1" brief="BP1 - port 1 connected to backplane"/>
+                    <field name="NPF_MGMT_GSW_BP4" brief="BP4 - port 4 connected to backplane"/>
+                    <field name="NPF_MGMT_GSW_BP5" brief="BP5 - port 5 connected to backplane"/>
+                    <field name="NPF_MGMT_GSW_FP1" brief="FP1 - port 7 connected to front panel"/>
+                    <field name="NPF_MGMT_GSW_GBE0" brief="GBE0 - port 9 connected to network processor"/>
+                </enum>
+                
+                <enum type="NPF_F_mgmtGswPortState_t" brief="State of the gigabit Ethernet Switch Port">
+                    <descr>
+                        This enumeration defines the port state codes.
+                    </descr>
+                    <field name="NPF_F_MGMT_GSW_PORT_UP" value="0x01">
+                        <descr>Port is up</descr>
+                    </field>
+                    <field name="NPF_F_MGMT_GSW_PORT_DOWN" value="0x02">
+                        <descr>Port is down</descr>
+                    </field>
+                </enum>
+                
+                <enum type="NPF_F_mgmtGswFlowCtrl_t" brief="State of the Gigabit Ethernet Switch Port Flow Control">
+                    <descr>
+                        This enumeration defines port flow control codes.
+                    </descr>
+                    <field name="NPF_F_MGMT_GSW_FLOW_CTRL_ON" value="0x01">
+                        <descr>Flow control is enabled</descr>
+                    </field>
+                    <field name="NPF_F_MGMT_GSW_FLOW_CTRL_OFF" value="0x02">
+                        <descr>Flow control is disabled</descr>
+                    </field>
+                </enum>
+                
+                <enum type="NPF_F_mgmtGswVlanNo_t" brief="Gigabit Ethernet Switch VLAN Number">
+                    <descr>
+                        This enumeration lists all predefined gigabit Ethernet switch VLANs.
+                    </descr>
+                    <field name="NPF_MGMT_GSW_VLAN0" brief="VLAN number 0, ports: GBE0, BP0, BP1, BP4, BP5, FP1, untagged"/>
+                    <field name="NPF_MGMT_GSW_VLAN1" brief="VLAN number 1, ports: GBE0, BP0, BP1, BP4, BP5, FP1, tagged"/>
+                    <field name="NPF_MGMT_GSW_VLAN2" brief="VLAN number 2, ports: GBE0, BP0, BP1, tagged"/>
+                    <field name="NPF_MGMT_GSW_VLAN3" brief="VLAN number 3, ports: GBE0, BP4, BP5, tagged"/>
+                </enum>
+                
+                <struct type="NPF_F_mgmtGswVlanIdGetRspArgs_t" brief="Asynchronous Response Structure for the NPF_F_mgmtGswVlanIdGet FAPI Request">
+                    <descr>
+                        This structure contains the VLAN number and VLAN ID. Note that for
+                        NPF_MGMT_GSW_VLAN0 the "vlanId" field always has a "0" value, since this VLAN is not
+                        tagged (does not use VLAN ID)
+                    </descr>
+                    <field  type="NPF_F_mgmtGswVlanNo_t" name="vlanNo">
+                        <descr>
+                            VLAN number.
+                        </descr>
+                    </field>
+                    <field  type="NPF_uint32_t" name="vlanId">
+                        <descr>
+                            VLAN identifier.
+                        </descr>
+                    </field>
+                </struct>
+                
+                <struct type="NPF_F_mgmtGswPortStateGetRspArgs_t" brief="Asynchronous Response Structure for the NPF_F_mgmtGswPortStateGet FAPI Request">
+                    <descr>
+                        This structure contains the gigabit Ethernet switch port ID and the associated port state.
+                    </descr>
+                    <field  type="NPF_F_mgmtGswPortId_t" name="portId">
+                        <descr>
+                            Gigabit Ethernet switch port identifier
+                        </descr>
+                    </field>
+                    <field  type="NPF_F_mgmtGswPortState_t" name="portState">
+                        <descr>
+                            Gigabit Ethernet switch port state
+                        </descr>
+                    </field>
+                </struct>
+                
+                <struct type="NPF_F_mgmtGswFlowCtrlGetRspArgs_t" brief="Asynchronous Response Structure for the NPF_F_mgmtGswFlowCtrlGet
+                    FAPI Request">
+                    <descr>
+                        This structure contains the port ID and port flow control state.
+                    </descr>
+                    <field  type="NPF_F_mgmtGswPortId_t" name="portId">
+                        <descr>
+                            Gigabit Ethernet switch port identifier.
+                        </descr>
+                    </field>
+                    <field  type="NPF_F_mgmtGswFlowCtrl_t" name="flowCtrl">
+                        <descr>
+                            Gigabit Ethernet switch port flow control state.
+                        </descr>
+                    </field>
+                </struct>
+            </section>
+            
+            <section name="VLAN Management">
+                
+                <enum type="NPF_mgmtIfIpAssignment_t" brief="IP Address assignment">
+                    <descr>
+                        This enum specifies the way of assigning IP address for an IP interface.
+                    </descr>
+                    <field name="NPF_F_MGMT_IP_STATIC" value="0x01">
+                        <descr>IP address assigned statically</descr>
+                    </field>
+                    <field name="NPF_F_MGMT_IP_DHCP" value="0x02">
+                        <descr>IP address assigned via DHCP</descr>
+                    </field>
+                </enum>
+                
+                <struct type="NPF_F_mgmtIfIpParams_t" breif="IP address parameters">
+                    <descr>
+                        This structure contains the IP address, network mask, and default gateway of the IP interface.
+                    </descr>
+                    <field type="NPF_uint32_t" name="ipAddress" brief="IP address"/>
+                    <field type="NPF_uint32_t" name="ipNetMask" brief="IP network mask"/>
+                    <field type="NPF_uint32_t" name="ipGateway" brief="IP default gateway"/>
+                </struct>
+                
+                <struct type="NPF_F_mgmtIfCfg_t" brief="Interface configuration">
+                    <descr>
+                        This structure contains the configuration parameters for the IP interface.
+                    </descr>
+                    <field type="NPF_uint32_t" name="ipMtu">
+                        <descr>
+                            Value of Maximum Transmission Unit (MTU) for the specificed interface
+                        </descr>
+                    </field>
+                    
+                    <field type="NPF_mgmtIfIpAssignment_t" name="ipAssignment">
+                        <descr>Describes how the IP address for the specificed interface is assigned (static or via DHCP)
+                        </descr>
+                    </field>
+                    <field type="NPF_F_mgmtIfIpParams_t" name="ipParams">
+                        <descr>The structure contains the assigned (statically or by DHCP) IP address, network mask
+                            and the default gateway.
+                        </descr>
+                    </field>
+                </struct>
+                
+                <struct type="NPF_F_mgmtDataVlanInfo_t" brief="Data VLAN information">
+                    <descr>
+                        This structure contains the number of Gigabit Ethernet switch VLAN used for data traffic.
+                    </descr>
+                    <field type="NPF_F_mgmtGswVlanNo_t" name="vlanNumber" brief="VLAN number in GSW switch"/>
+                </struct>
+                
+                <struct type="NPF_F_mgmtControlVlanInfo_t" brief="Control VLAN information">
+                    <descr>
+                        This structure contains the number of the gigabit Ethernet switch VLAN used for control traffic
+                        and the IP configuration of the IP interface associated with the Control VLAN.
+                    </descr>
+                    <field type="NPF_F_mgmtGswVlanNo_t" name="vlanNumber" brief="VLAN Number in GSW switch"/>
+                    <field type="NPF_F_mgmtIfCfg_t" name="ipCfg" brief="IP interface configuration"/>
+                </struct>
+                
+            </section>
+            
+            <section name="Diagnostics">
+                
+                <struct type="NPF_F_mgmtDiagOfflineCfg_t" brief="Configuration of Off-Line Diagnostics">
+                    <descr>
+                        This is a script that is interpreted by the diagnostics firmware to configure off-line diagnostics.
+                        The user specifies the tests to be performed as well as the verbose level for output messages
+                        in the script as input to this function. This field returns a variable-length string. (For a list of
+                        the applicable diagnostics commands, see Appendix B in the .)
+                    </descr>
+                    <vector name="diagCfg" type="NPF_char8_t" brief="Diagnostics configuration string that contains the script">
+                        <length type="NPF_uint32_t" name="diagCfgLen" brief="Length of the diagnostics configuration string">
+                        </length>
+                    </vector>
+                </struct>
+                
+                <enum type="NPF_F_mgmtDiagOnline_t" brief="On-line Diagnostics Test Type">
+                    <descr>
+                        This enumeration lists all on-line diagnostic tests.
+                    </descr>
+                    <field name="NPF_MGMT_DIAG_ONLINE_BB" brief="Baseboard driver on-line test"/>
+                    <field name="NPF_MGMT_DIAG_ONLINE_GSW" brief="Gigabit Ethernet switch on-line test"/>
+                    <field name="NPF_MGMT_DIAG_ONLINE_ETH" brief="Ethernet interfaces on-line test"/>
+                    <field name="NPF_MGMT_DIAG_ONLINE_FPGA" brief="FPGA on-line test"/>
+                    <field name="NPF_MGMT_DIAG_ONLINE_PHY" brief="PHY on-line test"/>
+                </enum>
+                
+                <enum type="NPF_F_mgmtDiagResult_t" brief="OAM Diagnostics Result Type">
+                    <descr>
+                        This enumeration lists possible results for on-line and off-line diagnostic tests.
+                    </descr>
+                    
+                    <field name="NPF_MGMT_DIAG_PASS" brief="Diagnostic test passed"/>
+                    <field name="NPF_MGMT_DIAG_FAIL" brief="Diagnostic test failed"/>
+                    <field name="NPF_MGMT_DIAG_NOT_SUPPORTED" brief="Diagnostic test not supported"/>
+                </enum>
+                
+                <struct type="NPF_F_mgmtDiagErrorMsg_t" brief="Diagnostics Error Message">
+                    <descr>
+                        This structure contains a diagnostic test error message returned as a variable-length
+                        string. The string is generated by the diagnostics firmware when there is a failure in a diagnostic
+                        test.
+                    </descr>
+                    <vector name="errMsg" type="NPF_char8_t" brief="Error message string">
+                        <length type="NPF_uint32_t" name="errMsgLen" brief="Length of error message string">
+                        </length>
+                    </vector>
+                </struct>
+                
+                <struct type="NPF_F_mgmtDiagOfflineReport_t" brief="Off-Line Diagnostic Test Report">
+                    <descr>
+                        This structure contains the result of an off-line diagnostic test. If the test fails, the errorMsg
+                        field contains text describing the reason for the failure.
+                    </descr>
+                    <see></see>
+                    <field type="NPF_F_mgmtDiagResult_t" name="result" brief="Off-line diagnostic result"/>
+                    <field type="NPF_F_mgmtDiagErrorMsg_t" name="errorMsg" brief="Off-line diagnostic error message"/>
+                </struct>
+                
+                <struct type="NPF_F_mgmtDiagOnlineReport_t" bries="On-line diagnostic test report">
+                    <descr>
+                        This structure contains the result of an on-line diagnostic test.
+                    </descr>
+                    <see></see>
+                    <field type="NPF_F_mgmtDiagOnline_t" name="diagType" brief="On-line diagnostic test type"/>
+                    <field type="NPF_F_mgmtDiagResult_t" name="result" brief="On-line diagnostic result"/>
+                    <field type="NPF_F_mgmtDiagErrorMsg_t" name="errorMsg" brief="On-line diagnostic error message"/>
+                </struct>
+                
+            </section>
+            
+            <section name="Callback Specific">
+                
+                <enum type="NPF_F_mgmtCallbackType_t" brief="Completion Callback Type">
+                    <descr>
+                        This enumeration lists types of OAM callbacks. The callback type is used in callback data to
+                        identify the FAPI function and its response.
+                    </descr>
+                    
+                    <field name="NPF_F_MGMT_TIMER_GET"  brief="Get management timer configuration callback for NPF_F_mgmtTimerGet"/>
+                    <field name="NPF_F_MGMT_TIMER_SET"  brief="Set management timer configuration callback NPF_F_mgmtTimerSet"/>
+                    
+                    <field name="NPF_F_MGMT_HW_INFO_GET"  brief="Hardware information get callback for NPF_F_mgmtHwInfoGet"/>
+                    <field name="NPF_F_MGMT_RST_CNTR_GET" brief="Reset counter get callback for NPF_F_mgmtRstCntrGet"/>
+                    <field name="NPF_F_MGMT_UNUSED_1"    brief="Unused identifier"/>
+                    <field name="NPF_F_MGMT_UNUSED_2"    brief="Unused identifier"/>
+                    
+                    <field name="NPF_F_MGMT_CFG_GET_INFO"          brief="Configuration info callback for NPF_F_mgmtCfgGetInfo"/>
+                    <field name="NPF_F_MGMT_CFG_GET_RUNTIME_STATE" brief="Runtime configuration state callback for NPF_F_mgmtCfgGetRuntimeState"/>
+                    <field name="NPF_F_MGMT_CFG_GET_DATA"          brief="Configuration data callback for NPF_F_mgmtCfgGetData"/>
+                    <field name="NPF_F_MGMT_CFG_ONESHOT"           brief="Configuration oneshot callback for NPF_F_mgmtCfgOneshot"/>
+                    <field name="NPF_F_MGMT_CFG_ONESHOT_CANCEL"    brief="Configuration oneshot cancel callback for NPF_F_mgmtCfgOneshotCancel"/>
+                    <field name="NPF_F_MGMT_CFG_VALIDATE"          brief="Configuration validate callback for NPF_F_mgmtCfgValidate"/>
+                    <field name="NPF_F_MGMT_CFG_SAVE"              brief="Configuration save callback for NPF_F_mgmtCfgSave"/>
+                    <field name="NPF_F_MGMT_CFG_DELETE"            brief="Configuration delete callback for NPF_F_mgmtCfgDelete"/>
+                    <field name="NPF_F_MGMT_CFG_FILE_DOWNLOAD"     brief="Configuration file download callback for NPF_F_mgmtCfgFileDownload"/>
+                    <field name="NPF_F_MGMT_CFG_FILE_UPLOAD"       brief="Configuration file upload callback NPF_F_mgmtCfgFileUpload"/>
+                    
+                    <field name="NPF_F_MGMT_GSW_VLAN_ID_GET"       brief="GbE switch VLAN Id get callback for NPF_F_mgmtSwVlanIdGet"/>
+                    <field name="NPF_F_MGMT_GSW_PORT_STATE_GET"    brief="GbE switch port state get callback for NPF_F_mgmtGswPortStateGet"/>
+                    <field name="NPF_F_MGMT_GSW_FLOW_CTRL_GET"     brief="GbE switch flow control get callback for NPF_F_mgmtGswFlowCtrlGet"/>
+                    <field name="NPF_F_MGMT_DATA_VLAN_INFO_GET"    brief="Data VLAN get info callback for NPF_F_mgmtControlVlanInfoGet"/>
+                    <field name="NPF_F_MGMT_CONTROL_VLAN_INFO_GET" brief="Control VLAN get info callback for NPF_F_mgmtControlVlanInfoGet"/>
+                    
+                    <field name="NPF_F_MGMT_DIAG_OFFLINE_CONFIG_SET"  brief="Off-line diagnostics configure callback for NPF_F_mgmtDiagOfflineConfigSet"/>
+                    <field name="NPF_F_MGMT_DIAG_OFFLINE_CONFIG_GET"  brief="Off-line diagnostics configuration get callback for NPF_F_mgmtDiagOfflineConfigGet"/>
+                    <field name="NPF_F_MGMT_DIAG_OFFLINE_PERFORM"    brief="Off-line diagnostics perform callback for NPF_F_mgmtDiagOfflinePerform"/>
+                    <field name="NPF_F_MGMT_DIAG_OFFLINE_RESULT_GET" brief="Off-line diagnostics results get callback for NPF_F_mgmtDiagOfflineResultGet"/>
+                    <field name="NPF_F_MGMT_DIAG_ONLINE_PERFORM"     brief="On-line diagnostics perform callback for NPF_F_mgmtDiagOnlinePerform"/>
+                    
+                    <field name="NPF_F_MGMT_HEALTH_CHECK" brief="FAPI health check callback"/>
+                </enum>
+                
+                <struct type="NPF_F_mgmtAsyncResponse_t" brief="Asynchronous Response Structure">
+                    <descr>
+                        The asynchronous response data structure is used during callbacks in response to FAPI invocations.
+                        This structure contains an error/success code, other optional information that correlates
+                        the response to an element in a request array, and in some cases a function-specific
+                        structure. One or more of these is passed to the callback function as an array within the
+                        NPF_F_mgmtCallbackData_t structure.
+                    </descr>
+                    <field type="NPF_F_mgmtErrorType_t" name="error">
+                        <descr>Response error code.</descr>
+                    </field>
+                    
+                    <selectunion name="u" type="mgmtAsyncResponse_t">
+                        <descr>Response union with callback specific data.</descr>
+                        <selectfield type="NPF_F_mgmtCallbackType_t" name="type">
+                            <descr>
+                                Indicates the callback type and the union type
+                                The data is replicated from NPF_F_mgmtCallbackData_t.
+                                This member is required for remote transport to correctly convey the union content.
+                            </descr>
+                        </selectfield>
+                        
+                        <field type="NPF_F_mgmtTimer_t" name="timer" brief="Management timer">
+                            <descr>
+                                The structure contains the management timer configuration.
+                            </descr>
+                            <descr>Valid for NPF_F_MGMT_TIMER_GET.</descr>
+                            <selector>NPF_F_MGMT_TIMER_GET</selector>
+                        </field>
+                        
+                        <field type="NPF_F_mgmtHwInfo_t" name="hwInfo" brief="Hardware identification info">
+                            <descr>
+                                The structure contains hardware identification information
+                                associated with the current board.
+                            </descr>
+                            <descr>Valid for NPF_F_MGMT_HW_INFO_GET.</descr>
+                            <selector>NPF_F_MGMT_HW_INFO_GET</selector>
+                        </field>
+                        
+                        <field type="NPF_uint32_t" name="resetCounter" brief="Reset counter">
+                            <descr>
+                                This field contains the value of the reset counter, which counts the number of device
+                                reboots.
+                            </descr>
+                            <descr>Valid for NPF_F_MGMT_RST_CNTR_GET.</descr>
+                            <selector>NPF_F_MGMT_RST_CNTR_GET</selector>
+                        </field>
+                        
+                        <field type="NPF_F_mgmtCfgInfoArray_t" name="cfgInfoArray" brief="Configuration info array">
+                            <descr>
+                            This structure contains the ID, description, and state of the board configuration sets.                            </descr>
+                            <descr>Valid for NPF_F_MGMT_CFG_GET_INFO.</descr>
+                            <selector>NPF_F_MGMT_CFG_GET_INFO</selector>
+                        </field>
+                        
+                        <field type="NPF_F_mgmtCfgRuntimeState_t" name="cfgRuntimeState" brief="Runtime configuration state">
+                            <descr>
+                                This field contains the state of the runtime configuration.
+                            </descr>
+                            <descr>Valid for NPF_F_MGMT_CFG_GET_RUNTIME_STATE.</descr>
+                            <selector>NPF_F_MGMT_CFG_GET_RUNTIME_STATE</selector>
+                        </field>
+                        
+                        <field type="NPF_F_mgmtCfgData_t" name="cfgData" brief="Configuration data">
+                            <descr>
+                                This field contains configuratio set data.
+                            </descr>
+                            <descr>Valid for NPF_F_MGMT_CFG_GET_DATA.</descr>
+                            <selector>NPF_F_MGMT_CFG_GET_DATA</selector>
+                        </field>
+                        
+                        <field type="NPF_F_mgmtGswVlanIdGetRspArgs_t" name="vlanId" brief="VLAN id">
+                            <descr>
+                                This field contains the VLAN number and the VLAN ID.
+                            </descr>
+                            <descr>Valid for NPF_F_MGMT_GSW_VLAN_ID_GET.</descr>
+                            <selector>NPF_F_MGMT_GSW_VLAN_ID_GET</selector>
+                        </field>
+                        
+                        <field type="NPF_F_mgmtGswPortStateGetRspArgs_t" name="gswPortState" brief="GbE switch port state">
+                            <descr>
+                                This field contains the state of the gigabit Ethernet switch port.
+                            </descr>
+                            <descr>Valid for NPF_F_MGMT_GSW_PORT_STATE_GET.</descr>
+                            <selector>NPF_F_MGMT_GSW_PORT_STATE_GET</selector>
+                        </field>
+                        
+                        <field type="NPF_F_mgmtGswFlowCtrlGetRspArgs_t" name="gswFlowCtrlState" brief="GbE switch port flow control">
+                            <descr>
+                                This field contains the ID and flow control state of the gigabit Ethernet switch port.
+                            </descr>
+                            <descr>Valid for NPF_F_MGMT_GSW_FLOW_CTRL_GET.</descr>
+                            <selector>NPF_F_MGMT_GSW_FLOW_CTRL_GET</selector>
+                        </field>
+                        
+                        <field type="NPF_F_mgmtDataVlanInfo_t" name="dataVlan" brief="Data VLAN information">
+                            <descr>
+                                This structure contains the data VLAN configuration.
+                            </descr>
+                            <descr>Valid for NPF_F_MGMT_DATA_VLAN_INFO_GET.</descr>
+                            <selector>NPF_F_MGMT_DATA_VLAN_INFO_GET</selector>
+                        </field>
+                        
+                        <field type="NPF_F_mgmtControlVlanInfo_t" name="controlVlan" brief="Control VLAN information">
+                            <descr>
+                                This structure contains the control VLAN configuration.
+                            </descr>
+                            <descr>Valid for NPF_F_MGMT_CONTROL_VLAN_INFO_GET.</descr>
+                            <selector>NPF_F_MGMT_CONTROL_VLAN_INFO_GET</selector>
+                        </field>
+                        
+                        <field type="NPF_F_mgmtDiagOfflineCfg_t" name="offlineDiagCfg" brief="Off-line diagnostics configuration">
+                            <descr>
+                                This structure contains an off-line diagnostic tests configuration script.
+                            </descr>
+                            <descr>Valid for NPF_F_MGMT_DIAG_OFFLINE_CONFIG_GET.</descr>
+                            <selector>NPF_F_MGMT_DIAG_OFFLINE_CONFIG_GET</selector>
+                        </field>
+                        
+                        <field type="NPF_F_mgmtDiagOfflineReport_t" name="offlineDiagReport" brief="Off-line diagnostics report">
+                            <descr>
+                                The structure contains a report of the off-line diagnostic tests performed.
+                            </descr>
+                            <descr>Valid for NPF_F_MGMT_DIAG_OFFLINE_RESULT_GET.</descr>
+                            <selector>NPF_F_MGMT_DIAG_OFFLINE_RESULT_GET</selector>
+                        </field>
+                        
+                        <field type="NPF_F_mgmtDiagOnlineReport_t" name="onlineDiagReport" brief="On-line diagnostics report">
+                            <descr>
+                                This structure contains a report of the on-line diagnostic tests performed.
+                            </descr>
+                            <descr>Valid for NPF_F_MGMT_DIAG_ONLINE_PERFORM.</descr>
+                            <selector>NPF_F_MGMT_DIAG_ONLINE_PERFORM</selector>
+                        </field>
+                        
+                        <field type="NPF_uint32_t" name="unused">
+                            <descr>Reserved</descr>
+                            <descr>Valid for NPF_F_MGMT_TIMER_SET.</descr>
+                            <descr>Valid for NPF_F_MGMT_CFG_ONESHOT.</descr>
+                            <descr>Valid for NPF_F_MGMT_CFG_ONESHOT_CANCEL.</descr>
+                            <descr>Valid for NPF_F_MGMT_CFG_VALIDATE.</descr>
+                            <descr>Valid for NPF_F_MGMT_CFG_SAVE.</descr>
+                            <descr>Valid for NPF_F_MGMT_CFG_DELETE.</descr>
+                            <descr>Valid for NPF_F_MGMT_CFG_FILE_DOWNLOAD.</descr>
+                            <descr>Valid for NPF_F_MGMT_CFG_FILE_UPLOAD.</descr>
+                            <descr>Valid for NPF_F_MGMT_DIAG_OFFLINE_CONFIG_SET.</descr>
+                            <descr>Valid for NPF_F_MGMT_DIAG_OFFLINE_PERFORM.</descr>
+                            <descr>Valid for NPF_F_MGMT_HEALTH_CHECK.</descr>
+                            <selector default="yes"> </selector>
+                        </field>
+                        
+                    </selectunion>
+                </struct>
+                
+                <struct type="NPF_F_mgmtCallbackData_t" brief="Completion Callback Structure">
+                    <descr>
+                        This structure defines the callback data that contains the information on the completed function
+                        call. The OAM FAPI callback function returns this structure and the callback type (type
+                        field) is used to identify the function for which the callback was generated. The callback function
+                        receives a callback data structure containing one or more asynchronous responses from a
+                        single function call.
+                    </descr>
+                    <field type="NPF_F_mgmtCallbackType_t" name="type">
+                        <descr>Indicates callback type</descr>
+                    </field>
+                    <field type="NPF_boolean_t" name="allOK">
+                        <descr>Indicates that all responses are OK</descr>
+                    </field>
+                    <vector type="NPF_F_mgmtAsyncResponse_t" name="respArray">
+                        <descr>Pointer to array of responses</descr>
+                        <length type="NPF_uint32_t" name="resp">
+                            <descr>Number of responses in array</descr>
+                        </length>
+                    </vector>
+                </struct>
+                
+                
+                <functype name="NPF_F_mgmtCallbackFunc_t" type="void" class="callback" brief="Completion Callback Function">
+                    <descr>
+                        This function is used for handling asynchronous responses. The application uses it to register
+                        an asynchronous response handling routine to the OAM FAPI implementation. The application
+                        should implement this callback function and register it to the OAM FAPI implementation
+                        through the NPF_F_mgmtRegister() function.
+                    </descr>
+                    <param io="in" type="NPF_userContext_t" name="context">
+                        <descr>
+                            The context item that was supplied by the application when the
+                            completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator">
+                        <descr>
+                            The correlator item that was supplied by the application when
+                            the System Information FAPI function call was invoked.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_F_mgmtCallbackData_t" name="data">
+                        <descr>
+                            The response information related to the particular callback type.
+                        </descr>
+                    </param>
+                    <return>
+                        <descr>None.</descr>
+                    </return>
+                </functype>
+                
+            </section>
+            
+        </section>
+        
+        <section name="Management, Maintenance and Diagnostic Function Calls Reference">
+            
+            <section name="General">
+                <func type="NPF_error_t" name="NPF_F_mgmtTimerGet" xdrid="RPC_OAM_FAPI_TIMER_GET">
+                    <descr>
+                        Configuration Timer Get
+                        This function returns the current value in seconds of configuration timer.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was
+                            registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion
+                            callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this
+                            API function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                The callback handle is invalid.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The operation cannot be completed successfully because
+                                of problems encountered when handling the input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_TIMER_GET.
+                            The current configuration timer value is returned via this callback.
+                            The asynchronous response contains also error or success code.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_RESOURCE_UNAVAILABLE">
+                            <descr>
+                                The operation failed because the timer value could not be retrieved
+                                because of problems with access to flash memory.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_INTERNAL">
+                            <descr>Internal error encountered.</descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtTimerSet" xdrid="RPC_OAM_FAPI_TIMER_SET">
+                    <descr>
+                        Configuration Timer Set
+                        This function sets the time in second for the timer which guards the configuration.
+                        The timer is started just after the system is initialized with a new configuration set
+                        selected with the NPF_F_mgmtCfgOneshot FAPI function. If a connection to the device is
+                        not restored by the operator for the specified period, the device automatically reboots.
+                        Every OAM FAPI call received while the timer is active disarms this timer.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this API
+                            function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    <param io="in"  type="NPF_F_mgmtTimer_t*"  name="pTimer">
+                        <descr>
+                            A pointer to a variable containing the timer structure.
+                        </descr>
+                    </param>
+                    
+                    <return>
+                        <descr>
+                            An error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                The callback handle is invalid.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The operation cannot be completed successfully because of problems
+                                encountered when handling the input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_TIMER_SET.
+                            The asynchronous response will contain only a valid error code.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN_ERROR">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_RESOURCE_UNAVAILABLE">
+                            <descr>
+                                The operation failed because the timer value could not be saved
+                                because of problems with access to flash memory.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+            </section>
+            
+            <section name="System identification">
+                <func type="NPF_error_t" name="NPF_F_mgmtHwInfoGet" xdrid="RPC_OAM_FAPI_HW_INFO_GET">
+                    <descr>
+                        Get Hardware Information
+                        This function returns information about the hardware through the callback. The information
+                        returned includes the board name/ID, the board vendor name/ID, the board serial number,
+                        and its location retrieved from IPMI subsystem.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was
+                            registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied  to the asynchronous completion
+                            callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this
+                            API function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                The callback handle is invalid.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The operation cannot be completed successfully because
+                                of problems encountered when handling the input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_HW_INFO_GET.
+                            The hardware identification information is returned via this callback.
+                            The asynchronous response contains also error or success code:
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_INTERNAL">
+                            <descr>Internal error encountered.</descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtRstCntrGet" xdrid="RPC_OAM_FAPI_RST_CNTR_GET">
+                    <descr>
+                        Reset Counter Value Get
+                        This function returns the current value of the reset counter. The reset counter is incremented
+                        by firmware during every boot-up sequence.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was
+                            registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied  to the asynchronous completion
+                            callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this
+                            API function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                The callback handle is invalid.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The operation cannot be completed successfully because
+                                of problems encountered when handling the input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_RST_CNTR_GET.
+                            The reset counter value is returned through this callback.
+                            The asynchronous response also contains an error or success code.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_INTERNAL">
+                            <descr>Internal error encountered.</descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+            </section>
+            
+            <section name="Configuration Management">
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtCfgGetInfo" xdrid="RPC_OAM_FAPI_CFG_GET_INFO">
+                    <descr>
+                        Get Configuration Information
+                        This function retrieves configuration set information: ID, description, and state. If the pCfgIdArray
+                        parameter is empty, the function returns information for all existing configuration
+                        sets.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this API
+                            function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_F_mgmtCfgIdArray_t*" name="pCfgIdArray">
+                        <descr>
+                            A pointer to an array of configuration set IDs. If this parameter is empty,
+                            the function returns information about all existing configuration sets.
+                        </descr>
+                    </param>
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>The operation is in progress.</descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>The callback handle is invalid.</descr>
+                        </retval>
+                        <retval name="NPF_F_BAD_PARAM">
+                            <descr>"Invalid parameter"</descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>Unknown error which cannot be described otherwise..</descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The associated callback is of type RPC_OAM_FAPI_CFG_GET_INFO. The asynchronous response
+                            will contain the error code and an array of configuration information of type
+                            NPF_F_mgmtCfgInfoArray_t.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_RESOURCE_UNAVAILABLE">
+                            <descr>The configuration cannot be read.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_CFG_INVALID_ID">
+                            <descr>TThe configuration with the specified ID is not present.</descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtCfgGetRuntimeState" xdrid="RPC_OAM_FAPI_CFG_GET_RUNTIME_STATE">
+                    <descr>
+                        Get Runtime Configuration State
+                        This function retrieves the state of the runtime configuration.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this API
+                            function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>The operation is in progress.</descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>The callback handle is invalid.</descr>
+                        </retval>
+                        <retval name="NPF_F_BAD_PARAM">
+                            <descr>"Invalid parameter"</descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>Unknown error which cannot be described otherwise..</descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_CFG_GET_RUNTIME_STATE. The asynchronous
+                            response will contain the error code and the runtime configuration state in the
+                            NPF_F_mgmtCfgRuntimeState_t structure.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_RESOURCE_UNAVAILABLE">
+                            <descr>
+                                The configuration file cannot be read.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtCfgGetData" xdrid="RPC_OAM_FAPI_CFG_GET_DATA">
+                    <descr>
+                        Get Configuration Data
+                        This function retrieves the contents of the configuration set for a specified ID. The size of configuration
+                        set that can be transferred via FAPI call is limited by the RPC buffer size. In the
+                        case where the configuration set does not fit in the RPC buffer, only part of the configuration
+                        is displayed. In this case the configuration for the device can be retrieved using the
+                        NPF_F_mgmtCfgFileDownload function.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this API
+                            function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_F_mgmtCfgId_t*" name="pCfgId">
+                        <descr>
+                            A pointer to a structure containing the configuration set ID.
+                        </descr>
+                    </param>
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>The operation is in progress.</descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>The callback handle is invalid.</descr>
+                        </retval>
+                        <retval name="NPF_F_BAD_PARAM">
+                            <descr>"Invalid parameter"</descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>Unknown error</descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_CFG_GET_DATA. The asynchronous response
+                            will contain the error code and detailed configuration set information in the
+                            NPF_F_mgmtCfgData_t structure.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_RESOURCE_UNAVAILABLE">
+                            <descr>The configuration file cannot be read.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_CFG_INVALID_ID">
+                            <descr>The configuration set with given ID is not present.</descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtCfgOneshot" xdrid="RPC_OAM_FAPI_CFG_ONESHOT">
+                    <descr>
+                        Oneshot Configuration
+                        This function marks the configuration file to be loaded in oneshot test mode at next device
+                        restart. Configuration state transfers from NPF_F_CFG_STATE_INACTIVE to
+                        NPF_F_CFG_STATE_ONESHOT. Exactly one configuration set can be in
+                        NPF_F_CFG_STATE_ONESHOT or NPF_F_CFG_STATE_ONESHOT_RUNNING state.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this API
+                            function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_F_mgmtCfgId_t*" name="pCfgId">
+                        <descr>
+                            A pointer to a structure containing configuration set ID
+                        </descr>
+                    </param>
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>The operation is in progress.</descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>The callback handle is invalid.</descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The operation cannot be completed successfully because
+                                of problems encountered when handling the input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_CFG_ONESHOT.
+                            The asynchronous response will contain only a valid error code.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN_ERROR">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_RESOURCE_UNAVAILABLE">
+                            <descr>No resources.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_CFG_INVALID_ID">
+                            <descr>The operation failed because specified configuration set ID is invalid.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_CFG_INVALID_ACTION">
+                            <descr>
+                            The operation failed because operation is not allowed for given configuration set.                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtCfgOneshotCancel" xdrid="RPC_OAM_FAPI_CFG_ONESHOT_CANCEL">
+                    <descr>
+                        Cancel Oneshot Configuration
+                        This function transfers the configuration state from NPF_F_CFG_STATE_ONESHOT to NPF_F_CFG_STATE_INACTIVE.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this API
+                            function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>The operation is in progress.</descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>The callback handle is invalid.</descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The operation cannot be completed successfully because
+                                of problems encountered when handling the input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_CFG_ONESHOT_CANCEL.
+                            The asynchronous response will contain only a valid error code.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN_ERROR">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_RESOURCE_UNAVAILABLE">
+                            <descr>No resources.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_CFG_INVALID_ACTION">
+                            <descr>
+                                The operation failed because there is no configuration set in the
+                                NPF_F_CFG_STATE_ONESHOT state.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtCfgValidate" xdrid="RPC_OAM_FAPI_CFG_VALIDATE">
+                    <descr>
+                        Validate the Configuration
+                        This function validates a configuration set in NPF_F_CFG_STATE_ONESHOT_RUNNING state. The
+                        validated configuration set becomes the active one and the previously active configuration
+                        becomes inactive.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this API
+                            function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>The operation is in progress.</descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>The callback handle is invalid.</descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The operation cannot be completed successfully because
+                                of problems encountered when handling the input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_CFG_VALIDATE.
+                            The asynchronous response will contain only a valid error code.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN_ERROR">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_RESOURCE_UNAVAILABLE">
+                            <descr>No resources.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_CFG_INVALID_ACTION">
+                            <descr>
+                                The operation failed because there is no configuration set in the
+                                NPF_F_CFG_STATE_ONESHOT_RUNNING state.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtCfgSave" xdrid="RPC_OAM_FAPI_CFG_SAVE">
+                    <descr>
+                        Save the Configuration
+                        This function saves the Glenfield BBM configuration set. The configuration set includes PHY
+                        parameters, the parameters for gigabit Ethernet interfaces, gigabit Ethernet switch configuration
+                        and MAC instances parameters. All the information is stored in a XML file locally in the
+                        flash memory. Once the configuration is stored, it must be verified. It is loaded at the next
+                        system reboot. If everything works fine, the user has to validate the configuration by calling
+                        the NPF_F_mgmtCfgValidate function. If the new stored configuration is not working properly,
+                        the previous correct configuration is automatically activated.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this API
+                            function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    <param io="in"  type="NPF_F_mgmtCfgId_t*" name="pCfgId">
+                        <descr>
+                            A pointer to a structure containing configuration set id.
+                        </descr>
+                    </param>
+                    <param io="in"  type="NPF_F_mgmtCfgDescr_t*" name="pCfgDescr">
+                        <descr>
+                            A pointer to a structure containing configuration set description.
+                        </descr>
+                    </param>
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                The callback handle is invalid.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The operation cannot be completed successfully because
+                                of problems encountered when handling the input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_CFG_SAVE.
+                            The asynchronous response will contain only a valid error code.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_RESOURCE_UNAVAILABLE">
+                            <descr>
+                                The operation failed because configuration couldn't be saved due to problems
+                                with access to flash memory or remote server.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_CFG_INVALID_ID">
+                            <descr>
+                                The specified configuration ID is invalid. It is the same as the configuration set in the
+                                NPF_F_CFG_STATE_ACTIVE or NPF_F_CFG_ONESHOT_RUNNING_STATE state, or it is one of the
+                                reserved configuration IDs.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_CFG_TOO_MANY">
+                            <descr>
+                                The operation failed because the number of stored configuration sets reached the limit.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtCfgDelete" xdrid="RPC_OAM_FAPI_CFG_DELETE">
+                    <descr>
+                        Delete the Configuration
+                        This function removes the configuration set from the XML file. This action is only allowed for
+                        configurations in the NPF_F_CFG_STATE_INACTIVE state. For configuration that are not in the
+                        NPF_F_CFG_STATE_INACTIVE state, the associated callback reports an
+                        NPF_F_MGMT_E_CFG_INVALID_ACTION error. If the specified configuration is not present, the
+                        associated callback reports an NPF_F_MGMT_E_CFG_INVALID_ID error.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this API
+                            function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_F_mgmtCfgId_t*" name="pCfgId">
+                        <descr>
+                            A pointer to a structure containing configuration set ID.
+                        </descr>
+                    </param>
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>The operation is in progress.</descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>The callback handle is invalid.</descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The operation cannot be completed successfully because
+                                of problems encountered when handling the input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_CFG_DELETE.
+                            The asynchronous response will contain only a valid error code.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN_ERROR">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_RESOURCE_UNAVAILABLE">
+                            <descr>No resources.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_CFG_INVALID_ID">
+                            <descr>The operation failed because specified configuration set ID is invalid.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_CFG_INVALID_ACTION">
+                            <descr>
+                                The operation failed because the specified action is not allowed
+                                for this configuration set.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtCfgFileDownload" xdrid="RPC_OAM_FAPI_CFG_FILE_DOWNLOAD">
+                    <descr>
+                        Configuration File Download
+                        This function downloads the XML configuration file from a remote location to the Glenfield BBM. The downloaded
+                        file does not replace the local XML configuration file, but rather it adds entries from the downladed
+                        file to the local one. Each added configuration set is added to the local XML file with the
+                        NPF_F_CFG_STATE_INACTIVE state. Downloaded configuration sets cannot overwrite existing
+                        configuration sets. If configuration set identifiers are duplicated, the associated callback
+                        reports an NPF_F_MGMT_E_CFG_INVALID_ID error. The remote location of the file to be downloaded
+                        is specified by the IP address of the remote machine and the path to the remote configuration
+                        file.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this API
+                            function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    <param io="in"  type="NPF_F_mgmtCfgRemoteLoc_t*" name="pRemoteLocation">
+                        <descr>
+                            A pointer to a structure containing information about the remote location of
+                            the configuration file.
+                        </descr>
+                    </param>
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                The callback handle is invalid.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The operation cannot be completed successfully because
+                                of problems encountered when handling the input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_CFG_FILE_DOWNLOAD.
+                            The asynchronous response will contain only a valid error code.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN_ERROR">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_RESOURCE_UNAVAILABLE">
+                            <descr>
+                                The operation failed because the configuration file cannot be downloaded.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_CFG_INVALID_ID">
+                            <descr>
+                                The operation failed because the configuration set ID from the downloaded file
+                                is same as existing configuration set ID in local file.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_CFG_TOO_MANY">
+                            <descr>
+                                The operation failed because the number of stored configuration sets reached the limit.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtCfgFileUpload" xdrid="RPC_OAM_FAPI_CFG_FILE_UPLOAD">
+                    <descr>
+                        Configuration File Upload
+                        This function uploads the XML configuration file from Glenfield BBM to a remote location.
+                        The remote destination for the file is specified using the IP address of the remote
+                        machine and the path to the remote file.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this API
+                            function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    <param io="in"  type="NPF_F_mgmtCfgRemoteLoc_t*" name="pRemoteLocation">
+                        <descr>
+                            A pointer to a structure containing information about the remote location
+                            for the configuration file.
+                        </descr>
+                    </param>
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                The callback handle is invalid.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The operation cannot be completed successfully because
+                                of problems encountered when handling the input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_CFG_FILE_UPLOAD.
+                            The asynchronous response will contain only a valid error code.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN_ERROR">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_RESOURCE_UNAVAILABLE">
+                            <descr>
+                                The operation failed because the configuration file cannot be uploaded.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+            </section>
+            
+            
+            
+            <section name="Gigabit Ethernet Switch Management">
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtGswVlanIdGet" xdrid="RPC_OAM_FAPI_GSW_VLAN_ID_GET">
+                    <descr>
+                        Gigabit Ethernet Switch VLAN ID Get
+                        This function returns the VLAN Identifier (VID) used for a specified VLAN
+                        in the gigabit Ethernet switch.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this API
+                            function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    <param io="in" class="vector" type="NPF_F_mgmtGswVlanNo_t" name="vlanArray">
+                        <descr>
+                            An array of the VLAN numbers to query for IDs.
+                        </descr>
+                        <length type="NPF_uint32_t" name="numEntries" brief="Number of entries in vlanArray."></length>
+                    </param>
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                The callback handle is invalid.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The operation cannot be completed successfully because
+                                of problems encountered when handling the input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_GSW_VLAN_ID_GET.
+                            VLAN identifiers are delivered via the callback.
+                            The asynchronous response also contains a valid error code:
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_INVALID_VLAN">
+                            <descr>Invalid VLAN number - the VLAN does not exist</descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtGswPortStateGet" xdrid="RPC_OAM_FAPI_GSW_PORT_STATE_GET">
+                    <descr>
+                        Gigabit Ethernet Switch Port State Get
+                        This function returns the state of the gigabit Ethernet switch ports.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this API
+                            function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    <param io="in" class="vector" type="NPF_F_mgmtGswPortId_t" name="portArray">
+                        <descr>
+                            An array of the ports to query about state.
+                        </descr>
+                        <length type="NPF_uint32_t" name="numEntries" brief="Number of entries in portArray"></length>
+                    </param>
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                The callback handle is invalid.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The operation cannot be completed successfully because
+                                of problems encountered when handling the input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_GSW_PORT_STATE_GET.
+                            Ports states are delivered via the callback.
+                            The asynchronous response contains also a valid error code:
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN">
+                            <descr>Unknown error encountered</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_INVALID_PORT">
+                            <descr>Invalid port number - the port does not exist</descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtGswFlowCtrlGet" xdrid="RPC_OAM_FAPI_GSW_FLOW_CTRL_GET">
+                    <descr>
+                        Gigabit Ethernet Switch Port Flow Control Get
+                        This function returns flow control state of the gigabit Ethernet switch.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            A unique identifier provided to the application when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this API
+                            function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    <param io="in" class="vector" type="NPF_F_mgmtGswPortId_t" name="portArray">
+                        <descr>
+                            An array of the ports to query about flow control status.
+                        </descr>
+                        <length type="NPF_uint32_t" name="numEntries" brief="Number of entries in portArray."></length>
+                    </param>
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                The callback handle is invalid.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The operation cannot be completed successfully because
+                                of problems encountered when handling the input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_GSW_FLOW_CONTROL_GET.
+                            Ports' flow control statuses are delivered via the callback.
+                            The asynchronous response contains also valid error code:
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_INVALID_PORT">
+                            <descr>Invalid port number - the port does not exist</descr>
+                        </retval>
+                    </callback>
+                </func>
+            </section>
+            
+            <section name="VLAN Management">
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtControlVlanInfoGet" xdrid="RPC_OAM_FAPI_CONTROL_VLAN_INFO_GET">
+                    <descr>
+                        Get Control VLAN Information.
+                        This function retrieves information about the control VLAN. This VLAN is used for management
+                        traffic on the Glenfield BBM.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            The unique identifier provided to the application when the completion callback routine was
+                            registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion
+                            callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this
+                            API function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                The callback handle is invalid.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The operation cannot be completed successfully because
+                                of problems encountered when handling the input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_CONTROL_VLAN_INFO_GET.
+                            The information returned about the Control VLAN is the associated GSW VLAN number, the IP
+                            assignment type, the IP Address, the netmask and the default gateway. The asynchronous
+                            response also contains an error code or success code.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtDataVlanInfoGet" xdrid="RPC_OAM_FAPI_DATA_VLAN_INFO_GET">
+                    <descr>
+                        Get Data VLAN Information
+                        This function retrieves information about the data VLAN. This VLAN is used for data traffic
+                        on the Glenfield BBM device.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="cbhandle" xdr="no">
+                        <descr>
+                            The unique identifier provided to the application when the completion callback routine was
+                            registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous completion
+                            callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application needs to receive an asynchronous completion callback for this
+                            API function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Identifies the forwarding element where the operation is executed.
+                        </descr>
+                    </param>
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function call was accepted.
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                The callback handle is invalid.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The operation cannot be completed successfully because
+                                of problems encountered when handling the input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    
+                    <callback>
+                        <descr>
+                            The associated callback is of type NPF_F_MGMT_CONTROL_DATA_INFO_GET.
+                            The information returned about the data VLAN is the associated GSW VLAN number. The asynchronous
+                            response also contains an error code or success code.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR ">
+                            <descr>The operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                    </callback>
+                </func>
+            </section>
+            
+            <section name="Diagnostics">
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtDiagOfflineConfigSet" xdrid="RPC_OAM_FAPI_DIAG_OFFLINE_CONFIG_SET">
+                    <descr>
+                        Set Off-Line Diagnostic Tests Configuration
+                        This function stores the diagnostic test script in flash memory. The script is parsed and executed
+                        after a call to NPF_F_mgmtDiagOfflinePerform.
+                    </descr>
+                    <see>NPF_F_mgmtDiagOfflinePerform</see>
+                    <param io="in" type="NPF_callbackHandle_t" name="callbackHandle"  xdr="no">
+                        <descr>
+                            The unique identifier provided to the application
+                            when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            The unique application invocation context that will
+                            be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            Indicates whether the application requires an asynchronous completion callback
+                            for this API function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>Forwarding element handle.</descr>
+                    </param>
+                    <param io="in" type="NPF_F_mgmtDiagOfflineCfg_t" name="diagOfflineCfg">
+                        <descr>
+                            Desired configuration of off-line diagnostic tests.
+                        </descr>
+                    </param>
+                    <return>
+                        <descr>Possible return values are:</descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>The operation is in progress.</descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                Operation did not complete successfully because of problems encountered
+                                when handling input parameters.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>The callback handle is invalid.</descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The returned callback is of type NPF_F_MGMT_DIAG_OFFLINE_CONFIG_SET.
+                            The asynchronous response will contain only a valid error code.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR">
+                            <descr>Operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN_ERROR">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtDiagOfflineConfigGet" xdrid="RPC_OAM_FAPI_DIAG_OFFLINE_CONFIG_GET">
+                    <descr>
+                        Get Off-Line Diagnostic Tests Configuration
+                        This function gets the diagnostic test script stored in the flash memory. Script should be set
+                        up prior to call to this function using NPF_F_mgmtDiagOfflineConfigSet.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="callbackHandle"  xdr="no">
+                        <descr>
+                            The unique identifier provided to the application
+                            when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            The unique application invocation context that will
+                            be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            Indicates whether the application requires an asynchronous completion callback
+                            for this API function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>Forwarding element handle.</descr>
+                    </param>
+                    <return>
+                        <descr>Possible return values are:</descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>The operation is in progress.</descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                Operation did not complete successfully because of problems encountered
+                                when handling input parameters.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>The callback handle is invalid.</descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The returned callback is of type NPF_F_MGMT_DIAG_OFFLINE_CONFIG_GET. The off-line diagnostic
+                            tests script stored in the flash memory is returned via this callback. The asynchronous
+                            response will contain only a valid error code..
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR">
+                            <descr>Operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN_ERROR">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_RESOURCE_UNAVAILABLE">
+                            <descr>
+                                Operation failed because the diagnostics script is not present in the flash memory.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtDiagOfflinePerform" xdrid="RPC_OAM_FAPI_DIAG_OFFLINE_PERFORM">
+                    <descr>
+                        Off-Line Diagnostic Tests Perform
+                        This function invokes the off-line diagnostic tests. The diagnostic tests should be set up prior
+                        to call to this function using NPF_F_mgmtDiagOfflineConfigSet. The diagnostic tests are
+                        executed after bringing the board off-line.
+                        The test results are stored in flash memory and they can be retrieved from flash by calling the
+                        NPF_F_mgmtDiagOfflineResultGet function.
+                    </descr>
+                    <see>NPF_F_mgmtDiagOfflineResultGet</see>
+                    <see>NPF_F_mgmtDiagOfflineConfigSet</see>
+                    <see>NPF_F_mgmtDiagOfflineConfigGet</see>
+                    <param io="in" type="NPF_callbackHandle_t" name="callbackHandle"  xdr="no">
+                        <descr>
+                            The unique identifier provided to the application
+                            when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            The unique application invocation context that will
+                            be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            Indicates whether the application requires an asynchronous completion callback
+                            for this API function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>Forwarding element handle.</descr>
+                    </param>
+                    <return>
+                        <descr>Possible return values are:</descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>The operation is in progress.</descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                Operation did not complete successfully because of problems encountered
+                                when handling input parameters.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>The callback handle is invalid.</descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The returned callback is of type NPF_F_MGMT_DIAG_OFFLINE_PERFORM.
+                            The asynchronous response will contain only a valid error code.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR">
+                            <descr>Operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN_ERROR">
+                            <descr>Unknown error encountered.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_RESOURCE_UNAVAILABLE">
+                            <descr>
+                            The operation failed because the diagnostics application is not present in flash memory.                            </descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_INTERNAL">
+                            <descr>
+                                The operation failed because the diagnostic configuration couldn't be parsed.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtDiagOfflineResultGet" xdrid="RPC_OAM_FAPI_DIAG_OFFLINE_RESULT_GET">
+                    <descr>
+                        Get Off-Line Diagnostic Test Results
+                        This function returns the result of the off-line diagnostic tests. The diagnostic tests should be
+                        initiated earlier by calling NPF_F_mgmtDiagOfflinePerform. The test results are retrieved
+                        from flash memory and returned in the callback.
+                    </descr>
+                    <see>NPF_F_mgmtDiagOfflinePerform</see>
+                    <param io="in" type="NPF_callbackHandle_t" name="callbackHandle"  xdr="no">
+                        <descr>
+                            The unique identifier provided to the application
+                            when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            The unique application invocation context that will
+                            be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            Indicates whether the application requires an asynchronous completion callback
+                            for this API function call. Must be set to NPF_REPORT_ALL.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>Forwarding element handle.</descr>
+                    </param>
+                    <return>
+                        <descr>Possible return values are:</descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>The operation is in progress.</descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                Operation did not complete successfully because of problems encountered
+                                when handling input parameters.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>The callback handle is invalid.</descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The returned callback is of type NPF_F_MGMT_DIAG_OFFLINE_RESULT_GET. The off-line diagnostic
+                            tests result stored in flash memory are returned in this callback. The asynchronous
+                            response also ontains an error or success code.
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR">
+                            <descr>Operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_RESOURCE_UNAVAILABLE">
+                            <descr>
+                                The operation failed because there are no off-line diagnostic results in flash memory.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtDiagOnlinePerform" xdrid="RPC_OAM_FAPI_DIAG_ONLINE_PERFORM">
+                    <descr>
+                        Perform On-Line Diagnostic Tests
+                        This function invokes desired on-line diagnostics tests and returns their status
+                        via associated callback.
+                    </descr>
+                    <see></see>
+                    <param io="in" type="NPF_callbackHandle_t" name="callbackHandle"  xdr="no">
+                        <descr>
+                            A unique identifier provided to the application
+                            when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will
+                            be supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            Indicates whether the application requires an asynchronous completion callback
+                            for this API function call. Must be set to NPF_REPORT_ALL.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>Forwarding element handle.</descr>
+                    </param>
+                    <param io="in" class="vector" type="NPF_F_mgmtDiagOnline_t" name="diagArray">
+                        <descr>
+                            An array of the on-line diagnostic tests to be performed.
+                        </descr>
+                        <length type="NPF_uint32_t" name="numEntries" brief="Number of entries in diagArray."></length>
+                    </param>
+                    <return>
+                        <descr>Possible return values are:</descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>The operation is in progress.</descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                Operation did not complete successfully because of problems encountered
+                                when handling input parameters.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>The callback handle is invalid.</descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The returned callback is of type NPF_F_MGMT_DIAG_ONLINE_PERFORM.
+                            The on-line diagnostic tests results are returned via this callback.
+                            The asynchronous response contains also error or success code:
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR">
+                            <descr>Operation completed successfully.</descr>
+                        </retval>
+                        <retval name="NPF_F_MGMT_E_UNKNOWN">
+                            <descr>Operation failed for unknown reason.</descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+            </section>
+            
+            <section name="FAPI Health Check">
+                <func name="NPF_F_mgmtHealthCheckRequest" type="NPF_error_t" xdrid="RPC_OAM_FAPI_HEALTH_CHECK_REQUEST" fast_path="yes">
+                    <descr>
+                        Health Check Request.
+                        This function is used to check whether the collocated network processor is operational.
+                        If so, the registered callback function is invoked as soon as the reply from the network
+                        processor arrives.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+                        <descr>
+                            The unique identifier provided to the application when
+                            the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be supplied to the asynchronous
+                            completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            An indication of whether the application desires to receive an asynchronous
+                            completion callback for this API function call.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr> Forwarding element handle. </descr>
+                    </param>
+                    <return>
+                        <descr>Possible return values are:</descr>
+                        <retval name="NPF_NO_ERROR" brief="The requested operation is in progress."/>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE" brief="An invalid handle was passed."/>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                The request did not complete successfully because of problems encountered when handling input parameters.
+                            </descr>
+                        </retval>
+                    </return>
+                    <callback>
+                        <descr>
+                            The returned callback is of type NPF_F_MGMT_HEALTH_CHECK.
+                            If the callback function is invoked, it indicates that
+                            the network processor is operational. Apart from
+                            error code no other data field is set in asynchronous response.
+                            Possible return codes are:
+                        </descr>
+                        <retval name="NPF_F_MGMT_NO_ERROR">
+                            <descr>Operation completed successfully.</descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+            </section>
+            
+            <section name="Completion Callback">
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtRegister" class="cback_register">
+                    <descr>
+                        Callback Registration
+                        This function is used to register a callback completion function associated with OAM FAPI
+                        functions. The function allows the application to register a completion callback function for the
+                        related callback category and to associate a unique callback handle, as well as the application
+                        context. Upper layers may register multiple callback functions using this function.
+                        The callback function is identified by the pair of userContext and callbackFunc and for each
+                        individual pair, a unique callbackHandle is assigned for future reference. Because the callback
+                        function is identified by both userContext and callbackFunc, duplicate registration of
+                        the same callback function with a different userContext is allowed. Also, the same userContextt
+                        can be shared among different callback functions. Duplicate registration of the same
+                        userContext and callbackFunc pair has no effect and will output a handle that is already
+                        assigned to the pair and return NPF_E_CALLBACK_ALREADY_REGISTERED.
+                    </descr>
+                    <param io="in" type="NPF_userContext_t" name="userContext">
+                        <descr>
+                            User defined context provided at the callback registration time.
+                            The exact value will be provided back to the registered completion
+                            callback function as its first parameter when it is called.
+                            Upper layers can assign any value to the userContext and the
+                            value is completely opaque to OAM FAPI implementation.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_F_mgmtCallbackFunc_t" name="callbackFunc">
+                        <descr>The pointer to the completion callback function to be registered.</descr>
+                    </param>
+                    <param io="out" type="NPF_callbackHandle_t*" name="callbackHandle">
+                        <descr>
+                            Returned callback handle
+                            A unique identifier assigned for the registered userContext and callbackFunc pair. The
+                            upper layer will use this handle to specify which callback function is to be called when invoking
+                            asynchronous OAM FAPI functions. It will also be used when de-registering the userContext
+                            and callbackFunc pair.
+                        </descr>
+                    </param>
+                    
+                    <return>
+                        <descr>Possible return values are:</descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>Indicates successful registration.</descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_FUNCTION">
+                            <descr>Indicates invalid parameter for callback function.</descr>
+                        </retval>
+                        <retval name="NPF_E_CALLBACK_ALREADY_REGISTERED">
+                            <descr>Indicates duplicated registration.</descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>Indicates error other than above.</descr>
+                        </retval>
+                    </return>
+                </func>
+                
+                <func type="NPF_error_t" name="NPF_F_mgmtDeregister" class="cback_deregister">
+                    <descr>
+                        Callback De-Registration
+                        This function is used to de-register a completion callback function associated with OAM FAPI
+                        functions. The function allows the application to de-register the callback function that is associated
+                        with this callback handle.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="callbackHandle">
+                        <descr>Handle of the callback function to be deregistered.</descr>
+                    </param>
+                    <return>
+                        <descr>Possible return values are:</descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>Indicates successful deregistration.</descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>Indicates passing invalid handle.</descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>Indicates error other than above.</descr>
+                        </retval>
+                    </return>
+                </func>
+                
+            </section>
+            
+        </section>
+        
+    </section>
+    
+</api>

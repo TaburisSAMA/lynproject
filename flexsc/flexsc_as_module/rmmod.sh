@@ -1,0 +1,1 @@
+ sudo rmmod flexsc_module_all.ko

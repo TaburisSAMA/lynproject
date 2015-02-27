@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+
+	<!-- Servlets -->
+
+	<servlet>
+		<servlet-name>Maxobot</servlet-name>
+		<servlet-class>org.maksud.wave.maxobotapp.server.MaxobotServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Maxobot</servlet-name>
+		<url-pattern>/_wave/robot/jsonrpc</url-pattern>
+	</servlet-mapping>
+
+
+	<servlet>
+		<servlet-name>CronLogger</servlet-name>
+		<servlet-class>org.maksud.wave.maxobotapp.server.CronLogger</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CronLogger</servlet-name>
+		<url-pattern>/CronLogger</url-pattern>
+	</servlet-mapping>
+
+
+
+	<!-- Default page to serve -->
+	<welcome-file-list>
+		<welcome-file>Maxobot.html</welcome-file>
+	</welcome-file-list>
+
+</web-app>

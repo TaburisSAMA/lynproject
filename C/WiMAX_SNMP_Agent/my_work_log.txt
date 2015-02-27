@@ -1,0 +1,81 @@
+My work log.
+# Sunday, 30/11/2008
+Today I tested the table interface for a test MIB named 'testmibTable'.
+I was able to read the values from it. But I could not set values.
+
+Previously I also created and tested some scalar function. But I was 
+unable to set values to them. I have to look what should be done.
+
+
+Task TODO:
+1. I need to print the logs from snmpd.
+	//1/12/08 Done.... with agentx...
+2. An agentx integration must be done.
+	//1/12/08 : Solved... A make file is needed
+3. A work plan need to be devised to manage such a huge code.
+	//is under construction
+4. Need to implement Table with RowStatus.
+5. How to debug the code. probably from eclipse.
+
+
+mibtestTable:
+generate the code from
+mib2c -c mib2c.mfd.conf mibtestTable
+
+
+there is a potential bug in mibtestTable supplied from Don Tu. 
+I fixed it by "netSnmpExamples 10"
+
+the changes are marked with //Max
+
+Changes are done in (as per DT) 
+1. mibtestTable_data_access.c
+2. mibtestTable_data_set.c
+3. mibtestTable.c
+3. mibtestTable.h
+
+But Set is not working. Also initial values are not working.
+It should be 
+0 	100 	200
+0 	-100 	-200
+
+but I am getting 0 1 2, 0 -1 -2.... Have to see what is wrong.
+
+I am working on 5.3.1 version. 
+May need to switch to latest 5.4.1 version.
+ 
+Probable task
+1. Add database support to snmpd
+
+
+Search for community option in net to set snmp value.
+
+# 01/12/2008
+Set Access:
+in the snmpd.conf I have to declare readwrite community for set access.
+Type the following lines.
+
+------------------
+rwcommunity public
+------------------
+
+rocommunity for readonly community
+
+AgentX:
+for mfd style it's easy.
+type:
+[root@localhost ~]# mib2c -c subagent.m2c mibtestTable
+[root@localhost ~]# mib2c -c mfd-makefile.m2m mibtestTable
+
+Now to use gcc make uncomment:
+NETSNMPCFLAGS := $(shell $(NETSNMPCONFIG) --base-cflags)
+NETSNMPLIBS := $(shell $(NETSNMPCONFIG) --agent-libs)
+and comment the next two lines.
+
+
+Now its time for traps and rowstatus table.
+
+#23/12/2008
+After a lot of days I began working again on Net-SNMP.
+
+Now a framework is under development.

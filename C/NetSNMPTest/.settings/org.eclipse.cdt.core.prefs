@@ -1,0 +1,4 @@
+#Mon Dec 01 18:20:58 GMT 2008
+eclipse.preferences.version=1
+environment/project/cdt.managedbuild.toolchain.gnu.base.1589778706=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\n<environment append\="true" appendContributed\="true"/>\n
+environment/project/cdt.managedbuild.toolchain.gnu.base.1589778706.472979609=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\n<environment append\="true" appendContributed\="true">\n<variable delimiter\="\:" name\="PWD" operation\="replace" value\="/root/workspace/NetSNMPTest/wmanTestDataHolder"/>\n<variable delimiter\="\:" name\="CWD" operation\="replace" value\="/root/workspace/NetSNMPTest/wmanTestDataHolder"/>\n</environment>\n

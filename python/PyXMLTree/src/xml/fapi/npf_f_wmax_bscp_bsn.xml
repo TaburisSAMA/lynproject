@@ -1,0 +1,1114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE api SYSTEM "xmlfapi.dtd">
+<api name="npf_f_wmax_bscp_bsn">
+    <preamble> INTEL CONFIDENTIAL Copyright 2000 - 2005 Intel Corporation All 
+        Rights Reserved. The source code contained or described herein and all 
+        documents related to the source code (&quot;Material&quot;) are owned 
+        by Intel Corporation or its suppliers or licensors. Title to the 
+        Material remains with Intel Corporation or its suppliers and licensors. 
+        The Material contains trade secrets and proprietary and confidential 
+        information of Intel or its suppliers and licensors. The Material is 
+        protected by worldwide copyright and trade secret laws and treaty 
+        provisions. No part of the Material may be used, copied, reproduced, 
+        modified, published, uploaded, posted, transmitted, distributed, or 
+        disclosed in any way without Intel's prior express written permission. 
+        No license under any patent, copyright, trade secret or other 
+        intellectual property right is granted to or conferred upon you by 
+        disclosure or delivery of the Materials, either expressly, by 
+        implication, inducement, estoppel or otherwise. Any license under such 
+        intellectual property rights must be express and approved by Intel in 
+        writing. </preamble>
+    <imports>
+        <import> npf </import>
+        <import> npf_f_error </import>
+        <import> npf_f_stats </import>
+    </imports>
+    <section name="Tunnel management">
+        <typedef name="NPF_F_bscpBsnTunnelId_t" type="NPF_uint16_t">
+            <descr> BSN Tunnel Identifier. </descr>
+        </typedef>
+        <enum type="NPF_F_bscpBsnDSCPSetMethod_t" 
+            name="NPF_F_bscpBsnDSCPSetMethod_n" 
+            brief="Methods of setting DSCP field in tunnels.">
+            <descr> Defines how DSCP bits of TOS field in IPv4 header are set 
+                for tunneled packets. </descr>
+            <field name="NPF_F_BSCP_BSN_DSCP_FROM_ORGINAL_PACKET" 
+                brief="DSCP copied from the original IP header.">
+            </field>
+            <field name="NPF_F_BSCP_BSN_DSCP_FROM_TUNNEL_SETTINGS" 
+                brief="DSCP set based on tunnel settings">
+            </field>
+        </enum>
+        <struct type="NPF_F_bscpBsnTunnel_t" brief="BSN Tunnel creation parameters">
+            <descr>This data structure contains a definition of one BSN tunnel. A 
+                single BSN tunnel is distinguish by a touple (remote IP 
+                address, tosMethod, tos). For the same remote IP address 
+                multiple tunnels can be created, each with diferent TOS. 
+                </descr>
+            <field name="remoteAddr" type="NPF_IPv4Address_t" >
+                <descr>IP address of the remote tunnel end (ASN-GW)</descr>
+            </field>
+            <field name="tosMethod" type="NPF_F_bscpBsnDSCPSetMethod_t" 
+                brief="Method of setting TOS in outer (GRE) packets for this tunnel">
+            </field>
+            <field name="tos" type="NPF_uint8_t">
+                <descr>TOS used for packets transmitted by this tunnel. 
+                Valid only when NPF_F_BSCP_BSN_DSCP_FROM_TUNNEL_SETTINGS method of dscpMethod is set
+                </descr>
+            </field>
+            <field name="mtu" type="NPF_uint16_t" 
+                brief="MTU used for this tunnel.">
+            </field>
+            <field name="vlanTag" type="NPF_uint16_t">
+                <descr> VLAN Tag used for this tunnel.
+                VLAN Tag is valid only when 802.1Q encapsulation 
+                is used for Ethernet interface 
+                </descr>
+            </field>
+        </struct>
+        <struct type="NPF_F_bscpBsnTunnelChgArg_t" brief="BSN Tunnel modification parameters">
+            <descr>This data structure is used to change parameters of the 
+                existing BSN tunnel. Currently, only MTU used for packets 
+                transmitted by this tunnel can be configured. </descr>
+            <field name="tunnelId" type="NPF_F_bscpBsnTunnelId_t" 
+                brief="Tunnel Id - a handle to the existing tunnel">
+            </field>
+            <field name="mtu" type="NPF_uint16_t" 
+                brief="MTU used for this tunnel.">
+            </field>
+        </struct>
+        <func name="NPF_F_bscpBsnTunnelAdd" type="NPF_error_t" 
+            brief="Add BSN Tunnel" xdrid="RPC_BSN_TUNNEL_ADD">
+            <descr>This function adds new BSN tunnels.</descr>
+            <param io="in" type="NPF_callbackHandle_t" name="cbHandle" xdr="no">
+                <descr> Identifies the callback function which should be 
+                    called.</descr>
+            </param>
+            <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                <descr> A unique application invocation context that will be 
+                    supplied to the asynchronous completion callback 
+                    routine.</descr>
+            </param>
+            <param io="in" type="NPF_errorReporting_t" name="errorReporting" 
+                xdr="no">
+                <descr> Defines whether a callback will be called after 
+                    completing the action requested by the function 
+                    call.</descr>
+            </param>
+            <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                <descr> Identifies the forwarding element where the action will 
+                    be executed.</descr>
+            </param>
+            <param io="in" class="vector" type="NPF_F_bscpBsnTunnel_t" 
+                name="argsArray" xdr="yes">
+                <descr>Array of structures containing argsNum entries. Each 
+                    entry contains one tunnel to be added.</descr>
+                <length type="NPF_uint32_t" name="argsNum" 
+                    brief="Number of tunnels in the argsArray table.">
+                </length>
+            </param>
+            <return>
+                <descr> Error code indicating if function call was successful. 
+                    </descr>
+                <retval name="NPF_NO_ERROR">
+                    <descr> The operation is in progress. </descr>
+                </retval>
+                <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                    <descr> The callback handle is invalid. </descr>
+                </retval>
+                <retval name="NPF_E_UNKNOWN">
+                    <descr> The operation cannot be completed successfully 
+                        because of problems encountered when handling the input 
+                        parameters. </descr>
+                </retval>
+            </return>
+            <callback>
+                <descr> If errorReporting is set to ALWAYS, a callback is 
+                    invoked to indicate that the operation has been completed. 
+                    </descr>
+                <retval name="NPF_NO_ERROR" 
+                    brief="Operation completed successfully.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_NO_RES" 
+                    brief="Resources exhausted.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_INVALID_PARAMS" 
+                    brief="Invalid parameter.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_OBJ_EXISTS" 
+                    brief="Tunnel already exists.">
+                </retval>
+            </callback>
+        </func>
+        <func name="NPF_F_bscpBsnTunnelChg" type="NPF_error_t" 
+            brief="Change BSN Tunnel" xdrid="RPC_BSN_TUNNEL_CHG">
+            <descr>This function modifies parameters of the existing BSN tunnels. 
+                Currently only MTU can be changed. </descr>
+            <param io="in" type="NPF_callbackHandle_t" name="cbHandle" xdr="no">
+                <descr> Identifies the callback function which should be 
+                    called.</descr>
+            </param>
+            <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                <descr> A unique application invocation context that will be 
+                    supplied to the asynchronous completion callback 
+                    routine.</descr>
+            </param>
+            <param io="in" type="NPF_errorReporting_t" name="errorReporting" 
+                xdr="no">
+                <descr> Defines whether a callback will be called after 
+                    completing the action requested by the function 
+                    call.</descr>
+            </param>
+            <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                <descr> Identifies the forwarding element where the action will 
+                    be executed.</descr>
+            </param>
+            <param io="in" class="vector" type="NPF_F_bscpBsnTunnelChgArg_t" 
+                name="argsArray" xdr="yes">
+                <descr>Array of structures containing argsNum entries. Each 
+                    entry contains one tunnel id and arguments to be modified 
+                    for that tunnel.</descr>
+                <length type="NPF_uint32_t" name="argsNum" 
+                    brief="Number of tunnels in the argsArray table.">
+                </length>
+            </param>
+            <return>
+                <descr> Error code indicating if function call was successful. 
+                    </descr>
+                <retval name="NPF_NO_ERROR">
+                    <descr> The operation is in progress. </descr>
+                </retval>
+                <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                    <descr> The callback handle is invalid. </descr>
+                </retval>
+                <retval name="NPF_E_UNKNOWN">
+                    <descr> The operation cannot be completed successfully 
+                        because of problems encountered when handling the input 
+                        parameters. </descr>
+                </retval>
+            </return>
+            <callback>
+                <descr> If errorReporting is set to ALWAYS, a callback is 
+                    invoked to indicate that the operation has been completed. 
+                    </descr>
+                <retval name="NPF_NO_ERROR" 
+                    brief="Operation completed successfully.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_NO_RES" 
+                    brief="Resources exhausted.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_INVALID_PARAMS" 
+                    brief="Invalid parameter.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_OBJ_NONEXISTANT" 
+                    brief="Tunnel does not exists.">
+                </retval>
+            </callback>
+        </func>
+        <func name="NPF_F_bscpBsnTunnelDel" type="NPF_error_t" 
+            brief="Delete BSN Tunnel" xdrid="RPC_BSN_TUNNEL_DEL">
+            <descr>This function deletes existing tunnels</descr>
+            <param io="in" type="NPF_callbackHandle_t" name="cbHandle" xdr="no">
+                <descr>Identifies the callback function which should be 
+                    called.</descr>
+            </param>
+            <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                <descr> A unique application invocation context that will be 
+                    supplied to the asynchronous completion callback routine. 
+                    </descr>
+            </param>
+            <param io="in" type="NPF_errorReporting_t" name="errorReporting" 
+                xdr="no">
+                <descr> Defines whether a callback will be called after 
+                    completing the action requested by the function call. 
+                    </descr>
+            </param>
+            <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                <descr> Identifies the forwarding element where the action will 
+                    be executed. </descr>
+            </param>
+            <param io="in" class="vector" type="NPF_F_bscpBsnTunnelId_t" 
+                name="argsArray" xdr="yes">
+                <descr>Array of structures containing argsNum entries. Each 
+                    entry contains one tunnel to be deleted.</descr>
+                <length type="NPF_uint32_t" name="argsNum" 
+                    brief="Number of tunnels in the argsArray table.">
+                </length>
+            </param>
+            <return>
+                <descr> Error code indicating if function call was successful. 
+                    </descr>
+                <retval name="NPF_NO_ERROR">
+                    <descr> The operation is in progress. </descr>
+                </retval>
+                <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                    <descr> The callback handle is invalid. </descr>
+                </retval>
+                <retval name="NPF_E_UNKNOWN">
+                    <descr> The operation cannot be completed successfully 
+                        because of problems encountered when handling the input 
+                        parameters. </descr>
+                </retval>
+            </return>
+            <callback>
+                <descr> If errorReporting is set to ALWAYS, a callback is 
+                    invoked to indicate that the operation has been completed. 
+                    </descr>
+                <retval name="NPF_NO_ERROR" 
+                    brief="Operation completed successfully.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_NO_RES" 
+                    brief="Resources exhausted.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_INVALID_PARAMS" 
+                    brief="Invalid parameter.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_OBJ_NONEXISTANT" 
+                    brief="Specified tunnel does not exist.">
+                </retval>
+            </callback>
+        </func>
+    </section>
+    
+    <section name="Data traffic interface management">
+            
+        <enum type="NPF_F_bscpBsnIpSetMethod_t" 
+            name="NPF_F_bscpBsnIpSetMethod_n" 
+            brief="Methods of setting IP address.">
+            <descr>
+				Defines how IP address is set for the data traffic to/from the Base Station. 
+			 </descr>
+            <field name="NPF_F_BSCP_BSN_IP_FROM_DHCP" 
+                brief="IP address configured via DHCP.">
+            </field>
+            <field name="NPF_F_BSCP_BSN_IP_MANUALY" 
+                brief="IP address configured via FAPI call.">
+            </field>
+        </enum>
+        
+        <struct type="NPF_F_bscpBsnDhcpArgs_t" brief="DHCP arguments.">
+            <vector type="NPF_uint8_t" name="hostName">
+                <descr>A string (an array of bytes) provided as hostName 
+                    optional parameter for DHCP requests.</descr>
+                <length type="NPF_uint32_t" name="hostNameLen" 
+                    brief="Number of bytes in hostName.">
+                </length>
+            </vector>
+            <vector type="NPF_uint8_t" name="vendorClassId">
+                <descr>A string (an array of bytes) provided as vendorClassId 
+                    optional parameter for DHCP requests.</descr>
+                <length type="NPF_uint32_t" name="vendorClassIdLen" 
+                    brief="Number of bytes in vendorClassId.">
+                </length>
+            </vector>
+            <vector type="NPF_uint8_t" name="clientId">
+                <descr>A string (an array of bytes) provided as clientId 
+                    optional parameter for DHCP requests.</descr>
+                <length type="NPF_uint32_t" name="clientIdLen" 
+                    brief="Number of bytes in clientId.">
+                </length>
+            </vector>
+        </struct>
+        
+        <struct type="NPF_F_bscpBsnIpParams_t" 
+            brief="IP parameters of the interface.">
+            <descr>
+				This data structure contains parameters of the IP interface used for the data traffic from/to BS.
+			 </descr>
+            <field name="address" type="NPF_IPv4Address_t" 
+                brief="IP address of the interface">
+            </field>
+            <field name="mask" type="NPF_IPv4Address_t" 
+                brief="Network mask used on the network the interface is attached to">
+            </field>
+            <field name="defaultGateway" type="NPF_IPv4Address_t" 
+                brief="Default gateway">
+            </field>
+        </struct>
+        
+        <struct type="NPF_F_bscpBsnSetIpAddressArgs_t" 
+            brief="Specifies configuration of IP address.">
+            <descr> This structure specifies how IP address is configured and 
+                provide neccesery arguments. </descr>
+            <selectunion type="NPF_F_bscpBsnSetIpAddressArgs_union" name="u">
+                <selectfield type="NPF_F_bscpBsnIpSetMethod_t" name="method" 
+                    brief="Method of IP address setting.">
+                </selectfield>
+                <field type="NPF_F_bscpBsnIpParams_t" name="ipParams" 
+                    brief="IP parameters to be manualy set for the interface">
+                    <descr> New IP address, network mask and defaut gateway for 
+                        the Base Station. Used when IP setting method is 
+                        manual. </descr>
+                    <selector>NPF_F_BSCP_BSN_IP_MANUALY</selector>
+                </field>
+                <field type="NPF_F_bscpBsnDhcpArgs_t" name="dhcpParams" 
+                    brief="Parameters for DHCP client">
+                    <descr>Parameters specified for DHCP client. Used when IP 
+                        setting method is DHCP. </descr>
+                    <selector>NPF_F_BSCP_BSN_IP_FROM_DHCP</selector>
+                </field>
+            </selectunion>
+        </struct>
+        <func name="NPF_F_bscpBsnIpAddressSet" type="NPF_error_t" 
+            brief="Set IP address" xdrid="RPC_BSN_IP_ADDRESS_SET">
+            <descr>
+				This function configures IP address for the data traffic interface.
+				The IP address can be either configured staticly or obtained using DHCP client. 
+				In case of using DHCP, a new IP address is returned by NPF_F_BSCP_BSN_DHCP_EVENT. 
+                When VLAN tags should be used for the data traffic, VLAN ID must be configured first using 
+				NPF_F_ifDataVlanSet() function. 
+             </descr>
+             <see>NPF_F_ifDataVlanSet()</see>
+            <param io="in" type="NPF_callbackHandle_t" name="cbHandle" xdr="no">
+                <descr> Identifies the callback function which should be 
+                    called.</descr>
+            </param>
+            <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                <descr> A unique application invocation context that will be 
+                    supplied to the asynchronous completion callback 
+                    routine.</descr>
+            </param>
+            <param io="in" type="NPF_errorReporting_t" name="errorReporting" 
+                xdr="no">
+                <descr> Defines whether a callback will be called after 
+                    completing the action requested by the function 
+                    call.</descr>
+            </param>
+            <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                <descr> Identifies the forwarding element where the action will 
+                    be executed.</descr>
+            </param>
+            <param io="in" type="NPF_F_bscpBsnSetIpAddressArgs_t" name="addrArgs" xdr="yes">
+                <descr>New IP address or DHCP request arguments.</descr>
+            </param>
+            <return>
+                <descr> Error code indicating if function call was successful. 
+                    </descr>
+                <retval name="NPF_NO_ERROR">
+                    <descr> The operation is in progress. </descr>
+                </retval>
+                <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                    <descr> The callback handle is invalid. </descr>
+                </retval>
+                <retval name="NPF_E_UNKNOWN">
+                    <descr> The operation cannot be completed successfully 
+                        because of problems encountered when handling the input 
+                        parameters. </descr>
+                </retval>
+            </return>
+            <callback>
+                <descr> If errorReporting is set to ALWAYS, a callback is 
+                    invoked. The callback indicates that the operation of DHCP 
+                    request has been started. When DHCP request is finished, a 
+                    separate event NPF_F_BSCP_BSN_DHCP_EVENT is 
+                    triggered. </descr>
+                <retval name="NPF_NO_ERROR" 
+                    brief="Operation completed successfully.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_NO_RES" 
+                    brief="Resources exhausted.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_INVALID_PARAMS" 
+                    brief="Invalid parameter.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_OPERATION_IN_PROGRESS" 
+                    brief="DHCP client request is already pending.">
+                </retval>
+            </callback>
+        </func>
+
+        <!--      <func name="NPF_F_bscpBsnGetIpAddress" type="NPF_error_t" brief="Read Base Station IP Address" xdrid="RPC_BSN_GET_IP_ADDRESS">
+            <descr>This function reads the current IP parameters (IP address, network mask, MTU) of the interface, used by the BS, 
+                used to access Access Service Provider network (ASN).</descr>
+            <param io="in" type="NPF_callbackHandle_t" name="cbHandle" xdr="no">
+                <descr>	Identifies the callback function which should be called.</descr>
+            </param>
+            <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                <descr>	A unique application invocation context that will be supplied to the asynchronous completion callback routine.</descr>
+            </param>
+            <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                <descr>	Defines whether a callback will be called after
+					completing the action requested by the function call.</descr>
+            </param>
+            <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                <descr>	Identifies the forwarding element where the action will be executed.</descr>
+            </param>
+            <return>
+                <descr>	Error code indicating if function call was successful.	</descr>
+                <retval name="NPF_NO_ERROR">
+                    <descr> The operation is in progress. </descr>
+                </retval>
+                <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                    <descr>
+                            The callback handle is invalid.
+                        </descr>
+                </retval>
+                <retval name="NPF_E_UNKNOWN">
+                    <descr> The operation cannot be completed successfully because
+                            of problems encountered when handling the input parameters. </descr>
+                </retval>
+            </return>
+            <callback>
+                <descr>
+                        If errorReporting is set to ALWAYS, a callback is invoked to
+                        indicate that the operation has been completed. 
+                    </descr>
+                <retval name="NPF_NO_ERROR" brief="Operation completed successfully.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_NO_RES" brief="Resources exhausted.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_IP_ADDRESS_NOT_SET" brief="IP address for the ASN interface not assigned.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_OPERATION_IN_PROGRESS"  brief="DHCP client request is already pending.">
+                </retval>
+            </callback>
+        </func>
+         -->
+        <func name="NPF_F_bscpBsnMtuSet" type="NPF_error_t" 
+            brief="Set MTU for the interface" xdrid="RPC_BSN_MTU_SET">
+            <descr>This function sets the MTU (Maximum Transfer Unit) for the data traffic interface. 
+					For each tunnel, that value can be overwritten by tunnel-specific MTU.</descr>
+            <param io="in" type="NPF_callbackHandle_t" name="cbHandle" xdr="no">
+                <descr> Identifies the callback function which should be 
+                    called.</descr>
+            </param>
+            <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                <descr> A unique application invocation context that will be 
+                    supplied to the asynchronous completion callback 
+                    routine.</descr>
+            </param>
+            <param io="in" type="NPF_errorReporting_t" name="errorReporting" 
+                xdr="no">
+                <descr> Defines whether a callback will be called after 
+                    completing the action requested by the function 
+                    call.</descr>
+            </param>
+            <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                <descr> Identifies the forwarding element where the action will 
+                    be executed.</descr>
+            </param>
+            <param io="in" type="NPF_uint16_t" name="mtu">
+                <descr> The current value of the interface MTU</descr>
+            </param>
+            <return>
+                <descr> Error code indicating if function call was successful. 
+                    </descr>
+                <retval name="NPF_NO_ERROR">
+                    <descr> The operation is in progress. </descr>
+                </retval>
+                <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                    <descr> The callback handle is invalid. </descr>
+                </retval>
+                <retval name="NPF_E_UNKNOWN">
+                    <descr> The operation cannot be completed successfully 
+                        because of problems encountered when handling the input 
+                        parameters. </descr>
+                </retval>
+            </return>
+            <callback>
+                <descr> If errorReporting is set to ALWAYS, a callback is 
+                    invoked to indicate that the operation has been completed. 
+                    </descr>
+                <retval name="NPF_NO_ERROR" 
+                    brief="Operation completed successfully.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_NO_RES" 
+                    brief="Resources exhausted.">
+                </retval>
+            </callback>
+        </func>
+    </section>
+    <section name="Statistics">
+        <define brief="BSN Global Statistics Mask">
+            <descr>
+					These bits can be used to enable and reset global BSN statistics.
+				</descr>
+            <see>NPF_F_bscpBsnGblStats_t</see>
+            <field name="NPF_F_BSCP_BSN_STAT_G_ALL" brief="Mask to configure or reset all BSN managed global statistics.">
+                <value>(-1ull)</value>
+            </field>
+            <field name="NPF_F_BSCP_BSN_STAT_UL_FRAG_IP_PKTS"  brief="Number of fragmented IP packets UL.">
+                <value>(0x01ull &lt;&lt; 0)</value>
+            </field>
+            <field name="NPF_F_BSCP_BSN_STAT_DL_IP_FRAG_RCVD"  brief="Number of received IP fragments DL.">
+                <value>(0x01ull &lt;&lt; 1)</value>
+            </field>
+            <field name="NPF_F_BSCP_BSN_STAT_DL_GRE_PKTS_RCVD" brief="Total number of received GRE packets DL.">
+                <value>(0x01ull &lt;&lt; 2)</value>
+            </field>
+            <field name="NPF_F_BSCP_BSN_STAT_ICMP_ERROR_MSG"  brief="Number of pMTUD packet sent back to the CPE (number of ICMP error messages).">
+                <value>(0x01ull &lt;&lt; 3)</value>
+            </field>
+            <field name="NPF_F_BSCP_BSN_STAT_DL_ETH_NW_DROP_PKTS"  brief="Number of packets, received in DL and dropped at ETH NW">
+                <value>(0x01ull &lt;&lt; 4)</value>
+            </field>
+        </define>
+        <struct type="NPF_F_bscpBsnGblStats_t" brief="Global BSN Statistics">
+            <descr>
+					This structure contains global statistics gathered by the BSN component.
+				</descr>
+            <field name="gBsnUlFragIpPkts" type="NPF_uint64_t" brief="Number of fragmented IP packets UL.">
+            </field>
+            <field name="gBsnDlIpFragRcvd" type="NPF_uint64_t" brief="Number of received IP fragments DL.">
+            </field>
+            <field name="gBsnDlGrePktsRcvd" type="NPF_uint64_t" brief="Total number of received GRE packets DL.">
+            </field>
+            <field name="gBsnIcmpErrorMsg" type="NPF_uint64_t" brief="Number of pMTUD packet sent back to the CPE (number of ICMP error messages).">
+            </field>
+            <field name="gBsnDlEthNwDropPkts" type="NPF_uint64_t" brief="Number of packets, received in DL and dropped at ETH NW">
+            </field>
+        </struct>
+        <struct type="NPF_F_bscpBsnGblStatsConfigArgs_t" brief="Configure Global Statistics Arguments">
+            <descr>
+					This structure defines parameters to configure gathering of global statistics.
+				</descr>
+            <field name="gBsnConfigMask" type="NPF_F_statsConfig_t" 
+				brief="Mask specifies which statistics will be collected.  Also causes counters to be initialized to zero.  See: BSN Managed Global Statistics Mask.">
+            </field>
+        </struct>
+        <struct type="NPF_F_bscpBsnGblStatsGetArgs_t" brief="Get Global BSN Statistics Arguments">
+            <descr>
+					This structure defines parameters to retrieve and reset global statistics.
+				</descr>
+            <field name="gBsnSetMask" type="NPF_uint64_t" brief="Mask specifies which statistics will be reset.  See: BSN Global Statistics Mask.">
+            </field>
+        </struct>
+        <func name="NPF_F_bscpBsnGblStatsConf" type="NPF_error_t" 
+            brief="Set MTU for the interface" xdrid="RPC_BSN_GBL_STATS_CONF">
+            <descr>This function configures global statistics collected by the BSN layer.
+            </descr>
+            <param io="in" type="NPF_callbackHandle_t" name="cbHandle" xdr="no">
+                <descr> Identifies the callback function which should be 
+                    called.</descr>
+            </param>
+            <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                <descr> A unique application invocation context that will be 
+                    supplied to the asynchronous completion callback 
+                    routine.</descr>
+            </param>
+            <param io="in" type="NPF_errorReporting_t" name="errorReporting" 
+                xdr="no">
+                <descr> Defines whether a callback will be called after 
+                    completing the action requested by the function 
+                    call.</descr>
+            </param>
+            <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                <descr> Identifies the forwarding element where the action will 
+                    be executed.</descr>
+            </param>
+            <param io="in" type="NPF_F_bscpBsnGblStatsConfigArgs_t *" name="statsConfigArgs">
+                <descr>
+						BSN Statistics Config Arguments
+					</descr>
+            </param>
+            <return>
+                <descr> Error code indicating if function call was successful. 
+                    </descr>
+                <retval name="NPF_NO_ERROR">
+                    <descr> The operation is in progress. </descr>
+                </retval>
+                <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                    <descr> The callback handle is invalid. </descr>
+                </retval>
+                <retval name="NPF_E_UNKNOWN">
+                    <descr> The operation cannot be completed successfully 
+                        because of problems encountered when handling the input 
+                        parameters. </descr>
+                </retval>
+            </return>
+            <callback>
+                <descr> If errorReporting is set to ALWAYS, a callback is 
+                    invoked to indicate that the operation has been completed. 
+                    </descr>
+                <retval name="NPF_NO_ERROR" 
+                    brief="Operation completed successfully.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_NO_RES" 
+                    brief="Resources exhausted.">
+                </retval>
+            </callback>
+        </func>
+        <func name="NPF_F_bscpBsnGblStatsGet" type="NPF_error_t" 
+            brief="Set MTU for the interface" xdrid="RPC_BSN_GBL_STATS_GET">
+            <descr>This function reads global statistics collected by the BSN layer.
+            </descr>
+            <param io="in" type="NPF_callbackHandle_t" name="cbHandle" xdr="no">
+                <descr> Identifies the callback function which should be 
+                    called.</descr>
+            </param>
+            <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                <descr> A unique application invocation context that will be 
+                    supplied to the asynchronous completion callback 
+                    routine.</descr>
+            </param>
+            <param io="in" type="NPF_errorReporting_t" name="errorReporting" 
+                xdr="no">
+                <descr> Defines whether a callback will be called after 
+                    completing the action requested by the function 
+                    call.</descr>
+            </param>
+            <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                <descr> Identifies the forwarding element where the action will 
+                    be executed.</descr>
+            </param>
+            <param io="in" type="NPF_F_bscpBsnGblStatsGetArgs_t *" name="statsGetArgs">
+                <descr>
+						BSN Statistics Config Arguments
+					</descr>
+            </param>
+            <return>
+                <descr> Error code indicating if function call was successful. 
+                    </descr>
+                <retval name="NPF_NO_ERROR">
+                    <descr> The operation is in progress. </descr>
+                </retval>
+                <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                    <descr> The callback handle is invalid. </descr>
+                </retval>
+                <retval name="NPF_E_UNKNOWN">
+                    <descr> The operation cannot be completed successfully 
+                        because of problems encountered when handling the input 
+                        parameters. </descr>
+                </retval>
+            </return>
+            <callback>
+                <descr> If errorReporting is set to ALWAYS, a callback is 
+                    invoked to indicate that the operation has been completed. 
+                    </descr>
+                <retval name="NPF_NO_ERROR" 
+                    brief="Operation completed successfully.">
+                </retval>
+                <retval name="NPF_F_BSCP_BSN_ERROR_NO_RES" 
+                    brief="Resources exhausted.">
+                </retval>
+            </callback>
+        </func>
+    </section>
+    <section name="Callbacks">
+        <enum type="NPF_F_bscpBsnErrorType_t" name="e5" brief="BSN Error Type.">
+            <descr> Defines the BSN specific error types. This data type is 
+                used to indicate the status of the operation and possible error 
+                type that occurred while processing an asynchronous operation. 
+                </descr>
+            <field name="NPF_F_BSCP_BSN_ERROR_NO_ERROR" value="NPF_NO_ERROR" 
+                brief="The operation completed successfully.">
+            </field>
+            <field name="NPF_F_BSCP_BSN_ERROR_OBJ_EXISTS" 
+                value="NPF_F_BSCP_BSN_BASE_ERR" 
+                brief="BSN object creation failed since the requested object already exists.">
+            </field>
+            <field name="NPF_F_BSCP_BSN_ERROR_NO_RES" 
+                brief="The operation failed since there are no free resources (for example memory).">
+            </field>
+            <field name="NPF_F_BSCP_BSN_ERROR_INVALID_PARAMS" 
+                brief="The operation failed since the specified parameters are invalid.">
+            </field>
+            <field name="NPF_F_BSCP_BSN_ERROR_OBJ_NONEXISTANT" 
+                brief="The operation on the BSN object failed since the object does not exist.">
+            </field>
+            <field name="NPF_F_BSCP_BSN_ERROR_OPERATION_IN_PROGRESS" 
+                brief="The operation is already pending.">
+            </field>
+            <field name="NPF_F_BSCP_BSN_ERROR_IP_ADDRESS_NOT_SET" 
+                brief="IP address for the ASN interface not assigned.">
+            </field>
+        </enum>
+        <enum type="NPF_F_bscpBsnCallbackType_t" name="e1" 
+            brief="BSN Callback Type.">
+            <descr> Used to identify which FAPI call triggered the callback 
+                being invoked. The user then de-multiplexes this type to 
+                identify which routine should handle the callback. </descr>
+            <field name="NPF_F_BSCP_BSN_CALLBACK_TUNNEL_ADD" 
+                brief="Callback after NPF_F_bscpBsnTunnelAdd.">
+            </field>
+            <field name="NPF_F_BSCP_BSN_CALLBACK_TUNNEL_CHG" 
+                brief="Callback after NPF_F_bscpBsnTunnelChg.">
+            </field>
+            <field name="NPF_F_BSCP_BSN_CALLBACK_TUNNEL_DEL" 
+                brief="Callback after NPF_F_bscpBsnTunnelDel.">
+            </field>
+            <field name="NPF_F_BSCP_BSN_CALLBACK_IP_ADDRESS_SET" 
+                brief="Callback after NPF_F_bscpBsnIpAddressSet.">
+            </field>
+            <!-- 
+             <field name="NPF_F_BSCP_BSN_CALLBACK_SET_DEFAULT_ROUTE" 
+                 brief="Callback after NPF_F_bscpBsnSetDefaultRoute.">
+            </field>
+            <field
+            name="NPF_F_BSCP_BSN_CALLBACK_GET_IP_ADDRESS"  brief="Callback after
+            NPF_F_bscpBsnSGetIpAddress.">
+            </field> 
+            -->
+            <field name="NPF_F_BSCP_BSN_CALLBACK_IP_MTU_SET" 
+                brief="Callback after NPF_F_bscpBsnMtuSet.">
+            </field>
+            <field name="NPF_F_BSCP_BSN_GBL_STATS_CONF" 
+                brief="Callback after NPF_F_bscpBsnGblStatsConf.">
+            </field>
+            <field name="NPF_F_BSCP_BSN_GBL_STATS_GET" 
+                brief="Callback after NPF_F_bscpBsnGblStatsGET.">
+            </field>
+        </enum>
+        <struct type="NPF_F_bscpBsnAsyncResponse_t" 
+            brief="BSN Asynchronous FAPI Call Response.">
+            <descr> This data structure contains results of an asynchronous 
+                FAPI operation. </descr>
+            <field type="NPF_F_bscpBsnErrorType_t" name="error" 
+                brief="Operation results.">
+            </field>
+            <selectunion type="NPF_F_bscpBsnAsyncRespDataUnion_t" name="u">
+                <selectfield type="NPF_F_bscpBsnCallbackType_t" name="type" 
+                    brief="Response data type.">
+                </selectfield>
+                <field type="NPF_F_bscpBsnTunnelId_t" name="tunnelId" 
+                    brief="ID of the created tunnel">
+                    <descr>
+                    </descr>
+                    <selector>NPF_F_BSCP_BSN_CALLBACK_TUNNEL_ADD</selector>
+                </field>
+                <field type="NPF_F_bscpBsnGblStats_t" name="gblStats" 
+                    brief="Global BSN statistics">
+                    <descr>
+                    </descr>
+                    <selector>NPF_F_BSCP_BSN_GBL_STATS_GET</selector>
+                </field>
+                <field type="NPF_uint32_t" name="unusedResp" 
+                    brief="Unused variable, associated with all callbacks not returning any value.">
+                    <descr>
+                    </descr>
+                    <selector>NPF_F_BSCP_BSN_CALLBACK_IP_ADDRESS_SET</selector>
+                    <selector>NPF_F_BSCP_BSN_CALLBACK_TUNNEL_CHG</selector>
+                    <selector>NPF_F_BSCP_BSN_CALLBACK_TUNNEL_DEL</selector>
+                    <selector>NPF_F_BSCP_BSN_CALLBACK_IP_MTU_SET</selector>
+                    <selector>NPF_F_BSCP_BSN_GBL_STATS_CONF</selector>
+                </field>
+            </selectunion>
+        </struct>
+        <struct type="NPF_F_bscpBsnCallbackData_t" 
+            brief="BSN request callback data">
+            <descr> The data structure contains asynchronous operation results 
+                passed to FAPI clients using callbacks. The callback function 
+                receives this structure containing one or more asynchronous 
+                responses from a single function call. There is one element for 
+                each completed request, regardless of whether they were 
+                successful: the resp array contains respNum pointers to 
+                structures of the type NPF_F_bscpBsnAsyncResponse_t. Callback 
+                function invocations are repeated until all requests are 
+                complete. Responses are not repeated for request elements 
+                already indicated as complete in earlier callback function 
+                invocations. </descr>
+            <field type="NPF_F_bscpBsnCallbackType_t" name="type" 
+                brief="Asynchronous procedure type.">
+            </field>
+            <field type="NPF_boolean_t" name="allOK" 
+                brief="TRUE if all requests completed OK.">
+            </field>
+            <vector name="respArray" type="NPF_F_bscpBsnAsyncResponse_t">
+                <descr> Array of response structures containing respNum 
+                    entries. </descr>
+                <length type="NPF_uint32_t" name="respNum" 
+                    brief="Number of responses in respArray.">
+                </length>
+            </vector>
+        </struct>
+        <functype name="NPF_F_bscpBsnRequestCallback_t" type="void" 
+            class="callback">
+            <descr> Request Callback Prototype. This function is used for 
+                handling request confirmation notifications. The callback 
+                function is for the application to register a request 
+                confirmation notifications handling routine to the BSN BSCP
+                FAPI implementation. It is intended to be implemented by the 
+                application, and to be registered to the BSN BSCP FAPI 
+                implementation through the NPF_F_bscpBsnCallbackRegister 
+                function. </descr>
+            <param io="in" type="NPF_userContext_t" name="context">
+                <descr> The context item that was supplied by the application 
+                    when the FAPI function call was invoked. </descr>
+            </param>
+            <param io="in" type="NPF_correlator_t" name="correlator">
+                <descr> A unique application invocation context that was 
+                    supplied during calling a function call. </descr>
+            </param>
+            <param io="in" type="NPF_F_bscpBsnCallbackData_t" name="data">
+                <descr> The callback notification data. </descr>
+            </param>
+        </functype>
+        <func type="NPF_error_t" name="NPF_F_bscpBsnRegisterCallback" 
+            class="cback_register">
+            <descr> Request Callback Registration. This function is used to 
+                register a status callback notification handler to receive 
+                callback notifications of BSN BSCP requests. This function 
+                operates in a synchronous manner. The function allows the 
+                application to register a completion callback function for the 
+                related callback category, and to associate a unique callback 
+                handle and application context. Upper layers can register 
+                multiple callback functions using this function. The callback 
+                function is identified by a userContext and requestCallbackFunc 
+                pair. For each pair, a unique callbackHandle is assigned for 
+                future reference. Because the callback function is identified 
+                by both userContext and requestCallbackFunc, duplicate 
+                registration of the same callback function with a different 
+                userContext is allowed. Also, the same userContext can be 
+                shared among different callback functions. Duplicate 
+                registration of the same pair of userContext and 
+                requestCallbackFunc has no effect; it will output a handle that 
+                is already assigned to the pair and return 
+                NPF_E_ALREADY_REGISTERED. </descr>
+            <param io="in" type="NPF_userContext_t" name="userContext">
+                <descr> The context item provided to the request callback 
+                    routine when it is invoked. </descr>
+            </param>
+            <param io="in" type="NPF_F_bscpBsnRequestCallback_t" 
+                name="callbackFunc">
+                <descr> The function pointer to the notification callback 
+                    function to be called for events. </descr>
+            </param>
+            <param io="out" type="NPF_callbackHandle_t*" name="callbackHandle">
+                <descr> A unique identifier related to this registration. 
+                    </descr>
+            </param>
+            <return>
+                <descr>Error code indicating function success.</descr>
+                <retval name="NPF_NO_ERROR">
+                    <descr>The registration completed successfully.</descr>
+                </retval>
+                <retval name="NPF_E_BAD_CALLBACK_FUNCTION">
+                    <descr> The registration was invoked with a function 
+                        pointer parameter that was invalid. </descr>
+                </retval>
+                <retval name="NPF_E_CALLBACK_ALREADY_REGISTERED">
+                    <descr> The registration was invoked with a pair composed 
+                        of a function pointer and a user context which was 
+                        previously used for an identical registration. </descr>
+                </retval>
+                <retval name="NPF_E_UNKNOWN">
+                    <descr>Used to indicate other errors not listed 
+                        above.</descr>
+                </retval>
+            </return>
+        </func>
+        <func type="NPF_error_t" name="NPF_F_bscpBsnDeregisterCallback" 
+            xdrid="RPC_BSN_REQ_DEREG" class="cback_deregister">
+            <descr> Request Callback De-registration. This function is used to 
+                deregister a request callback handler, which was previously 
+                registered to receive callback notifications of BSN BSCP 
+                request statuses. It may be invoked by any application no 
+                longer interested in receiving status notifications. Note: This 
+                function operates in a synchronous manner. There may be a 
+                timing window where outstanding callback continue to be 
+                delivered to the callback routine after the de-registration 
+                function has been invoked. It is the responsibility of 
+                implementation to guarantee that the request callback function 
+                is not called after the deregister function has returned. 
+                </descr>
+            <param io="in" type="NPF_callbackHandle_t" name="callbackHandle">
+                <descr> The unique identifier returned to the application when 
+                    the request callback routine was registered. </descr>
+            </param>
+            <return>
+                <descr> Error code indicating function success. </descr>
+                <retval name="NPF_NO_ERROR">
+                    <descr> The operation completed successfully. </descr>
+                </retval>
+                <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                    <descr> A function was invoked with a callback handle that 
+                        did not correspond to a valid NPF callback handle as 
+                        returned by a registration function. </descr>
+                </retval>
+                <retval name="NPF_E_UNKNOWN">
+                    <descr> Indicates other errors. </descr>
+                </retval>
+            </return>
+        </func>
+    </section>
+    <section name="Events">
+        <enum type="NPF_F_bscpBsnDhcpResult_t" name="e1" 
+            brief="Results of IP assignment using DHCP.">
+            <descr> Used to inform controling application whether new IP 
+                address was assigned by DHCP and remain valid. </descr>
+            <field name="NPF_F_BSCP_BSN_NEW_IP_ADDRESS" 
+                brief="New IP address assigned via DHCP">
+            </field>
+            <field name="NPF_F_BSCP_BSN_DHCP_REQUEST_TIMEOUT" 
+                brief="DHCP request time-outed">
+            </field>
+            <field name="NPF_F_BSCP_BSN_ADDRESS_EXPIRED" 
+                brief="Already assigned IP address expired and the new one not assigned">
+            </field>
+        </enum>
+        <struct type="NPF_F_bscpBsnAddressAssigmentRes_t" 
+            brief="IP parameters of the interface.">
+            <descr> This data structure contains result of last DHCP event 
+                changing status of IP interface. </descr>
+            <field name="result" type="NPF_F_bscpBsnDhcpResult_t" 
+                brief="Result of DHCP client request">
+            </field>
+            <field name="ipParams" type="NPF_F_bscpBsnIpParams_t" 
+                brief=" Assigned parameters for IP interface
+                 (valid only when result is NPF_F_BSCP_BSN_NEW_IP_ADDRESS)">
+            </field>
+            <field name="LeaseTime" type="NPF_uint32_t" 
+                brief=" LeaseTime
+                 (valid only when result is NPF_F_BSCP_BSN_NEW_IP_ADDRESS)">
+            </field>
+        </struct>
+        <struct type="NPF_F_bscpBsnMtuChangeRes_t" 
+            brief="Changed MTU for a given path">
+            <descr> This data structure contains result of the recieved PathMTU 
+                discovery message (ICMP message last DHCP event (ICMP message 
+                type:3 code:4 recieved). </descr>
+            <field name="remoteAddr" type="NPF_IPv4Address_t" 
+                brief="IP address of the remote tunnel end of the path.">
+            </field>
+            <field name="tos" type="NPF_uint8_t" 
+            brief="TOS used for packets transmitted on this path.">
+            </field>
+            <field name="mtu" type="NPF_uint16_t" 
+                brief="New MTU used for this path.">
+            </field>
+        </struct>
+        <enum type="NPF_F_bscpBsnEventType_t" name="e6" brief="BSN Events.">
+            <descr> Defines the BSN events. This data type is used to indicate 
+                the type of event triggered by the BDN. </descr>
+            <field name="NPF_F_BSCP_BSN_DHCP_EVENT" 
+                brief="New IP address assigned for the BS via DHCP or DHCP request time-outed.">
+            </field>
+            <field name="NPF_F_BSCP_BSN_MTU_CHANGE_EVENT" 
+                brief="MTU change raported using Path MTU discovery.">
+            </field>
+        </enum>
+        <struct type="NPF_F_bscpBsnEventData_t" brief="BSN event data">
+            <descr> This data structure is used to pass information associated 
+                with an event </descr>
+            <selectunion type="NPF_F_bscpBsnEvent_t" name="eventData">
+                <selectfield type="NPF_F_bscpBsnEventType_t" name="eventType" 
+                    brief="Event data type." />
+                <field type="NPF_F_bscpBsnAddressAssigmentRes_t" 
+                    name="dhcpEvent">
+                    <descr fixed="no">Result of DHCP client activity - new IP 
+                        address was assigned or lost.</descr>
+                    <selector default="no">NPF_F_BSCP_BSN_DHCP_EVENT</selector>
+                </field>
+                <field type="NPF_F_bscpBsnMtuChangeRes_t" name="pmtuEvent">
+                    <descr fixed="no">MTU for a given destination address and 
+                        TOS combination changed.</descr>
+                    <selector default="no">
+                        NPF_F_BSCP_BSN_MTU_CHANGE_EVENT</selector>
+                </field>
+            </selectunion>
+        </struct>
+        <struct type="NPF_F_bscpBsnEventArray_t" name="" 
+            brief="Event data array">
+            <descr fixed="no">This data structure allows for passing a number 
+                of events to the Control Plane in one FAPI call.</descr>
+            <field type="NPF_uint32_t" name="eventNum" 
+                brief="Number of events in the array." />
+            <field type="NPF_F_bscpBsnEventData_t*" name="eventArray" 
+                brief="Pointer to the array of events." />
+        </struct>
+        <functype name="NPF_F_bscpBsnEventCallback_t" type="void" class="event" 
+            brief="Event Callback Prototype">
+            <descr fixed="no">This function is used to handle various 
+                unsolicited events generated by the BSN. It is intended to be 
+                implemented by the BSCP BSN FAPI Client application, and to be 
+                registered to the BSCP BSN FAPI implementation through the 
+                NPF_F_bscpBsnEventRegister function.</descr>
+            <param io="in" type="NPF_userContext_t" name="context" 
+                class="simple" xdr="yes">
+                <descr fixed="no">The context item that was supplied by the 
+                    application when the event callback routine was 
+                    registered.</descr>
+            </param>
+            <param io="in" type="NPF_F_bscpBsnEventArray_t" name="eventArray" 
+                class="simple" xdr="yes">
+                <descr fixed="no">A data structure containing the event 
+                    data.</descr>
+            </param>
+        </functype>
+        <func type="NPF_error_t" name="NPF_F_bscpBsnEventRegister" 
+            xdrid="RPC_BSN_EVENT_REG" class="event_register" 
+            brief="Event Callback Registration." impl="yes">
+            <descr fixed="no">This function is used to register an event 
+                handler to receive notifications of BSN layer events.
+                This function operates in a synchronous manner.</descr>
+            <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no" 
+                class="simple">
+                <descr fixed="no">Forwarding Element handle.</descr>
+            </param>
+            <param io="in" type="NPF_userContext_t" name="userContext" xdr="no" 
+                class="simple">
+                <descr fixed="no">The context item provided to the event 
+                    callback routine when it is invoked.</descr>
+            </param>
+            <param io="in" type="NPF_F_bscpBsnEventCallback_t" 
+                name="eventCallFunc" xdr="no" class="simple">
+                <descr fixed="no">The function pointer to the event callback 
+                    function to be called for events.</descr>
+            </param>
+            <param io="out" type="NPF_callbackHandle_t*" name="callbackHandle" 
+                xdr="no" class="simple">
+                <descr fixed="no">A unique identifier related to this 
+                    registration.</descr>
+            </param>
+            <return>
+                <descr fixed="no">Error code indicating function 
+                    success.</descr>
+                <retval name="NPF_NO_ERROR">
+                    <descr fixed="no">The registration completed 
+                        successfully.</descr>
+                </retval>
+                <retval name="NPF_E_BAD_CALLBACK_FUNCTION">
+                    <descr fixed="no">The registration was invoked with a 
+                        function pointer parameter that was invalid.</descr>
+                </retval>
+                <retval name="NPF_E_CALLBACK_ALREADY_REGISTERED">
+                    <descr fixed="no">The registration was invoked with a pair 
+                        composed of a function pointer and a user context which 
+                        was previously used for an identical 
+                        registration.</descr>
+                </retval>
+                <retval name="NPF_E_UNKNOWN">
+                    <descr fixed="no">Used to indicate other errors not listed 
+                        above.</descr>
+                </retval>
+            </return>
+        </func>
+        <func type="NPF_error_t" name="NPF_F_bscpBsnEventDeregister" 
+            xdrid="RPC_BSN_EVENT_DEREG" class="event_deregister">
+            <descr fixed="no">Event Callback De-registration. This function is 
+                used to deregister an event handler, which was previously 
+                registered to receive notifications of BSN events. 
+                It may be invoked by any application no longer 
+                interested in receiving status events. Note: This function 
+                operates in a synchronous manner. There may be a timing window 
+                where outstanding events continue to be delivered to the event 
+                routine after the de-registration function has been invoked. It 
+                is the responsibility of implementation to guarantee that the 
+                event function is not called after the deregister function has 
+                returned.</descr>
+            <param io="in" type="NPF_callbackHandle_t" name="callbackHandle" 
+                xdr="no" class="simple">
+                <descr fixed="no">The unique identifier returned to the 
+                    application when the event callback routine was 
+                    registered.</descr>
+            </param>
+            <return>
+                <descr fixed="no">Error code indicating function 
+                    success.</descr>
+                <retval name="NPF_NO_ERROR">
+                    <descr fixed="no">The operation completed 
+                        successfully.</descr>
+                </retval>
+                <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                    <descr fixed="no">A function was invoked with a callback 
+                        handle that did not correspond to a valid NPF callback 
+                        handle as returned by a registration function.</descr>
+                </retval>
+                <retval name="NPF_E_UNKNOWN">
+                    <descr fixed="no">Indicates other errors.</descr>
+                </retval>
+            </return>
+        </func>
+    </section>
+</api>
+

@@ -1,0 +1,71 @@
+<!DOCTYPE api SYSTEM "../xmlfapi.dtd">
+<api name='npf_f_stats'>
+<preamble>
+  INTEL CONFIDENTIAL
+
+  Copyright 2000 - 2003 Intel Corporation All Rights Reserved.
+
+  The source code contained or described herein and all documents related to
+  the source code ("Material") are owned by Intel Corporation or its
+  suppliers or licensors.
+
+  Title to the Material remains with Intel Corporation or its suppliers and
+  licensors. The Material contains trade secrets and proprietary and
+  confidential information of Intel or its suppliers and licensors.
+  The Material is protected by worldwide copyright and trade secret laws and
+  treaty provisions. No part of the Material may be used, copied, reproduced,
+  modified, published, uploaded, posted, transmitted, distributed,
+  or disclosed in any way without Intel's prior express written permission.
+
+  No license under any patent, copyright, trade secret or other intellectual
+  property right is granted to or conferred upon you by disclosure
+  or delivery of the Materials, either expressly, by implication, inducement,
+  estoppel or otherwise. Any license under such intellectual property rights
+  must be express and approved by Intel in writing.
+</preamble>
+
+<imports>
+<import>npf</import>
+</imports>
+
+<section name='Data Types Reference'>
+<section name='Statistics'>
+
+<define>
+<descr>
+All Statistics Reset Mask.
+Use it to reset all statistics.
+</descr>
+<field name='NPF_F_STATS_RESET_ALL'><value>0xffffffffffffffff</value></field>
+</define>
+
+
+<struct type='NPF_F_statsConfig_t' brief='Statistics Configuration'>
+<descr>
+This structure lists statistics that should be added to the counted statistics
+pool, statistics that should be deleted from the counted statistics pool,
+and statistics that should be reset. All operations are provided
+in the form of a bitmask with each bit in a bitmask representing one supported statistic.
+The first statistic in a "read statistics value" structure is represented
+by the first LSB. Bits that do not have a corresponding statistic are not analyzed.
+Particular statistics can have only one operation executed upon it. A bit
+can be set either in an "add" bitmask or a "delete" or "reset" bitmask. Operation
+that does not change the state of a statistic is skipped (e.g., adding a statistic
+that is already in the counted statistics pool).
+</descr>
+<field type='NPF_uint64_t' name='addMask'>
+<descr>Bit mask of statistics to be added.</descr>
+</field>
+<field type='NPF_uint64_t' name='deleteMask'>
+<descr>Bit mask of statistics to be deleted.</descr>
+</field>
+<field type='NPF_uint64_t' name='resetMask'>
+<descr>Bit mask of statistics to be reset.</descr>
+</field>
+</struct>
+
+</section>
+
+</section>
+
+</api>

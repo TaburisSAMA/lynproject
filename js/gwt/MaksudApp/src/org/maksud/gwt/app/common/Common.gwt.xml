@@ -1,0 +1,4 @@
+<module>
+	<inherits name='com.extjs.gxt.ui.GXT' />
+	<entry-point class="org.maksud.gwt.app.common.client.Common"/>
+</module>

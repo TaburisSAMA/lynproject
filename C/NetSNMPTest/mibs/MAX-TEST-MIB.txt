@@ -1,0 +1,43 @@
+MAX-TEST-MIB DEFINITIONS ::= BEGIN
+                                    
+  IMPORTS
+        MODULE-IDENTITY,
+        OBJECT-TYPE,
+        NOTIFICATION-TYPE,
+        Unsigned32, Integer32
+                FROM SNMPv2-SMI
+        SnmpAdminString
+                FROM SNMP-FRAMEWORK-MIB
+        TEXTUAL-CONVENTION,
+        RowStatus, TruthValue,
+        TimeStamp, DateAndTime        
+                FROM SNMPv2-TC
+        InetAddressType, InetAddress
+                FROM INET-ADDRESS-MIB
+        OBJECT-GROUP,
+        MODULE-COMPLIANCE,
+        NOTIFICATION-GROUP
+                FROM SNMPv2-CONF;
+
+maxTestMib MODULE-IDENTITY
+        LAST-UPDATED    "200508020000Z" -- August 02, 2005
+        ORGANIZATION    "IEEE 802.16"
+        CONTACT-INFO
+             "Editor:    Maksudul Alam
+             Postal:    Commlink Info Tech"
+        DESCRIPTION
+                        "Its a test mib"
+        REVISION        "200508020000Z"
+        DESCRIPTION
+            "The first version of MAX-TEST-MIB module."
+        ::= {iso std(0) iso8802(8802) wman(16) 3 }
+        
+wmanTestDataHolder OBJECT-TYPE
+        SYNTAX      INTEGER
+        MAX-ACCESS  read-write
+        STATUS      current
+        DESCRIPTION
+            "This value is a test field."
+        ::= { maxTestMib 1 }
+
+END

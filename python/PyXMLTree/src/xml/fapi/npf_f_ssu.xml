@@ -1,0 +1,1159 @@
+<?xml version="1.0"?>
+<api name="npf_f_ssu">
+    
+    <preamble>
+        INTEL CONFIDENTIAL
+        
+        Copyright 2000 - 2006 Intel Corporation All Rights
+        
+        The source code contained or described herein and all documents related to
+        the source code (&quot;Material&quot;) are owned by Intel Corporation or its
+        suppliers or licensors.
+        
+        Title to the Material remains with Intel Corporation or its suppliers and
+        licensors. The Material contains trade secrets and proprietary and
+        confidential information of Intel or its suppliers and licensors.
+        The Material is protected by worldwide copyright and trade secret laws and
+        treaty provisions. No part of the Material may be used, copied, reproduced,
+        modified, published, uploaded, posted, transmitted, distributed,
+        or disclosed in any way without Intel&quot;s prior express written permission.
+        
+        No license under any patent, copyright, trade secret or other intellectual
+        property right is granted to or conferred upon you by disclosure
+        or delivery of the Materials, either expressly, by implication, inducement,
+        estoppel or otherwise. Any license under such intellectual property rights
+        must be express and approved by Intel in writing.
+    </preamble>
+    
+    <imports>
+        <import>npf</import>
+        <import>npf_f_error</import>
+    </imports>
+    
+    <section name="Safe System Upgrade API">
+        
+        <section name="SSU API Data Type Reference">
+            
+            <section name="Software Upgrade">
+                
+                <enum type="NPF_F_ssuImageType_t" brief="Type of upgradeable image">
+                    <descr>
+                        Type of upgradeable software image stored in FLASH.
+                    </descr>
+                    <field name="NPF_F_SSU_BOOTROM" brief="Boot Loader on the network processor (NP)"/>
+                    <field name="NPF_F_SSU_KERNEL" brief="Operating system kernel on the network processor (NP)"/>
+                    <field name="NPF_F_SSU_ROOTFS" brief="Root File System (cramfs) on the network processor (NP)"/>
+                    <field name="NPF_F_SSU_TARGETAPP" brief="Target application (Base Station Sofware) image on the network processor (NP)"/>
+                    <field name="NPF_F_SSU_USERAPP" brief="User application image on the network processor (NP)"/>
+                    <field name="NPF_F_SSU_DIAGS" brief="Diagnostics image"/>
+                    <field name="NPF_F_SSU_NPE_FW" brief="NPE (Network Processing Element) firmware image"/>
+                    <field name="NPF_F_SSU_MMC" brief="MMC (Module Management Controller) firmware image"/>
+                </enum>
+                
+                <enum type="NPF_F_ssuImageState_t" brief="Image state">
+                    <descr>
+                        The blade can store two versions of each image type in local flash.
+                        There is always one active and validated image, while the second
+                        placeholder can be occupied by a new image downloaded for a safe upgrade.
+                        A typical path for a new image to become an active one is:
+                        </descr><descr>
+                        state = NPF_F_SSU_EMPTY               -&gt; action = download new image -&gt;
+                        </descr><descr>
+                        state = NPF_F_SSU_INACTIVE            -&gt; action = mark image for one-shot test -&gt;
+                        </descr><descr>
+                        state = NPF_F_SSU_ONESHOT             -&gt; action = reboot blade -&gt;
+                        </descr><descr>
+                        state = NPF_F_SSU_ONESHOT_RUNNING     -&gt; action = validate current configuration -&gt;
+                        </descr><descr>
+                        state = NPF_F_SSU_ACTIVE
+                        </descr><descr>
+                        See the type's member descriptions for detailed information about the transitions and the error conditons
+                        for each image state.
+                    </descr>
+                    <descr>
+                        Note that the MMC processor does not support dual flash storage. 
+                        There is only a single instance of the MMC image in the device and the only allowed state
+                        for NPF_F_SSU_MMC type is NFP_F_SSU_ACTIVE.
+                    </descr>
+                    <field name="NPF_F_SSU_EMPTY" brief="No image (flash partition empty)">
+                        <descr>
+                            Initial state of the flash partition if no
+                            image is downloaded. The partition also enters this state when image download
+                            fails because of a CRC error.
+                            </descr><descr>
+                            Allowed state transitions from NPF_F_SSU_EMPTY
+                            </descr><descr>
+                            action = successful download of a new image     -&gt; new state = NFP_F_SSU_INACTIVE
+                    </descr></field>
+                    <field name="NPF_F_SSU_INACTIVE" brief="Inactive flash image">
+                        <descr>
+                            Image state after a successful download from remote repository.
+                            An image also reverts to this state after explicit canceling of one-shot test mode
+                            or after system reboot if an image running in one-shot test was not validated.
+                            </descr><descr>
+                            Allowed state transitions from NPF_F_SSU_INACTIVE
+                            </descr><descr>
+                            action = mark image for one-shot test mode    -&gt; new state = NFP_F_SSU_ONESHOT,
+                            </descr><descr>
+                            action = failed attempt to download new image -&gt; new state = NFP_F_SSU_EMPTY,
+                            </descr><descr>
+                            action = successful download of a new image    -&gt; new state = NFP_F_SSU_INACTIVE
+                    </descr></field>
+                    <field name="NPF_F_SSU_ONESHOT" brief="Inactive flash image marked for one-shot test">
+                        <descr>
+                            An inactive image can be marked for one-shot test using SSU FAPI.
+                            Marking for one-shot test does not imply automatic system reboot.
+                            </descr><descr>
+                            Possible state transitions from NPF_F_SSU_ONESHOT
+                            </descr><descr>
+                            action = cancel one-shot test mode using FAPI -&gt; new state = NFP_F_SSU_INACTIVE,
+                            </descr><descr>
+                            action = successful reboot (new image works)  -&gt; new state = NFP_F_SSU_ONESHOT_RUNNING,
+                            </descr><descr>
+                            action = successful reboot (another image loaded) -&gt; new state = NFP_F_SSU_ONESHOT_NOT_RUN,
+                            </descr><descr>
+                            action = failed reboot (watchdog expires)     -&gt; new state = NFP_F_SSU_INACTIVE
+                    </descr></field>
+                    <field name="NPF_F_SSU_ONESHOT_RUNNING" brief="Flash image running in one-shot test mode">
+                        <descr>
+                            State entered by one-shot test image after system reboot.
+                            The running one-shot image must be explicitly validated using FAPI.
+                            Otherwise, it automatically reverts to inactive state after next reboot.
+                            </descr><descr>
+                            Possible state transitions from NPF_F_SSU_ONESHOT_RUNNING
+                            </descr><descr>
+                            action = validate current configuration       -&gt; new state = NFP_F_SSU_ACTIVE_RUNNING,
+                            </descr><descr>
+                            action = reboot without prior validation      -&gt; new state = NFP_F_SSU_INACTIVE
+                    </descr></field>
+                    <field name="NPF_F_SSU_ONESHOT_NOT_RUN" brief="One-shot flash image not running after reboot">
+                        <descr>
+                            State entered by NPF_F_SSU_TARGET image if it was marked for one-shot test before reboot,
+                            but it has not been selected for running after reboot. This may happen if after reboot
+                            Boot Agent is instructed to download another target image from network repository.
+                            A target image in this state can be validated same as if it was NPF_F_SSU_ONESHOT_RUNNING.
+                            If not validated, it automatically  reverts to inactive state after next reboot.
+                            </descr><descr>
+                            Possible state transitions from NPF_F_SSU_ONESHOT_NOT_RUN
+                            </descr><descr>
+                            action = validate current configuration       -&gt; new state = NFP_F_SSU_ACTIVE,
+                            </descr><descr>
+                            action = reboot without prior validation      -&gt; new state = NFP_F_SSU_INACTIVE
+                    </descr></field>
+                    <field name="NPF_F_SSU_ACTIVE" brief="Active flash image">
+                        <descr>
+                            A validated image stored in flash, but not currently running.
+                            An active flash image should not  be running when a remote image
+                            is loaded (NPF_F_SSU_REMOTE_RUNNING) or if the second image
+                            is tested in one-shot mode (NPF_F_SSU_ONESHOT_RUNNING).
+                            The only way to leave this state is to validate the second image.
+                            The active image cannot be overridden, nor marked for one-shot mode.
+                            </descr><descr>
+                            Possible state transitions from NPF_F_SSU_ACTIVE
+                            </descr><descr>
+                            action = validate the other image             -&gt; new state = NFP_F_SSU_INACTIVE,
+                            </descr><descr>
+                            action = reboot without validating the other image -&gt; new state = NFP_F_SSU_ACTIVE_RUNNING
+                    </descr></field>
+                    <field name="NPF_F_SSU_ACTIVE_RUNNING" brief="Active flash image running">
+                        <descr>
+                            Validated image stored in local flash and currently running.
+                            No SSU operations are allowed during this state. An image may
+                            leave this state and enter NPF_F_SSU_ACTIVE after system reboot,
+                            if another image is selected to run (one-shot test or remote).
+                            </descr><descr>
+                            Possible state transitions from NPF_F_SSU_ACTIVE_RUNNING
+                            </descr><descr>
+                            action = reboot and select one-shot or remote image for running
+                            -&gt; new state = NFP_F_SSU_ACTIVE,
+                    </descr></field>
+                    <field name="NPF_F_SSU_NOT_PRESENT" brief="Image not present">
+                        <descr>
+                            This state means that the backup partition cannot be found on FLASH at all. This state
+                            of the image indicates serious system problem and requires local administrator intervention
+                            in the boot loader configuration menu. No state transitions are allowed in this state.
+                            Also remote image upgrade in not allowed in this situation.
+                    </descr></field>
+                </enum>
+                
+                <enum type="NPF_F_ssuImageAction_t" brief="Image action">
+                    <descr>
+                        Actions to set/cancel one-shot test mode using SSU FAPI.
+                    </descr>
+                    <see>NPF_F_ssuImageStateChange()</see>
+                    <field name="NPF_F_SSU_ACTION_ONESHOT_SET" brief="Mark inactive image for one-shot test"/>
+                    <field name="NPF_F_SSU_ACTION_ONESHOT_CANCEL" brief="Revert image state from one-shot test to inactive"/>
+                </enum>
+                
+                <struct type="NPF_F_ssuImageInfo_t" brief="Image information record">
+                    <descr>
+                        Information about the image stored in local flash and/or currently running.
+                        For images stored in flash, the image version/description strings
+                        are same as those in cramfs files when the image was downloaded.
+                        </descr><descr>
+                        cfgReq field is currently used for Kernel image type only. It shows kernel configuration
+                        parameters stored in a non-volatile memory.
+                    </descr>
+                    <see>NPF_F_ssuImageInfoGet()</see>
+                    <see>NPF_F_ssuCfgRecSet()</see>
+                    <field type="NPF_F_ssuImageType_t" name="type" brief="Image type"/>
+                    <field type="NPF_F_ssuImageState_t" name="state" brief="Image state"/>
+                    <vector type="NPF_char8_t" name="ver" brief="Image version data">
+                        <length type="NPF_uint32_t" name="verLen" brief="Length of image version data"/>
+                    </vector>
+                    <vector type="NPF_char8_t" name="descr" brief="Image description string">
+                        <length type="NPF_uint32_t" name="descrLen" brief="Length of image description string"/>
+                    </vector>
+                    <vector type="NPF_char8_t" name="cfgRec" brief="Configuration string">
+                        <length type="NPF_uint32_t" name="cfgRecLen" brief="Length of configuration string"/>
+                    </vector>
+                </struct>
+                
+                <struct type="NPF_F_ssuImageInfoArray_t" brief="Image Info Array">
+                    <descr>
+                        An array of image information structures.
+                        The array is returned in a callback to NPF_F_ssuImageInfoGet() function.
+                    </descr>
+                    <see>NPF_F_ssuImageInfoGet()</see>
+                    <vector type="NPF_F_ssuImageInfo_t" name="infoArray" brief="Image Info Array">
+                        <length type="NPF_uint32_t" name="arrayLen" brief="Length of image info array"/>
+                    </vector>
+                </struct>
+                
+                <enum type="NPF_F_ssuProtocol_t" brief="Image transfer protocol">
+                    <descr>
+                        Transfer protocol used to download new image from a remote network repository.
+                    </descr>
+                    <field name="NPF_F_SSU_PROTO_NFS" brief="Use NFS to download new image"/>
+                    <field name="NPF_F_SSU_PROTO_TFTP" brief="Use TFTP to download new image"/>
+                </enum>
+                
+                <struct type="NPF_F_ssuImageLocation_t" brief="Location of a new image">
+                    <descr>
+                        The structure specifies location of the new image file
+                        and a transport protocol. The structure is supplied to NPF_F_ssuImageUpgrade()
+                        to download a new image from a remote repository to the local flash.
+                        The image file includes an image header with version
+                        and description strings. Once the image is stored in flash,
+                        this information can be retrieved by calling NPF_F_ssuImageInfoGet().
+                    </descr>
+                    <see>NPF_F_ssuImageUpgrade()</see>
+                    <field type="NPF_F_ssuImageType_t" name="type" brief="Image type"/>
+                    <field type="NPF_F_ssuProtocol_t" name="protocol" brief="Transport protocol to download image"/>
+                    <field type="NPF_IPv4Address_t" name="repAddr" brief="IP address of image repository server"/>
+                    <vector type="NPF_char8_t" name="repPath" brief="Path in remote repository">
+                        <length type="NPF_uint32_t" name="repPathLen" brief="Length of path string"/>
+                    </vector>
+                </struct>
+                
+                <struct type="NPF_F_ssuImageTransition_t" brief="Image state transition">
+                    <descr>
+                        The structure is used to manage image state transitions between
+                        NPF_F_SSU_INACTIVE and NPF_F_SSU_ONESHOT.
+                    </descr>
+                    <see>NPF_F_ssuImageStateChange()</see>
+                    <field type="NPF_F_ssuImageType_t" name="type" brief="Image to be affected"/>
+                    <field type="NPF_F_ssuImageAction_t" name="action" brief="Action to be performed"/>
+                </struct>
+                
+                <enum type="NPF_F_ssuProcessor_t" brief="Processor type">
+                    <descr>
+                        Type of processor that stores upgradeable software image(s):
+                        Network Processor (NP) or Module Management Controller (MMC).
+                        This data type is used to indicate which processor should be rebooted.
+                    </descr>
+                    <see>NPF_F_ssuReboot()</see>
+                    <field name="NPF_F_SSU_PROC_NP" brief="Network Processor"/>
+                    <field name="NPF_F_SSU_PROC_MMC" brief="Module Management Controller"/>
+                    <field name="NPF_F_SSU_PROC_ALL" brief="All processors (reset whole board)"/>
+                </enum>
+                
+                <struct type="NPF_F_ssuCfgRec_t" brief="Configuration record">
+                    <descr>
+                        Configuration data to be used when starting image of given type.
+                    </descr>
+                    <see>NPF_F_ssuImageInfoGet()</see>
+                    <see>NPF_F_ssuCfgRecSet()</see>
+                    <field type="NPF_F_ssuImageType_t" name="type" brief="Image type"/>
+                    <vector type="NPF_char8_t" name="cfgRec" brief="Configuration string">
+                        <length type="NPF_uint32_t" name="cfgRecLen" brief="Length of configuration string"/>
+                    </vector>
+                </struct>
+            </section>
+            
+            <section name="Completion Callbacks">
+                
+                <enum type="NPF_F_ssuErrorCode_t" brief="SSU Agent Error Codes">
+                    <descr>
+                        This data type is used to indicate the presence and type of an error
+                        that has occurred while processing an asynchronous operation.
+                    </descr>
+                    <field name="NPF_F_SSU_NO_ERROR" value="NPF_NO_ERROR">
+                        <descr>The operation completed successfully.</descr>
+                    </field>
+                    <field name="NPF_F_SSU_NO_RESOURCES" value="NPF_F_NO_RESOURCE">
+                        <descr>The image could not be downloaded due to lack of resources.</descr>
+                    </field>
+                    <field name="NPF_F_SSU_REP_NOT_FOUND" value="NPF_F_SSU_BASE_ERR">
+                        <descr>The IPv4 address of a repository server cannot be reached.</descr>
+                    </field>
+                    <field name="NPF_F_SSU_PATH_NOT_FOUND">
+                        <descr>Cannot find the image at the repository server.</descr>
+                    </field>
+                    <field name="NPF_F_SSU_IMAGE_CRC_ERROR">
+                        <descr>CRC error encountered while downloading the image.</descr>
+                    </field>
+                    <field name="NPF_F_SSU_INVALID_ACTION">
+                        <descr>Requested transition is not supported for this image state.</descr>
+                    </field>
+                    <field name="NPF_F_SSU_INVALID_TYPE">
+                        <descr>Operation not allowed on requested image type.</descr>
+                    </field>
+                    <field name="NPF_F_SSU_INVALID_PROTOCOL">
+                        <descr>Requested transport protocol is not supported.</descr>
+                    </field>
+                    <field name="NPF_F_SSU_VALIDATION_PENDING">
+                        <descr>Current configuration must be validated before calling this function.</descr>
+                    </field>
+                </enum>
+                
+                <enum type="NPF_F_ssuCallbackType_t" brief="Callback types">
+                    <descr>
+                        List of SSU callback types.
+                        Callback type is used in callback data to identify the FAPI function and its response.
+                    </descr>
+                    <field name="NPF_F_SSU_IMAGE_INFO_GET" brief="Get Image Info Callback"/>
+                    <field name="NPF_F_SSU_IMAGE_UPGRADE" brief="Image Upgrade Callback"/>
+                    <field name="NPF_F_SSU_IMAGE_STATE_CHANGE" brief="Image State Change Callback"/>
+                    <field name="NPF_F_SSU_REBOOT" brief="Reboot Callback"/>
+                    <field name="NPF_F_SSU_VALIDATE" brief="Validate Configuration Callback"/>
+                    <field name="NPF_F_SSU_CFG_RECORD_SET" brief="Set Configuration Record Callback"/>
+                </enum>
+                
+                <struct type="NPF_F_ssuAsyncResponse_t" brief="Asynchronous Response Structure">
+                    <descr>
+                        This data structure is used during callbacks in
+                        response to API invocations. This structure contains an error/success
+                        code, other optional information that correlates the response to an element
+                        in a request array, and in some cases, a function-specific structure.
+                        One or more of these is passed to the callback function as an array within
+                        the NPF_F_ssuCallbackData_t structure.
+                    </descr>
+                    <field type="NPF_F_ssuErrorCode_t" name="error">
+                        <descr>Response error code
+                    </descr></field>
+                    
+                    <selectunion name="u" type="NPF_F_ssuAsyncResponseUnion_t">
+                        <selectfield type="NPF_F_ssuCallbackType_t" name="type">
+                            <descr>
+                                Indicates callback type and discriminates union type. Value is copied
+                                from NPF_F_ssuCallbackData_t. Required for remote transport.
+                            </descr>
+                        </selectfield>
+                        <field type="NPF_F_ssuImageInfoArray_t" name="imageArray" brief="Image info array">
+                            <descr>
+                                An array of images of the specific type.
+                                The array can store from zero to two elements.
+                                </descr><descr>
+                                0 elements - there is no image of the specific type
+                                (e.g. when invalid image type was provided)
+                                </descr><descr>
+                                1 element - if there is only one valid image on flash
+                                (e.g. active image only)
+                                </descr><descr>
+                                2 elements - two flash images
+                            </descr>
+                            <descr>Valid for type NPF_F_SSU_IMAGE_INFO_GET.</descr>
+                            <selector>NPF_F_SSU_IMAGE_INFO_GET</selector>
+                        </field>
+                        <field type="NPF_F_ssuImageState_t" name="state" brief="Current image state">
+                            <descr>
+                                Current state of the image, after the requested operation is done.
+                            </descr>
+                            <descr>Valid for type NPF_F_SSU_IMAGE_UPGRADE.</descr>
+                            <descr>Valid for type NPF_F_SSU_IMAGE_STATE_CHANGE.</descr>
+                            <selector>NPF_F_SSU_IMAGE_UPGRADE</selector>
+                            <selector>NPF_F_SSU_IMAGE_STATE_CHANGE</selector>
+                        </field>
+                        <field type="NPF_uint32_t" name="unused">
+                            <descr>Reserved.</descr>
+                            <descr>Valid for type NPF_F_SSU_REBOOT.</descr>
+                            <descr>Valid for type NPF_F_SSU_VALIDATE.</descr>
+                            <descr>Valid for type NPF_F_SSU_CFG_RECORD_SET.</descr>
+                            <selector>NPF_F_SSU_REBOOT</selector>
+                            <selector>NPF_F_SSU_VALIDATE</selector>
+                            <selector>NPF_F_SSU_CFG_RECORD_SET</selector>
+                        </field>
+                    </selectunion>
+                </struct>
+                
+                <struct type="NPF_F_ssuCallbackData_t" brief="Completion Callback Structure">
+                    <descr>
+                        This structure defines the callback data containing the information on
+                        the completed function call. The SSU completion callback function
+                        returns this structure and callback type - type field - is used to
+                        identify the function for which the callback was generated. The callback
+                        function receives a callback data structure containing one or more
+                        asynchronous responses from a single function call.
+                    </descr>
+                    <field type="NPF_F_ssuCallbackType_t" name="type">
+                        <descr>Indicates callback type.
+                    </descr></field>
+                    <field type="NPF_boolean_t" name="allOK">
+                        <descr>Indicates that all responses are OK.
+                    </descr></field>
+                    <vector name="respArray" type="NPF_F_ssuAsyncResponse_t" brief="Pointer to array of responses.">
+                        <length type="NPF_uint32_t" name="respNum" brief="Number of responses in array."/>
+                    </vector>
+                </struct>
+                
+                
+                <functype name="NPF_F_ssuCallbackFunc_t" type="void" class="callback">
+                    <descr>
+                        Completion Callback Function.
+                        This function, implemented by an application, is used for handling asynchronous
+                        responses. This callback function is intended to be registered to the SSU FAPI
+                        implementation through the NPF_F_ssuRegister() function.
+                    </descr>
+                    <param io="in" type="NPF_userContext_t" name="context">
+                        <descr>
+                            The context item that was supplied by the application when the
+                            completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator">
+                        <descr>
+                            The correlator item that was supplied by the application when
+                            the SSU FAPI function call was invoked.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_F_ssuCallbackData_t" name="data">
+                        <descr>
+                            The response information related to the particular callback type.
+                        </descr>
+                    </param>
+                </functype>
+                
+            </section>
+            
+        </section>
+        
+        <section name="SSU API Function Calls Reference">
+            
+            <section name="Image Control">
+                
+                <func type="NPF_error_t" name="NPF_F_ssuImageInfoGet" xdrid="RPC_SSU_FAPI_IMAGE_INFO_GET">
+                    <descr>
+                        Get image info.
+                        The function returns information about images stored
+                        in local flash and/or currently running in operational memory.
+                        </descr><descr>
+                        The function reports only images explicitly requested in 'imageArray'.
+                        It does not return information on other image types, even if present.
+                        </descr><descr>
+                        The function reports an array of response structures in a callback,
+                        one response structure per each element of 'imageArray'.
+                        A single response structure (type of NPF_F_ssuImageInfoArray_t)
+                        may contain from zero to two images of the requested type.
+                        For example, the response structure for NPF_F_SSU_TARGET type may contain:
+                        </descr><descr>
+                        - information about local flash image in state NPF_F_SSU_INACTIVE,
+                        </descr><descr>
+                        - information about local flash image in state NPF_F_SSU_ACTIVE,
+                    </descr>
+                    <see>NPF_F_ssuImageInfo_t</see>
+                    <param io="inout" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+                        <descr>
+                            The unique identifier provided to the application
+                            when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be
+                            supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            Indicates whether the application requires an
+                            asynchronous completion callback for this
+                            API function invocation. When errorReporting is set
+                            to NPF_REPORT_ERRORS, the application cannot make any
+                            assumptions about when all the requests in the call
+                            will be completed.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Forwarding element handle
+                        </descr>
+                    </param>
+                    <param io="in" class="vector" type="NPF_F_ssuImageType_t" name="imageArray">
+                        <descr>
+                            An array with types of images to be reported.
+                        </descr>
+                        <length type="NPF_uint32_t" name="numReq" brief="Number of requests in array"/>
+                    </param>
+                    
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function was successful:
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                                Detailed operation status will be returned in a completion callback.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                Operation did not complete successfully because of problems
+                                encountered when handling the input parameters.
+                                Callback function should not be expected
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                A function was invoked with a callback handle that did not
+                                correspond to a valid NPF callback handle as returned by
+                                a registration function.
+                                Callback function should not be expected
+                            </descr>
+                        </retval>
+                    </return>
+                    
+                    <callback>
+                        <descr>
+                            The returned callback type is NPF_F_SSU_IMAGE_INFO_GET.
+                            Possible return codes are:
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                Operation completed successfully.
+                                The callback data structure contains information about all images of the specified type.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_SSU_INVALID_TYPE">
+                            <descr>
+                                The requested image type is not valid.
+                                The callback data structure contains an empty array.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                
+                <func type="NPF_error_t" name="NPF_F_ssuImageUpgrade" xdrid="RPC_SSU_FAPI_IMAGE_UPGRADE">
+                    <descr>
+                        Upgrade image.
+                        An application calls this function to download new image(s) from
+                        a remote repository and store the image(s) in local flash.
+                        </descr><descr>
+                        A new image can only be written to a flash partition that is either
+                        empty (NPF_F_SSU_EMPTY) or stores an image of NPF_F_SSU_INACTIVE state.
+                        If there is no such partition, the download request is discarded.
+                        </descr><descr>
+                        An application specifies location of the new image
+                        and transport method to download the file (e.g. TFTP or NFS).
+                        After a successful download, the new image is stored as NPF_F_SSU_INACTIVE.
+                        If the image cannot be found, the partition content remains unchanged.
+                        If a downloaded file is corrupted, the partition is marked as NPF_F_SSU_EMPTY.
+                        </descr><descr>
+                        If an application requests download of multiple images of the same type,
+                        such requests are serialized. The function callback is invoked after
+                        all requests are handled.
+                    </descr>
+                    <descr>
+                        Note: Since the MMC does not support dual images, the upgrade operation for the NPF_F_SSU_MMC
+                        type overwrites the only MMC image instance and immediately resets the MMC processor to load
+                        newly updated software.
+                    </descr>
+                    <param io="inout" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+                        <descr>
+                            The unique identifier provided to the application
+                            when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be
+                            supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            Indicates whether the application requires an
+                            asynchronous completion callback for this
+                            API function invocation. When errorReporting is set
+                            to NPF_REPORT_ERRORS, the application cannot make any
+                            assumptions about when all the requests in the call
+                            will be completed.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Forwarding element handle
+                        </descr>
+                    </param>
+                    <param io="in" class="vector" type="NPF_F_ssuImageLocation_t" name="locationArray">
+                        <descr>
+                            Array of images to be downloaded.
+                        </descr>
+                        <length type="NPF_uint32_t" name="numReq" brief="Number of elements in array."/>
+                    </param>
+                    
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function was successful:
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                                Detailed operation status will be returned in a completion callback.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                Operation did not complete successfully because of problems
+                                encountered when handling the input parameters.
+                                Callback function should not be expected
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                A function was invoked with a callback handle that did not
+                                correspond to a valid NPF callback handle as returned by
+                                a registration function.
+                                Callback function should not be expected
+                            </descr>
+                        </retval>
+                    </return>
+                    
+                    <callback>
+                        <descr>
+                            The returned callback type is NPF_F_SSU_IMAGE_UPGRADE.
+                            Possible return codes are:
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                Operation completed successfully.
+                                The image is stored in local flash as NPF_F_SSU_INACTIVE.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_SSU_INVALID_ACTION">
+                            <descr>
+                                The image cannot be downloaded, because there is no placeholder
+                                (there is no empty or inactive image of this type).
+                                The images currently stored in local flash remain unchanged.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_SSU_VALIDATION_PENDING">
+                            <descr>
+                                There is at least one image not validated after previous reboot.
+                                Running configuration must be first validated before calling
+                                this function. The requested image is not downloaded and
+                                images currently stored in local flash remain unchanged.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_SSU_INVALID_TYPE">
+                            <descr>
+                                The image cannot be downloaded, because the requested image type
+                                is unknown (invalid).
+                                The images currently stored in local flash remain unchanged.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_SSU_INVALID_PROTOCOL">
+                            <descr>
+                                The image cannot be downloaded, because the requested transfer
+                                protocol is not supported.
+                                The images currently stored in local flash remain unchanged.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_SSU_REP_NOT_FOUND">
+                            <descr>
+                                The IPv4 address of the image repository is unreachable.
+                                The new image is not downloaded and the images currently
+                                stored in local flash remain unchanged.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_SSU_PATH_NOT_FOUND">
+                            <descr>
+                                The path to the image file cannot be found in remote repository.
+                                The new image is not downloaded and the images currently
+                                stored in local flash remain unchanged.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_SSU_IMAGE_CRC_ERROR">
+                            <descr>
+                                The downloaded image file is invalid.
+                                The partition where the image is stored is marked NPF_F_SSU_EMPTY.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                
+                <func type="NPF_error_t" name="NPF_F_ssuImageStateChange" xdrid="RPC_SSU_FAPI_IMAGE_STATE_CHANGE">
+                    <descr>
+                        Change image state (one-shot).
+                        An application invokes this function to set/clear the one-shot test mode.
+                        </descr><descr>
+                        Setting one-shot mode is only allowed for images in the NPF_F_SSU_INACTIVE state.
+                        The selected image is marked as NPF_F_SSU_ONESHOT and it will be loaded
+                        after the next system reboot.
+                        </descr><descr>
+                        Clearing one-shot mode is only allowed for images in NPF_F_SSU_ONESHOT
+                        or NPF_F_SSU_ONESHOT_RUNNING state. The selected image enters the NPF_F_SSU_INVALID state.
+                    </descr>
+                    <descr>
+                        Note: This operation is not allowed for the NPF_F_SSU_MMC image type since the MMC does not support
+                        dual images.
+                    </descr>
+                    <param io="inout" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+                        <descr>
+                            The unique identifier provided to the application
+                            when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be
+                            supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            Indicates whether the application requires an
+                            asynchronous completion callback for this
+                            API function invocation. When errorReporting is set
+                            to NPF_REPORT_ERRORS, the application cannot make any
+                            assumptions about when all the requests in the call
+                            will be completed.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Forwarding element handle
+                        </descr>
+                    </param>
+                    <param io="in" class="vector" type="NPF_F_ssuImageTransition_t" name="transitionArray">
+                        <descr>
+                            Array of state transition requests.
+                        </descr>
+                        <length type="NPF_uint32_t" name="numReq" brief="Number of elements in array."/>
+                    </param>
+                    
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function was successful:
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                                Detailed operation status will be returned in a completion callback.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                Operation did not complete successfully because of problems
+                                encountered when handling the input parameters.
+                                Callback function should not be expected
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                A function was invoked with a callback handle that did not
+                                correspond to a valid NPF callback handle as returned by
+                                a registration function.
+                                Callback function should not be expected
+                            </descr>
+                        </retval>
+                    </return>
+                    
+                    <callback>
+                        <descr>
+                            The returned callback type is NPF_F_SSU_IMAGE_STATE_CHANGE.
+                            Possible return codes are:
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                Operation completed successfully.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_SSU_INVALID_TYPE">
+                            <descr>
+                                The selected type of image is invalid for this operation.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_SSU_INVALID_ACTION">
+                            <descr>
+                                The requested action is invalid on this image type.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_SSU_VALIDATION_PENDING">
+                            <descr>
+                                There is at least one image not validated after previous reboot.
+                                Running configuration must be first validated before calling
+                                this function. Current image states remain unchanged.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                
+                
+                <func type="NPF_error_t" name="NPF_F_ssuValidateAll" xdrid="RPC_SSU_FAPI_VALIDATE">
+                    <descr>
+                        Validate all images.
+                        The function validates the currently running configuration.
+                        The following state transitions are made:
+                        </descr><descr>
+                        - Images in state NPF_F_ONESHOT_RUNNING become NPF_F_ACTIVE_RUNNING.
+                        </descr><descr>
+                        It is not possible to validate only one selected element, and not validate others.
+                    </descr>
+                    <param io="inout" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+                        <descr>
+                            The unique identifier provided to the application
+                            when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be
+                            supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            Indicates whether the application requires an
+                            asynchronous completion callback for this
+                            API function invocation. When errorReporting is set
+                            to NPF_REPORT_ERRORS, the application cannot make any
+                            assumptions about when all the requests in the call
+                            will be completed.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Forwarding element handle
+                        </descr>
+                    </param>
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function was successful:
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                                Detailed operation status will be returned in a completion callback.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                Operation did not complete successfully because of problems
+                                encountered when handling the input parameters.
+                                Callback function should not be expected.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                A function was invoked with a callback handle that did not
+                                correspond to a valid NPF callback handle as returned by
+                                a registration function.
+                                Callback function should not be expected.
+                            </descr>
+                        </retval>
+                    </return>
+                    
+                    <callback>
+                        <descr>
+                            The returned callback type is NPF_F_SSU_VALIDATE.
+                            Possible return codes are:
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                Operation completed successfully.
+                                All images in NPF_F_SSU_ONESHOT_RUNNING
+                                state are validated and they transit to NPF_F_SSU_ACTIVE_RUNNING
+                                (or NPF_F_SSU_ACTIVE) state.
+                                Other image states remain unchanged.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_SSU_INVALID_TYPE">
+                            <descr>
+                                Validation cannot be performed because there are no images
+                                in NPF_F_SSU_ONESHOT_RUNNING state.
+                                All image states remain unchanged.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                
+                <func type="NPF_error_t" name="NPF_F_ssuReboot" xdrid="RPC_SSU_FAPI_REBOOT">
+                    <descr>
+                        Reboot request.
+                        An application uses this function to request reboot of the selected processor.
+                    </descr>
+                    <param io="inout" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+                        <descr>
+                            The unique identifier provided to the application
+                            when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be
+                            supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            Indicates whether the application requires an
+                            asynchronous completion callback for this
+                            API function invocation. When errorReporting is set
+                            to NPF_REPORT_ERRORS, the application cannot make any
+                            assumptions about when all the requests in the call
+                            will be completed.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Forwarding element handle
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_F_ssuProcessor_t" name="processor">
+                        <descr>
+                            Processor to be rebooted.
+                        </descr>
+                    </param>
+                    
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function was successful:
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                                Detailed operation status will be returned in a completion callback.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                Operation did not complete successfully because of problems
+                                encountered when handling the input parameters.
+                                Callback function should not be expected.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                A function was invoked with a callback handle that did not
+                                correspond to a valid NPF callback handle as returned by
+                                a registration function.
+                                Callback function should not be expected.
+                            </descr>
+                        </retval>
+                    </return>
+                    
+                    <callback>
+                        <descr>
+                            The returned callback type is NPF_F_SSU_REBOOT.
+                            Possible return codes are:
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                Operation completed successfully.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                
+                <func type="NPF_error_t" name="NPF_F_ssuCfgRecSet" xdrid="RPC_SSU_FAPI_CFG_RECORD_SET">
+                    <descr>
+                        The function sets configuration record for given image type. Specific implementation may
+                        limit types of image for which this operation is supported. Configuration record exists
+                        in two instances which are associated with given image type. This operation allows to
+                        modify cfg record associated with inactive image only.
+                    </descr>
+                    <param io="inout" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+                        <descr>
+                            The unique identifier provided to the application
+                            when the completion callback routine was registered.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                        <descr>
+                            A unique application invocation context that will be
+                            supplied to the asynchronous completion callback routine.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                        <descr>
+                            Indicates whether the application requires an
+                            asynchronous completion callback for this
+                            API function invocation. When errorReporting is set
+                            to NPF_REPORT_ERRORS, the application cannot make any
+                            assumptions about when all the requests in the call
+                            will be completed.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                        <descr>
+                            Forwarding element handle
+                        </descr>
+                    </param>
+                    <param io="in" class="vector" type="NPF_F_ssuCfgRec_t" name="cfgRecArray">
+                        <descr>
+                            An array with types of image and corresponding configuration data.
+                        </descr>
+                        <length type="NPF_uint32_t" name="numReq" brief="Number of elements in array."/>
+                    </param>
+                    
+                    
+                    <return>
+                        <descr>
+                            Error code indicating whether the function was successful:
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                The operation is in progress.
+                                Detailed operation status will be returned in a completion callback.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_UNKNOWN">
+                            <descr>
+                                Operation did not complete successfully because of problems
+                                encountered when handling the input parameters.
+                                Callback function should not be expected
+                            </descr>
+                        </retval>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                            <descr>
+                                A function was invoked with a callback handle that did not
+                                correspond to a valid NPF callback handle as returned by
+                                a registration function.
+                                Callback function should not be expected
+                            </descr>
+                        </retval>
+                    </return>
+                    
+                    <callback>
+                        <descr>
+                            The returned callback type is NPF_F_SSU_CFG_RECORD_SET.
+                            Possible return codes are:
+                        </descr>
+                        <retval name="NPF_NO_ERROR">
+                            <descr>
+                                Operation completed successfully. The callback data structure contains
+                                information about all images of the specified type.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_SSU_INVALID_TYPE">
+                            <descr>
+                                The selected type of image is invalid for this operation.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_SSU_INVALID_ACTION">
+                            <descr>
+                                The requested action is invalid for current image state.
+                            </descr>
+                        </retval>
+                        <retval name="NPF_F_SSU_VALIDATION_PENDING">
+                            <descr>
+                                There is at least one image not validated after previous reboot.
+                                Running configuration must be first validated before calling
+                                this function. Current image states remain unchanged.
+                            </descr>
+                        </retval>
+                    </callback>
+                </func>
+                
+                
+            </section>
+            
+            <section name="Completion Callbacks">
+                
+                <func name="NPF_F_ssuRegister" type="NPF_error_t" class="cback_register">
+                    <descr>
+                        Callback Registration.
+                        This function registers a callback completion function associated with
+                        SSU FAPI configuration functions. The function allows the application
+                        to register a completion callback function for the related callback category,
+                        and to associate a unique callback handle and application context.
+                        Upper layers can register multiple callback functions using this function.
+                        The callback function is identified by a userContext and callbackFunc pair.
+                        For each pair, a unique callbackHandle is assigned for future
+                        reference. Because the callback function is identified by both userContext and
+                        callbackFunc, duplicate registration of the same callback function with a different
+                        userContext is allowed. Also, the same userContext can be shared among different
+                        callback functions. Duplicate registration of the same pair of userContext and callbackFunc
+                        has no effect; it will output a handle that is already assigned to the pair
+                        and return NPF_E_ALREADY_REGISTERED.
+                    </descr>
+                    <param io="in" type="NPF_userContext_t" name="userContext">
+                        <descr>
+                            User defined context provided at the callback registration time.
+                            The exact value will be provided back to the registered completion
+                            callback function (as its first parameter) when it is called.
+                            Upper layers can assign any value to the userContext and the
+                            value is completely opaque to the SSU implementation.
+                        </descr>
+                    </param>
+                    <param io="in" type="NPF_F_ssuCallbackFunc_t" name="callbackFunc">
+                        <descr>
+                            The pointer to the completion callback function to be registered.
+                        </descr>
+                    </param>
+                    <param io="out" type="NPF_callbackHandle_t*" name="callbackHandle">
+                        <descr>
+                            Returned callback handle. The unique identifier assigned for
+                            the registered userContext and callbackFunc pair. The upper layer
+                            will use this handle to specify which callback function is to be called
+                            when invoking asynchronous SSU FAPI functions. It will also
+                            be used when deregistering the userContext and callbackFunc pair.
+                        </descr>
+                    </param>
+                    <return>
+                        <descr>Error code indicating whether the function was successful:</descr>
+                        <retval name="NPF_NO_ERROR" brief="Indicates successful registration."/>
+                        <retval name="NPF_E_BAD_CALLBACK_FUNCTION" brief="Indicates invalid parameter for callback function."/>
+                        <retval name="NPF_E_CALLBACK_ALREADY_REGISTERED" brief="Indicates duplicated registration."/>
+                        <retval name="NPF_E_UNKNOWN" brief="Indicates an error other than above."/>
+                    </return>
+                </func>
+                
+                <func name="NPF_F_ssuDeregister" type="NPF_error_t" class="cback_deregister">
+                    <descr>
+                        Callback Deregistration.
+                        This function deregisters a completion callback function associated with
+                        SSU FAPI configuration functions. The function allows the application to
+                        deregister the callback function that is associated with this callback handle.
+                    </descr>
+                    <param io="in" type="NPF_callbackHandle_t" name="callbackHandle">
+                        <descr>
+                            Handle of the callback function to be deregistered.
+                        </descr>
+                    </param>
+                    <return>
+                        <descr>Error code indicating whether the function was successful:</descr>
+                        <retval name="NPF_NO_ERROR" brief="Indicates successful deregistration."/>
+                        <retval name="NPF_E_BAD_CALLBACK_HANDLE" brief="Indicates passing invalid handle."/>
+                        <retval name="NPF_E_UNKNOWN" brief="Indicates an error other than above."/>
+                    </return>
+                </func>
+                
+            </section>
+            
+        </section>
+        
+    </section>
+    
+</api>

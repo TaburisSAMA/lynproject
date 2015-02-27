@@ -1,0 +1,1201 @@
+<?xml version="1.0"?>
+<api name="npf_f_rp3">
+    <preamble>
+	INTEL CONFIDENTIAL
+        
+	Copyright 2000 - 2006 Intel Corporation All Rights
+
+	The source code contained or described herein and all documents related to
+	the source code (&quot;Material&quot;) are owned by Intel Corporation or its 
+	suppliers or licensors.
+
+	Title to the Material remains with Intel Corporation or its suppliers and
+	licensors. The Material contains trade secrets and proprietary and
+	confidential information of Intel or its suppliers and licensors.
+	The Material is protected by worldwide copyright and trade secret laws and
+	treaty provisions. No part of the Material may be used, copied, reproduced,
+	modified, published, uploaded, posted, transmitted, distributed,
+	or disclosed in any way without Intel&quot;s prior express written permission.
+
+	No license under any patent, copyright, trade secret or other intellectual
+	property right is granted to or conferred upon you by disclosure
+	or delivery of the Materials, either expressly, by implication, inducement,
+	estoppel or otherwise. Any license under such intellectual property rights
+	must be express and approved by Intel in writing.
+    </preamble>
+
+    <imports>
+
+        <import>npf</import>
+        <import>npf_f_error</import>
+
+    </imports>
+
+    <section name="OBSAI RP3-01 Interface Management">
+
+    <section name="OBSAI RP3-01 Interface Management Data Types">
+
+        <section name="Global Configuration Parameters">
+
+            <enum type="NPF_F_rp3ClockSource_t" brief="RP3-01 Clock Signal Sources">
+                <descr>
+                    Sources of RP3-01 clock signal references.
+                </descr>
+                    <field name="NPF_F_RP3_CLK_INTERNAL" value="0x0" brief="Internal clock source; on-board local oscillator"/>
+                    <field name="NPF_F_RP3_CLK_AMC_CLK1" value="0x1" brief="CLK1 signal on AMC connector"/>
+                    <field name="NPF_F_RP3_CLK_AMC_CLK2" value="0x2" brief="CLK2 signal on AMC connector"/>
+                    <field name="NPF_F_RP3_CLK_AMC_CLK3" value="0x3" brief="CLK3 signal on AMC connector"/>
+                </enum>
+
+            <struct type="NPF_F_rp3Params_t" brief="Global Output Parameters">
+                <descr>
+                     This structure defines the RP3 configuration parameters common to all links.
+                     The parameters include:
+                </descr><descr>
+                     - a subset of data link layer (DLL) parameters defined in the OBSAI RP3 specification v3.0, Table 26.
+                </descr><descr>
+                     - RP3-01 clock configuration settings.
+                </descr>
+                <field type="NPF_uint16_t" name="m_mg" brief="The number of message slots in a Message Group"/>
+                <field type="NPF_uint16_t" name="n_mg" brief="The number of Message Groups in a Master Frame"/>
+                <field type="NPF_uint8_t" name="k_mg" brief="The number of IDLE bytes at the end of a Message Group"/>
+                <field type="NPF_uint16_t" name="blockSize" brief="The number of bytes within a block"/>
+                <field type="NPF_uint16_t" name="syncT" brief="The threshold for entering the NPF_F_RP3_DLL_RXSTATE_WAIT_FOR_K287_IDLES state"/>
+                <field type="NPF_uint16_t" name="usyncT" brief="The threshold for entering the NPF_F_RP3_DLL_RXSTATE_USYNC state"/>
+                <field type="NPF_uint16_t" name="frameSyncT" brief="The threshold for entering the NPF_F_RP3_DLL_RXSTATE_FRAME_SYNC state"/>
+                <field type="NPF_uint16_t" name="frameUsyncT" brief="The threshold for falling back to the NPF_F_RP3_DLL_RXSTATE_WAIT_FOR_K28.7_IDLES state"/>
+                <field type="NPF_int16_t" name="delta" brief="The transmit time offset">
+                   <descr>
+                        The time offset (given in byte-clock ticks) between a bus frame tick and the transmission
+                        start of the Master Frame boundary. This delta is typically a negative value in the BBM.
+                        A common value is supported for all links.                            
+                   </descr>
+                </field>
+                <field type="NPF_int16_t" name="pi" brief="The receive time offset">
+                   <descr>
+                        The time offset (given in byte-clock ticks) between a bus frame tick and the reception
+                        start of Master Frame boundary. This is typically a positive value in the BBM.
+                        A common value is supported for all links.                            
+                   </descr>
+                </field>
+                <field type="NPF_uint8_t" name="maxOffset" brief="The master Frame boundary width flag">
+                   <descr>
+                        Only LSB bit 0 is used.
+                        Bit value = 0 (default setting) indicates that MAX_OFFSET is equal to 4 byte-clocks.
+                        Bit value = 1 indicates that MAX_OFFSET is equal to 8 byte-clocks.
+                   </descr>
+                </field>
+                <field type="NPF_uint8_t" name="fcbType" brief="The system type of RP3-01 Frame Clock Burst message">
+                   <descr>
+                         The 8-bit system type identifier sent periodically in RP3-01 Frame Clock Burst messages
+                         to RF module over RP3 link.
+                   </descr><descr>
+                         A complete list of system type codes is defined in OBSAI RP1 spec.
+                         Selected types used in WiMAX application include:
+                   </descr><descr>
+                            00h - Not used; Frame Clock Burst messages are not sent. 
+                   </descr><descr>
+                            01h - RP3 frame clock tick 
+                   </descr><descr>
+                            83h - 802.16 Frame Number, 5 ms Frame Duration
+                   </descr><descr>
+                         Note: this parameter configures content of the FCB message field. The actual airframe
+                         tick interval (2.5ms, 5ms, 10ms, etc.) must be selected in PHY module (PHY OAM API). 
+                   </descr><descr>
+                        Default setting = 00h (FCB messages are not transmitted). 
+                   </descr>
+                </field>
+                <field type="NPF_F_rp3ClockSource_t" name="systemClock" brief="Source of OBSAI system clock (30.72MHz)">
+                   <descr>
+                        Source of the 30.72MHz OBSAI system clock reference. This can be either local oscillator or
+                        one of three clock signal pins on the AMC connector.
+                        The BBM module uses 30.72MHz system clock to drive the RP3 link towards RRH module. 
+                   </descr><descr>
+                        Default setting = NPF_F_RP3_CLK_INTERNAL (local oscillator). 
+                   </descr>
+                </field>
+                <field type="NPF_F_rp3ClockSource_t" name="airFrameTick" brief="Source of airframe reference tick">
+                   <descr>
+                        The BBM module uses this signal to synchronize start of PHY airframe and send Frame Control Burst
+                        messages towards RRH module. The signal source can be either local oscillator (airframe not
+                        synchronized) or one of 3 clock singal pins on the AMC connector.
+                   </descr><descr>
+                        The BBM module synchronizes airframe to the positive edge (tick) of the clock reference signal.
+                        Time interval between reference ticks must be an integer multiply of airframe duration.
+                        For example, a 1pps (pulse per second) refercence can be used for 10ms, 5ms or 2.5ms airframes. 
+                   </descr><descr>
+                        Default setting = NPF_F_RP3_CLK_INTERNAL (local oscillator). 
+                   </descr>
+                </field>
+            </struct>
+
+            <enum type="NPF_F_rp3ParamsInMask_t" brief="Global Input Parameter Mask">
+                <descr>
+                    Mask identifiers for writeable RP3 global input parameters.
+                </descr>
+                    <field name="NPF_F_RP3_DLLPARAM_K_MG" value="0x1" brief="IDLE bytes at the end of Message Group (K_MG) specified"/>
+                    <field name="NPF_F_RP3_DLLPARAM_DELTA" value="0x2" brief="Transmit time offset (DELTA) specified"/>
+                    <field name="NPF_F_RP3_DLLPARAM_PI" value="0x4" brief="Receive time offset (PI) specified"/>
+                    <field name="NPF_F_RP3_DLLPARAM_MAX_OFFSET" value="0x8" brief="Master Frame boundary window (MAX_OFFSET) specified"/>
+                    <field name="NPF_F_RP3_CLKPARAM_FCB" value="0x10" brief="Frame Clock Burst message system type specified"/>
+                    <field name="NPF_F_RP3_CLKPARAM_SYSTEM_CLOCK" value="0x20" brief="Source of 30.72MHz system clock specified"/>
+                    <field name="NPF_F_RP3_CLKPARAM_AIRFRAME_TICK" value="0x40" brief="Source of the ariframe reference tick specified"/>
+                </enum>
+
+            <struct type="NPF_F_rp3ParamsSetArgs_t" brief="Set Global Configuration Arguments">
+                <descr>
+                    This structure defines arguments to NPF_F_rp3ParamsSet function. 
+                </descr>
+                <field type="NPF_F_rp3ParamsInMask_t" name="validFields"   brief="A mask indicating the fields to be set"/>
+                <field type="NPF_F_rp3Params_t"       name="params"        brief="Input configuration parameters"/>
+            </struct>
+                
+            <struct type="NPF_F_rp3ParamsGetArgs_t" brief="Get Global Configuration Arguments">
+                <descr>
+                    This structure defines arguments to NPF_F_rp3ParamsGet function. 
+                </descr>
+                <field type="NPF_uint16_t" name="unused" brief="Field not used (NPF framework)"/>
+            </struct>
+                
+        </section>
+                
+        <section name="Link-Specific Configuration Parameters">
+            
+            <typedef name="NPF_F_rp3LinkId_t" type="NPF_uint16_t">
+                <descr>
+                        Local RP3 link identifier.
+                        Note: Currently, there is only one physical link, so linkID=0.                        
+                </descr>
+            </typedef>
+
+            <enum type="NPF_F_rp3LineRate_t" brief="Link line rate">
+	    	<descr>
+                        This type is used to set the line rate for the RP3 link.
+                        Note: Currently, only NPF_F_RP3_DLL_LINE_RATE_3072 is supported.                        
+                </descr>
+                <field name="NPF_F_RP3_DLL_LINE_RATE_3072" brief="RP3 link line rate 3072 Mbps"/>
+                <field name="NPF_F_RP3_DLL_LINE_RATE_1536" brief="RP3 link line rate 1536 Mbps (not supported in this release)"/>
+                <field name="NPF_F_RP3_DLL_LINE_RATE_0786" brief="RP3 link line rate 786 Mbps (not supported in this release)"/>
+            </enum>
+
+            <enum type="NPF_F_rp3DllRxState_t" brief="Rx link state">
+                 <descr>
+                        This data type is used to indicate the receive state of the RP3 Rx link.
+                 </descr>
+                 <field name="NPF_F_RP3_DLL_RXSTATE_UNSYNC" value="0x1">
+                    <descr>
+                        Link down. 
+                    </descr>
+                 </field>
+                 <field name="NPF_F_RP3_DLL_RXSTATE_WAIT_FOR_K287_IDLES" value="0x2">
+                    <descr>
+                        Link up, not synchronized; 
+                        the link is waiting for consecutive K28.7 idle bytes to be detected.
+                    </descr>
+                 </field>            
+                 <field name="NPF_F_RP3_DLL_RXSTATE_WAIT_FOR_FRAME_SYNC_T" value="0x4">
+                    <descr>
+                        Link up, not synchronized;
+                        the link is waiting for consecutive valid message groups to be received.
+                    </descr>
+                 </field>
+                 <field name="NPF_F_RP3_DLL_RXSTATE_FRAME_SYNC" value="0x8">
+                    <descr>
+                        Link up, data transmission.
+                    </descr>
+                 </field>
+            </enum>
+
+            <enum type="NPF_F_rp3DllTxState_t" brief="Tx link state">
+	        <descr>
+                        This data type is used to indicate the transmit state of the RP3 Rx link.
+                  </descr>
+	        <field name="NPF_F_RP3_DLL_TXSTATE_OFF" value="0x1" brief="The link is down">
+                    <descr>
+                        This is the default state after power reset. The RP3 interface can enter
+                        this state also on an application request (transmitterEn flag = 0) or if an LoS event is
+                        detected.
+                    </descr>
+                 </field>
+                 <field name="NPF_F_RP3_DLL_TXSTATE_IDLE" brief="The link is up, but no transmission">
+                    <descr>
+                       The RP3 interface enters this state on an application request (transmitterEn flag = 1).
+                       The application can only update the delta parameter when in this idle state.
+                    </descr>
+                 </field>
+                 <field name="NPF_F_RP3_DLL_TXSTATE_FRAME_TX" brief="The link is up and data transmission occurs">
+                    <descr>
+                        The RP3 interface enters this state after the application updates the delta parameter.                            
+                    </descr>
+                 </field>
+            </enum>
+
+            <struct type="NPF_F_rp3DllLinkParams_t" brief="DLL Link-Specific Parameters">
+                <descr>
+                        This structure defines the RP3 data link layer configuration parameters specific to
+                        a particular link. This is a subset of parameters defined in
+                        the OBSAI RP3 specification v3.0, Table 26.                        
+                </descr>
+                <field type="NPF_uint8_t" name="transmitterEn" brief="Transmitter enabled/disabled flag">
+                   <descr>
+                        Value = 1 indicates the transmitter is enabled.
+                        Value = 0 indicates the transmitter is disabled.
+                   </descr>
+                </field>
+                <field type="NPF_uint8_t" name="losEnable" brief="LOS impact on transmitter enabled/disabled flag">
+                   <descr>
+                        Value = 1 indicates a LOS event detected on the receive side stops transmission.
+                        Value = 0 indicates the LOS event has no effect on transmit side.
+                   </descr>
+                </field>
+                <field type="NPF_F_rp3DllRxState_t" name="synchronizationStatus" brief="Receiver synchronization status"/>
+	        <field type="NPF_F_rp3DllTxState_t" name="transmitterStatus" brief="Transmitter status"/>
+                <field type="NPF_F_rp3LineRate_t" name="lineRate" brief="Link line rate"/>
+                <field type="NPF_uint8_t" name="rxMasterFrameOffset" brief="Received Master Frame time offset">
+                   <descr>
+                        Time offset is expressed in byte-clock ticks, and measured between RP3 bus frame
+                        tick plus offset PI and arrival of the Master Frame boundary. The time offset
+                        value is capped at 255.
+                    </descr>
+                </field>
+            </struct>
+
+            <struct type="NPF_F_rp3tlLinkParams_t" brief="Transport Layer link-Specific Parameters">
+                <descr>
+                    This structure defines RP3 transport layer configuration parameters (input and output).
+                    This is a subset of the parameters that are defined in the OBSAI RP3 specification v3.0, Table 28.
+                </descr><descr>
+                    Only one peer RP3 address is supported per link.                        
+                </descr>
+                <field type="NPF_uint16_t" name="rp3Address" brief="Local (own) RP3 address"/>
+                <field type="NPF_uint16_t" name="peerRp3Address" brief="Remote peer RP3 address"/>
+           </struct>
+
+            <enum type="NPF_F_rp3LinkParamsInMask_t" brief="Link-Specific Input Parameter Mask">
+                <descr>
+                    This enumeration defines mask identifiers for writeable RP3 DLL link-specific parameters.                        
+                </descr>
+                    <field name="NPF_F_RP3_DLLPARAM_TX_ENABLE"     value="0x1" brief="Transmitter flag selected"/>
+                    <field name="NPF_F_RP3_DLLPARAM_LOS_ENABLE"    value="0x2" brief="LoS flag selected"/>
+                    <field name="NPF_F_RP3_TLLPARAM_RP3_ADDR"      value="0x4" brief="Local RP3 address"/>
+                    <field name="NPF_F_RP3_TLLPARAM_PEER_RP3_ADDR" value="0x8" brief="Peer RP3 address"/>
+                </enum>
+                
+           <struct type="NPF_F_rp3LinkParamsSetArgs_t" brief="Link-Specific Input Parameters">
+                <descr>
+                    This structure defines RP3 link configuration parameters available for writting
+                    (argument to NFP_F_rp3LinkParamsSet function call).
+                </descr>
+                <field type="NPF_F_rp3LinkId_t"         name="linkId" brief="RP3 link identifier."/>
+                <field type="NPF_F_rp3LinkParamsInMask_t" name="validFields" brief="A mask indicating fields to be set"/>
+                <field type="NPF_F_rp3DllLinkParams_t"  name="dllParams" brief="DLL link-specific parameters."/>
+                <field type="NPF_F_rp3tlLinkParams_t"   name="tllParams" brief="Transport layer link-specific parameters."/>
+           </struct>
+
+           <struct type="NPF_F_rp3LinkParamsGetRspArgs_t" brief="Link-Specific Output Parameters">
+                <descr>
+                    This structure defines RP3 link configuration parameters returned by asynchronous
+                    callback to NFP_F_rp3LinkParamsGet function call.
+                </descr>
+                <field type="NPF_F_rp3LinkId_t"        name="linkID" brief="RP3 link identifier"/>
+                <field type="NPF_F_rp3DllLinkParams_t" name="dllParams" brief="Data Link Layer parameters"/>
+                <field type="NPF_F_rp3tlLinkParams_t"  name="tlParams" brief="Transport Layer parameters"/>
+           </struct>
+
+            <typedef name="NPF_F_rp3Rtt_t" type="NPF_uint32_t" brief="Round trip time">
+                <descr>
+                    This is the RP3 link round trip time, expressed in (8*76.8) MHz clock ticks.
+                </descr><descr>
+                    Note: The returned value is the actual calculated RTT (excluding time spent in RRH),
+                          not the content of the RTT Measurement message.                        
+                </descr>
+            </typedef>
+                
+        </section>
+
+        <section name="Completion Callback Data Structures ">
+
+            <enum type="NPF_F_rp3ErrorCode_t" brief="RP3 Error Codes">
+                <descr>
+                    This data type is used to indicate the presence and type of an error
+                    that has occurred while processing an asynchronous operation.
+                </descr>
+                <field name="NPF_F_RP3_NO_ERROR" value="NPF_NO_ERROR">
+                    <descr>The operation completed successfully.</descr>
+                </field>
+                <field name="NPF_F_RP3_LINK_NOT_FOUND">
+                    <descr>The requested RP3 link does not exist.</descr>
+                </field>
+                <field name="NPF_F_RP3_ERROR_UNKNOWN" brief="Unknown RP3 error"/>
+                <field name="NPF_F_RP3_NO_RESOURCES" value="NPF_F_NO_RESOURCE">
+                    <descr>The operation cannot be completed due to lack of resources.</descr>
+                </field>
+            </enum>
+
+            <enum type="NPF_F_rp3CallbackType_t" brief="Callback types">
+                <descr>
+                    This enumeration is a list of RP3 callback types.
+                    Callback type is used in callback data to identify the FAPI function and its response.                        
+                </descr>
+                <field name="NPF_F_RP3_PARAMS_SET" brief="Set RP3 OAM parameters common to all links"/>
+                <field name="NPF_F_RP3_PARAMS_GET" brief="Get RP3 OAM parameters common to all links"/>
+                <field name="NPF_F_RP3_LINK_PARAMS_SET" brief="Set RP3 OAM parameters for specific link"/>
+                <field name="NPF_F_RP3_LINK_PARAMS_GET" brief="Get RP3 OAM parameters for specific link"/>
+                <field name="NPF_F_RP3_RTT_GET" brief="Get the Round Trip Tipme (RTT) delay value"/>
+                <field name="NPF_F_RP3_HW_RESET" brief="Request a Remote Radio Unit (RRU) virtual HW reset"/>
+            </enum>
+
+            <struct type="NPF_F_rp3AsyncResponse_t" brief="Asynchronous Response Structure">
+                <descr>
+                    This data structure is used during callbacks in response to API invocations.
+                    This structure contains an error/success code, other optional information that
+                    correlates the response to an element in a request array, and in some cases,
+                    a function-specific structure.
+                    One or more of these values is passed to the callback function as an array within
+                    the NPF_F_rp3CallbackData_t structure.                        
+                </descr>
+                <field type="NPF_F_rp3ErrorCode_t" name="error">
+                    <descr>Response error code
+                    </descr></field>
+                
+                <selectunion name="u" type="NPF_F_rp3AsyncResponseUnion_t">
+                    <selectfield type="NPF_F_rp3CallbackType_t" name="type">
+                        <descr>
+                            Indicates the callback type and discriminates identifies the union type
+                            The value is copied from NPF_F_rp3CallbackData_t.
+                            Required for remote transport.
+                        </descr>
+                    </selectfield>
+                    <field type="NPF_F_rp3Params_t" name="globalParams" brief="Common parameters for node">
+                        <selector>NPF_F_RP3_PARAMS_SET</selector>
+                        <selector>NPF_F_RP3_PARAMS_GET</selector>
+                    </field>
+                    <field type="NPF_F_rp3LinkParamsGetRspArgs_t" name="linkParams" brief="Link-specific parameters">
+                        <selector>NPF_F_RP3_LINK_PARAMS_SET</selector>
+                        <selector>NPF_F_RP3_LINK_PARAMS_GET</selector>
+                    </field>
+                    <field type="NPF_F_rp3Rtt_t" name="rtt" brief="Round Trip Time value">
+                        <selector>NPF_F_RP3_RTT_GET</selector>
+                    </field>
+                    <field type="NPF_uint32_t" name="unused">
+                        <descr>Reserved.</descr>
+                        <descr>Valid for NPF_F_RP3_HW_RESET</descr>
+                        <selector default="yes"/>
+                    </field>
+                </selectunion>
+            </struct>
+            
+            <struct type="NPF_F_rp3CallbackData_t" brief="Completion Callback Structure">
+                <descr>
+                    This structure defines the callback data for the completed function call.
+                    The RP3 completion callback function returns this structure and callback type
+                    The type field is used to identify the function for which the callback was generated.
+                    The callback function receives a callback data structure containing one or more
+                    asynchronous responses from a single function call.
+                </descr>
+                <field type="NPF_F_rp3CallbackType_t" name="type">
+                    <descr>Indicates callback type.
+                    </descr></field>
+                <field type="NPF_boolean_t" name="allOK">
+                    <descr>Indicates that all responses are OK.
+                    </descr></field>
+                <vector name="respArray" type="NPF_F_rp3AsyncResponse_t" brief="Pointer to array of responses.">
+                    <length type="NPF_uint32_t" name="respNum" brief="Number of responses in array."/>
+                </vector>
+            </struct>
+            
+
+            <functype name="NPF_F_rp3CallbackFunc_t" type="void" class="callback">
+                <descr>
+                    Completion Callback Function.
+                    This function, implemented by an application, is used for handling asynchronous
+                    responses. This callback function should be registered to the RP3 FAPI 
+                    implementation through the NPF_F_rp3Register() function.
+                </descr>
+                <param io="in" type="NPF_userContext_t" name="context">
+                    <descr>
+                        The context item that was supplied by the application when the
+                        completion callback routine was registered.
+                    </descr>
+                </param>
+                <param io="in" type="NPF_correlator_t" name="correlator">
+                    <descr>
+                        The correlator item that was supplied by the application when
+                        the RP3 FAPI function call was invoked.
+                    </descr>
+                </param>
+                <param io="in" type="NPF_F_rp3CallbackData_t" name="data">
+                    <descr>
+                        The response information related to the particular callback type.
+                    </descr>
+                </param>
+            </functype>
+            
+        </section>
+        
+        <section name="Event Notification Data Structures">
+
+            <enum type="NPF_F_rp3EventType_t">
+                <descr>
+                    Event Notification Type.
+                    This enumeration is used by the RP3 event handler to distinguish event types.
+                </descr>
+                <field name="NPF_F_RP3_EVENT_SYNC_STATUS_CHANGE" value="0x1">
+                    <descr>RP3 receiver state machine changes.</descr>
+                </field>
+                <field name="NPF_F_RP3_EVENT_RX_MASTER_FRAME_BOUNDARY_OUT_OF_RANGE">
+                    <descr>
+                        RP3 receiver detects Master Frame boundary outside the allowed MAX_OFFSET+1 wide window.
+                    </descr>
+                </field>
+                <field name="NPF_F_RP3_EVENT_LOS_DEFECT">
+                    <descr>
+                        RP3 receiver detects Loss of Signal (LOS) condition.
+                    </descr>
+                </field>
+            </enum>
+
+            <struct type="NPF_F_rp3EventData_t" brief="Event Data">
+                <descr>
+                    This structure consists of an event type and the union of the possible event data.
+                    The event data union contains additional information about the event.
+                </descr>
+                <field type="NPF_F_rp3LinkId_t" name="linkId" brief="identifier of affected RP3 link"/>
+                <selectunion name="params" type="rp3EventsData_t">
+                    <selectfield type="NPF_F_rp3EventType_t" name="type" brief="Event type.">
+                    </selectfield>
+                    <field type="NPF_F_rp3DllRxState_t" name="synchronizationStatus" brief="Receiver state">
+                        <selector>NPF_F_RP3_EVENT_SYNC_STATUS_CHANGE</selector>
+                    </field>
+                    <field type="NPF_uint32_t" name="unused" brief="Used for other event types">
+                        <selector default="yes"/>
+                    </field>
+                </selectunion>
+            </struct><struct type="NPF_F_rp3EventArray_t" brief="Event Array.">
+                <descr>
+                     This structure is used to store information about events. 
+                     It specifies the number of events and includes a pointer to the array of events. 
+                     It is passed to the application-defined event callback function 
+                     to notify about one or more events. 
+                 </descr>
+                 <vector type="NPF_F_rp3EventData_t" name="eventData">
+                     <descr>Pointer to the array of events.</descr>
+                     <length type="NPF_uint32_t" name="numEventData" brief="Number of events in the array."/>
+                 </vector>
+            </struct>
+
+            <functype name="NPF_F_rp3EventCallFunc_t" type="void" class="event">
+                <descr>
+                    Event Callback Function.
+                    This function is an event notification function (handler) used for handling
+                    events. This callback function is intended to be implemented by the
+                    application, and to be registered to the RP3 FAPI implementation
+                    through the NPF_F_rp3EventRegister() function.
+                </descr>
+                <param io="in" type="NPF_userContext_t" name="userContext">
+                    <descr>User-defined context provided at callback registration time.</descr>
+                </param>
+                <param io="in" type="NPF_F_rp3EventArray_t" name="eventArray">
+                    <descr>Events array containing information about one or more events.</descr>
+                </param>
+                <return>
+                    <descr>None</descr>
+                </return>
+            </functype>
+
+        </section>
+
+    </section>
+        
+
+    <section name="RP3-01 Interface Management Functions">
+
+        <section name="Configuration Setting">
+            
+            <func type="NPF_error_t" name="NPF_F_rp3ParamsSet" xdrid="RPC_RP3_FAPI_PARAMS_SET" brief="Set global parameters">
+		<descr>
+                    This function sets the RP3 parameters that are common to all links.                                            
+                </descr>
+		<param io="inout" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+                    <descr>
+                        The unique identifier provided to the application
+                        when the completion callback routine was registered.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                    <descr>
+                        A unique application invocation context that will be
+                        supplied to the asynchronous completion callback routine.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                    <descr>
+                        Indicates whether the application requires an
+                        asynchronous completion callback for this
+                        API function invocation. When errorReporting is set
+                        to NPF_REPORT_ERRORS, the application cannot make any
+                        arp3mptions about when all the requests in the call
+                        will be completed.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                    <descr>
+                        Forwarding element handle
+                    </descr>
+		</param>
+                    
+                <param io="in" type="NPF_F_rp3ParamsSetArgs_t *" name="paramsSetArgs">
+                    <descr>
+                        Global data link layer and clock configuration settings.
+                    </descr>
+                </param>
+
+
+                <return>
+                    <descr>
+                        Error code indicating whether the function was successful:
+                    </descr>
+                    <retval name="NPF_NO_ERROR">
+                        <descr>
+                            The operation is in progress.
+                            Detailed operation status will be returned in a completion callback.
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_UNKNOWN">
+                        <descr>
+                            Operation did not complete successfully because of problems
+                            encountered when handling the input parameters.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                        <descr>
+                            A function was invoked with a callback handle that did not
+                            correspond to a valid NPF callback handle as returned by
+                            a registration function.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+		</return>
+		
+		<callback>
+                    <descr>
+                        The returned callback type is NPF_F_RP3_PARAMS_SET, which reports current
+                        setting of all RP3 parameters (both input and output).
+                        Possible return codes are:                        
+                    </descr>
+                    <retval name="NPF_NO_ERROR">
+                        <descr>
+                            Operation completed successfully.
+                            The callback data structure contains information about all images of the specified type. 
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_UNKNOWN">
+                        <descr>
+                            Operation did not complete successfully because of problems
+                            encountered when handling the input parameters.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+		</callback>
+            </func>
+
+
+            <func type="NPF_error_t" name="NPF_F_rp3ParamsGet" xdrid="RPC_RP3_FAPI_PARAMS_GET" brief="Get global parameters">
+		<descr>
+                    This function gets RP3 parameters that are common to all links.                        
+                </descr>
+		<param io="inout" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+                    <descr>
+                        The unique identifier provided to the application
+                        when the completion callback routine was registered.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                    <descr>
+                        A unique application invocation context that will be
+                        supplied to the asynchronous completion callback routine.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                    <descr>
+                        Indicates whether the application requires an
+                        asynchronous completion callback for this
+                        API function invocation. When errorReporting is set
+                        to NPF_REPORT_ERRORS, the application cannot make any
+                        arp3mptions about when all the requests in the call
+                        will be completed.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                    <descr>
+                        Forwarding element handle
+                    </descr>
+		</param>
+
+		<param io="in" type="NPF_F_rp3ParamsGetArgs_t *" name="paramsGetArgs">
+                    <descr>
+                        Get global parameters arguments 
+                    </descr>
+		</param>
+
+                <return>
+                    <descr>
+                        Error code indicating whether the function was successful:
+                    </descr>
+                    <retval name="NPF_NO_ERROR">
+                        <descr>
+                            The operation is in progress.
+                            Detailed operation status will be returned in a completion callback.
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_UNKNOWN">
+                        <descr>
+                            Operation did not complete successfully because of problems
+                            encountered when handling the input parameters.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                        <descr>
+                            A function was invoked with a callback handle that did not
+                            correspond to a valid NPF callback handle as returned by
+                            a registration function.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+		</return>
+		
+		<callback>
+                    <descr>
+                        The returned callback type is NPF_F_RP3_PARAMS_SET, which reports current
+                        setting of all RP3 parameters (both input and output).
+                        Possible return codes are:                        
+                    </descr>
+                    <retval name="NPF_NO_ERROR">
+                        <descr>
+                            Operation completed successfully.
+                            The callback data structure contains information about all images of the specified type. 
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_UNKNOWN">
+                        <descr>
+                            Operation did not complete successfully because of problems
+                            encountered when handling the input parameters.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+		</callback>
+            </func>
+
+
+            <func type="NPF_error_t" name="NPF_F_rp3LinkParamsSet" xdrid="RPC_RP3_FAPI_LINK_PARAMS_SET" brief="Set link parameters">
+		<descr>
+                    This function sets the RP3 parameters for a specific link                        
+                </descr>        
+		<param io="inout" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+                    <descr>
+                        The unique identifier provided to the application
+                        when the completion callback routine was registered.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                    <descr>
+                        A unique application invocation context that will be
+                        supplied to the asynchronous completion callback routine.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                    <descr>
+                        Indicates whether the application requires an
+                        asynchronous completion callback for this
+                        API function invocation. When errorReporting is set
+                        to NPF_REPORT_ERRORS, the application cannot make any
+                        arp3mptions about when all the requests in the call
+                        will be completed.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                    <descr>
+                        Forwarding element handle
+                    </descr>
+		</param>
+                <param io="in" type="NPF_F_rp3LinkParamsSetArgs_t *" name="linkParams">
+                    <descr>
+                        Link input parameters.
+                    </descr>
+                </param>
+
+                <return>
+                    <descr>
+                        Error code indicating whether the function was successful:
+                    </descr>
+                    <retval name="NPF_NO_ERROR">
+                        <descr>
+                            The operation is in progress.
+                            Detailed operation status will be returned in a completion callback.
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_UNKNOWN">
+                        <descr>
+                            Operation did not complete successfully because of problems
+                            encountered when handling the input parameters.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                        <descr>
+                            A function was invoked with a callback handle that did not
+                            correspond to a valid NPF callback handle as returned by
+                            a registration function.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+		</return>
+		
+		<callback>
+                    <descr>
+                        The returned callback type is NPF_F_RP3_LINK_PARAMS_SET, which reports current
+                        setting of all RP3 parameters configured for this link (both input and output).
+                        Possible return codes are:                        
+                    </descr>
+                    <retval name="NPF_NO_ERROR">
+                        <descr>
+                            Operation completed successfully.
+                            The callback data structure contains information about all images of the specified type. 
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_UNKNOWN">
+                        <descr>
+                            Operation did not complete successfully because of problems
+                            encountered when handling the input parameters.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+		</callback>
+            </func>
+
+
+            <func type="NPF_error_t" name="NPF_F_rp3LinkParamsGet" xdrid="RPC_RP3_FAPI_LINK_PARAMS_GET" brief="Get link parameters">
+		<descr>
+                    This function gets RP3 parameters configured for a specific link.                        
+                </descr>
+		<param io="inout" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+                    <descr>
+                        The unique identifier provided to the application
+                        when the completion callback routine was registered.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                    <descr>
+                        A unique application invocation context that will be
+                        supplied to the asynchronous completion callback routine.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                    <descr>
+                        Indicates whether the application requires an
+                        asynchronous completion callback for this
+                        API function invocation. When errorReporting is set
+                        to NPF_REPORT_ERRORS, the application cannot make any
+                        arp3mptions about when all the requests in the call
+                        will be completed.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                    <descr>
+                        Forwarding element handle
+                    </descr>
+		</param>
+                <param io="in" type="NPF_F_rp3LinkId_t" name="linkId">
+                    <descr>
+                        RP3 link identifier.
+                    </descr>
+                </param>
+
+                <return>
+                    <descr>
+                        Error code indicating whether the function was successful:
+                    </descr>
+                    <retval name="NPF_NO_ERROR">
+                        <descr>
+                            The operation is in progress.
+                            Detailed operation status will be returned in a completion callback.
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_UNKNOWN">
+                        <descr>
+                            Operation did not complete successfully because of problems
+                            encountered when handling the input parameters.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                        <descr>
+                            A function was invoked with a callback handle that did not
+                            correspond to a valid NPF callback handle as returned by
+                            a registration function.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+		</return>
+		
+		<callback>
+                    <descr>
+                        The returned callback type is NPF_F_RP3_LINK_PARAMS_GET, which reports current
+                        setting of RP3 parameters configured for specific link.
+                        Possible return codes are:                        
+                    </descr>
+                    <retval name="NPF_NO_ERROR">
+                        <descr>
+                            Operation completed successfully.
+                            The callback data structure contains information about all images of the specified type. 
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_UNKNOWN">
+                        <descr>
+                            Operation did not complete successfully because of problems
+                            encountered when handling the input parameters.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+		</callback>
+            </func>
+            
+
+            <func type="NPF_error_t" name="NPF_F_rp3LinkRttGet" xdrid="RPC_RP3_FAPI_LINK_RTT_GET" brief="Measure Round Trip Time (RTT)">
+		<descr>
+                    This function initiates the Round Trip Time (RTT) measurement procedure and returns the RTT
+                    value for the specified RP3 link.                        
+                </descr>
+		<param io="inout" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+                    <descr>
+                        The unique identifier provided to the application
+                        when the completion callback routine was registered.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                    <descr>
+                        A unique application invocation context that will be
+                        supplied to the asynchronous completion callback routine.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                    <descr>
+                        Indicates whether the application requires an
+                        asynchronous completion callback for this
+                        API function invocation. When errorReporting is set
+                        to NPF_REPORT_ERRORS, the application cannot make any
+                        arp3mptions about when all the requests in the call
+                        will be completed.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                    <descr>
+                        Forwarding element handle
+                    </descr>
+		</param>
+                <param io="in" type="NPF_F_rp3LinkId_t" name="linkId">
+                    <descr>
+                        RP3 link identifier.
+                    </descr>
+                </param>
+
+
+                <return>
+                    <descr>
+                        Error code indicating whether the function was successful:
+                    </descr>
+                    <retval name="NPF_NO_ERROR">
+                        <descr>
+                            The operation is in progress.
+                            Detailed operation status will be returned in a completion callback.
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_UNKNOWN">
+                        <descr>
+                            Operation did not complete successfully because of problems
+                            encountered when handling the input parameters.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                        <descr>
+                            A function was invoked with a callback handle that did not
+                            correspond to a valid NPF callback handle as returned by
+                            a registration function.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+		</return>
+		
+		<callback>
+                    <descr>
+                        The returned callback type is NPF_F_RP3_LINK_RTT_GET, which reports the measured 
+                        round trip delay for this link.
+                        Possible return codes are:                        
+                    </descr>
+                    <retval name="NPF_NO_ERROR">
+                        <descr>
+                            Operation completed successfully.
+                            The callback data structure contains information about all images of the specified type. 
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_UNKNOWN">
+                        <descr>
+                            Operation did not complete successfully because of problems
+                            encountered when handling the input parameters.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+		</callback>
+            </func>
+
+
+            <func type="NPF_error_t" name="NPF_F_rp3HwReset" xdrid="RPC_RP3_FAPI_HW_RESET" brief="Request Remote Radio Unit (RRU) Hardware Reset">
+		<descr>
+                    This function requests a virtual hardware reset of the peer RRU unit
+                    connected to the specified RP3 link.                        
+                </descr>        
+		<param io="inout" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+                    <descr>
+                        The unique identifier provided to the application
+                        when the completion callback routine was registered.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_correlator_t" name="correlator" xdr="no">
+                    <descr>
+                        A unique application invocation context that will be
+                        supplied to the asynchronous completion callback routine.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_errorReporting_t" name="errorReporting" xdr="no">
+                    <descr>
+                        Indicates whether the application requires an
+                        asynchronous completion callback for this
+                        API function invocation. When errorReporting is set
+                        to NPF_REPORT_ERRORS, the application cannot make any
+                        arp3mptions about when all the requests in the call
+                        will be completed.
+                    </descr>
+		</param>
+		<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                    <descr>
+                        Forwarding element handle
+                    </descr>
+		</param>
+                <param io="in" type="NPF_F_rp3LinkId_t" name="linkId">
+                    <descr>
+                        RP3 link identifier.
+                    </descr>
+                </param>
+
+                <return>
+                    <descr>
+                        Error code indicating whether the function was successful:
+                    </descr>
+                    <retval name="NPF_NO_ERROR">
+                        <descr>
+                            The operation is in progress.
+                            Detailed operation status will be returned in a completion callback.
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_UNKNOWN">
+                        <descr>
+                            Operation did not complete successfully because of problems
+                            encountered when handling the input parameters.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                        <descr>
+                            A function was invoked with a callback handle that did not
+                            correspond to a valid NPF callback handle as returned by
+                            a registration function.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+		</return>
+		
+		<callback>
+                    <descr>
+                        The returned callback type is NPF_F_RP3_HW_RESET.
+                        Possible return codes are:                        
+                    </descr>
+                    <retval name="NPF_NO_ERROR">
+                        <descr>
+                            Operation completed successfully.
+                            The callback data structure contains information about all images of the specified type. 
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_UNKNOWN">
+                        <descr>
+                            Operation did not complete successfully because of problems
+                            encountered when handling the input parameters.
+                            Callback function should not be expected
+                        </descr>
+                    </retval>
+		</callback>
+            </func>
+           
+    </section>
+
+        <section name="Completion Callbacks">
+
+            <func name="NPF_F_rp3Register" type="NPF_error_t" class="cback_register">
+                <descr>
+                    Callback Registration.
+                    This function registers a callback completion function associated with
+                    RP3 FAPI configuration functions. The function allows the application
+                    to register a completion callback function for the related callback category,
+                    and to associate a unique callback handle and application context.
+                    Upper layers can register multiple callback functions using this function.
+                    The callback function is identified by a userContext and callbackFunc pair.
+                    For each pair, a unique callbackHandle is assigned for future
+                    reference. Because the callback function is identified by both userContext and
+                    callbackFunc, duplicate registration of the same callback function with a different
+                    userContext is allowed. Also, the same userContext can be shared among different
+                    callback functions. Duplicate registration of the same pair of userContext and callbackFunc
+                    has no effect; it will output a handle that is already assigned to the pair
+                    and return NPF_E_ALREADY_REGISTERED.
+                </descr>
+                <param io="in" type="NPF_userContext_t" name="userContext">
+                    <descr>
+                        User defined context provided at the callback registration time.
+                        The exact value will be provided back to the registered completion
+                        callback function as its first parameter when it is called.
+                        Upper layers can assign any value to the userContext and the
+                        value is completely opaque to the RP3 implementation.
+                    </descr>
+                </param>
+                <param io="in" type="NPF_F_rp3CallbackFunc_t" name="callbackFunc">
+                    <descr>
+                        The pointer to the completion callback function to be registered.
+                    </descr>
+                </param>
+                <param io="out" type="NPF_callbackHandle_t*" name="callbackHandle">
+                    <descr>
+                        Returned callback handle. The unique identifier assigned for
+                        the registered userContext and callbackFunc pair. The upper layer
+                        will use this handle to specify which callback function to be called
+                        when invoking asynchronous RP3 FAPI functions. It will also
+                        be used when deregistering the userContext and callbackFunc pair.
+                    </descr>
+                </param>
+                <return>
+                    <descr>Possible return codes are:</descr>
+                    <retval name="NPF_NO_ERROR" brief="Indicates successful registration."/>
+                    <retval name="NPF_E_BAD_CALLBACK_FUNCTION" brief="Indicates invalid parameter for callback function."/>
+                    <retval name="NPF_E_CALLBACK_ALREADY_REGISTERED" brief="Indicates duplicated registration."/>
+                    <retval name="NPF_E_UNKNOWN" brief="Indicates an error other than above."/>
+                </return>
+            </func>
+
+            <func name="NPF_F_rp3Deregister" class="cback_deregister" type="NPF_error_t">
+                <descr>
+                    Callback Deregistration.
+                    This function deregisters a completion callback function associated with
+                    RP3 FAPI configuration functions. The function allows the application to
+                    deregister the callback function that is associated with this callback handle.
+                </descr>
+                <param io="in" type="NPF_callbackHandle_t" name="callbackHandle">
+                    <descr>
+                        Handle of the callback function to be deregistered.
+                    </descr>
+                </param>
+                <return>
+                    <descr>Possible return codes are:</descr>
+                    <retval name="NPF_NO_ERROR" brief="Indicates successful deregistration."/>
+                    <retval name="NPF_E_BAD_CALLBACK_HANDLE" brief="Indicates passing invalid handle."/>
+                    <retval name="NPF_E_UNKNOWN" brief="Indicates an error other than above."/>
+                </return>
+            </func>
+
+        </section>
+
+<section name="Event Notifications">
+
+            <func name="NPF_F_rp3EventRegister" class="event_register" type="NPF_error_t" xdrid="RPC_RP3_FAPI_EVENT_REGISTER">
+                <descr>
+                    Event Callback Registration.
+                    This function registers a status event handler to receive
+                    notifications of events related to RP3 functionality.
+                    This function operates in a synchronous manner.
+                </descr>
+		<param io="in" type="NPF_FEHandle_t" name="feHandle" xdr="no">
+                    <descr>
+                        Forwarding element handle
+                    </descr>
+		</param>
+                <param io="in" type="NPF_userContext_t" name="userContext" xdr="no">
+                    <descr>
+                        The context item provided to the event callback routine
+                        when it is invoked.
+                    </descr>
+                </param>
+                <param io="in" type="NPF_F_rp3EventCallFunc_t" name="eventCallFunc" xdr="no">
+                    <descr>
+                        The function pointer to the event callback function
+                        to be called for events.
+                    </descr>
+                </param>
+                <param io="out" type="NPF_callbackHandle_t*" name="callbackHandle" xdr="no">
+                    <descr>
+                        The unique identifier related to this registration.
+                    </descr>
+                </param>
+                <return>
+                    <descr>Possible return codes are:</descr>
+                    <retval name="NPF_NO_ERROR" brief="The registration completed successfully."/>
+                    <retval name="NPF_E_BAD_CALLBACK_FUNCTION">
+                        <descr>
+                            The registration was invoked with a function
+                            pointer parameter that was invalid.
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_CALLBACK_ALREADY_REGISTERED">
+                        <descr>
+                            The registration was invoked with
+                            a pair composed of a function pointer and a user context which was previously
+                            used for an identical registration.
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_UNKNOWN" brief="Used to indicate other errors."/>
+                </return>
+            </func>
+
+            <func name="NPF_F_rp3EventDeregister" class="event_deregister" type="NPF_error_t" xdrid="RPC_RP3_FAPI_EVENT_DEREGISTER">
+                <descr>
+                    Event Callback Deregistration.
+                    This function deregisters an event handler that was previously
+                    registered to receive notifications of events for RP3 functionality.
+                    It can be invoked by any application that no longer needs to receive status events.
+                    Note: This function operates in a synchronous manner; there may be a timing window in which
+                    outstanding events continue to be delivered to the event routine after the deregistration
+                    function has been invoked. It is guaranteed the event function is not called
+                    after the deregister function has returned.
+                </descr>
+                <param io="in" type="NPF_callbackHandle_t" name="callbackHandle" xdr="no">
+                    <descr>
+                        The unique identifier returned to the application when the
+                        event callback routine was registered.
+                    </descr>
+                </param>
+                <return>
+                    <descr>Possible return codes are:</descr>
+                    <retval name="NPF_NO_ERROR" brief="The operation completed successfully."/>
+                    <retval name="NPF_E_BAD_CALLBACK_HANDLE">
+                        <descr>
+                            A function was invoked with a callback handle that did not
+                            correspond to a valid NPF callback handle as returned by a registration function.
+                        </descr>
+                    </retval>
+                    <retval name="NPF_E_UNKNOWN" brief="Indicates an error other than above."/>
+                </return>
+            </func>
+
+            </section>
+        </section>
+    </section>
+        
+</api>

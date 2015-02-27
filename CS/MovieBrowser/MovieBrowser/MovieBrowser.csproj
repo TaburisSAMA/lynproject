@@ -1,0 +1,300 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7CE369FC-D45F-4D56-ACAD-165E94103AF2}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MovieBrowser</RootNamespace>
+    <AssemblyName>MovieBrowser</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>mb.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <NoWin32Manifest>true</NoWin32Manifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="ObjectListView, Version=2.4.1.38133, Culture=neutral, PublicKeyToken=b1c5bf581481bcd4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Library\ObjectListView.dll</HintPath>
+    </Reference>
+    <Reference Include="RatingControl, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Library\RatingControl.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Configuration.Install" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="VistaUIApi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Library\VistaUIApi.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsFormsAero, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Controller\TextEventArgs.cs" />
+    <Compile Include="Controller\VirtualMovieFolderSerializer.cs" />
+    <Compile Include="Forms\Db\MovieListForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Db\MovieListForm.Designer.cs">
+      <DependentUpon>MovieListForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Dialogs\LoginForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Dialogs\LoginForm.Designer.cs">
+      <DependentUpon>LoginForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Db\UsersForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Db\UsersForm.Designer.cs">
+      <DependentUpon>UsersForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\Keyword.cs" />
+    <Compile Include="Parser\ImdbParser.cs" />
+    <Compile Include="Controller\MovieBrowserController.cs" />
+    <Compile Include="Controller\MovieEventArgs.cs" />
+    <Compile Include="Forms\Dialogs\IgnoreListForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Dialogs\IgnoreListForm.Designer.cs">
+      <DependentUpon>IgnoreListForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Db\KeywordsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Db\KeywordsForm.Designer.cs">
+      <DependentUpon>KeywordsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SearchForm.Designer.cs">
+      <DependentUpon>SearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\UpdateMovieInformation.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\UpdateMovieInformation.Designer.cs">
+      <DependentUpon>UpdateMovieInformation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\Movie.cs" />
+    <Compile Include="Forms\MovieBrowserSimple.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MovieBrowserSimple.Designer.cs">
+      <DependentUpon>MovieBrowserSimple.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\MovieComparer.cs" />
+    <Compile Include="Model\MoviesDb.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MoviesDb.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Util\ComponentUtility.cs" />
+    <Compile Include="Util\InstallDb.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Util\InstallDb.Designer.cs">
+      <DependentUpon>InstallDb.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Forms\Db\MovieListForm.resx">
+      <DependentUpon>MovieListForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Dialogs\IgnoreListForm.resx">
+      <DependentUpon>IgnoreListForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Db\KeywordsForm.resx">
+      <DependentUpon>KeywordsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Dialogs\LoginForm.resx">
+      <DependentUpon>LoginForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MovieBrowserSimple.resx">
+      <DependentUpon>MovieBrowserSimple.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SearchForm.resx">
+      <DependentUpon>SearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\UpdateMovieInformation.resx">
+      <DependentUpon>UpdateMovieInformation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Db\UsersForm.resx">
+      <DependentUpon>UsersForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Database\MovieDb.sqlite" />
+    <EntityDeploy Include="Model\MoviesDb.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>MoviesDb.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <None Include="Properties\DataSources\MovieBrowser.Model.MovieDbEntities.datasource" />
+    <None Include="Properties\DataSources\MovieBrowser.Model.User.datasource" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CommonUtilities\CommonUtilities.csproj">
+      <Project>{C3ABB3E2-C7A5-4E6F-BFD0-D246ED83E1BC}</Project>
+      <Name>CommonUtilities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ShellLib\ShellLib.csproj">
+      <Project>{773B1EF8-E5F0-45CA-96E8-20AE06716026}</Project>
+      <Name>ShellLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\folder_add.png" />
+    <None Include="Images\save.png" />
+    <None Include="Images\refresh.png" />
+    <None Include="Images\imdb.png" />
+    <None Include="Images\google.png" />
+    <None Include="Images\delete.png" />
+    <None Include="Images\explorer.png" />
+    <None Include="Images\ignore_list.png" />
+    <None Include="Images\pen_drives.png" />
+    <None Include="Images\update.png" />
+    <None Include="Images\movie_db.png" />
+    <None Include="Images\check_list_dis.png" />
+    <None Include="Images\hate_it_dis.png" />
+    <None Include="Images\like_it_dis.png" />
+    <None Include="Images\seen_it_dis.png" />
+    <None Include="Images\have_it_dis.png" />
+    <None Include="Images\send_to.png" />
+    <None Include="Images\like_it.png" />
+    <None Include="Images\seen_it.png" />
+    <None Include="Images\have_it.png" />
+    <None Include="Images\pb_movie.png" />
+    <None Include="Images\pb_update.png" />
+    <None Include="Images\add.png" />
+    <None Include="Images\modify.png" />
+    <None Include="Images\refresh16.png" />
+    <None Include="Images\intel.png" />
+    <Content Include="Images\list.png" />
+    <Content Include="Images\mb.ico" />
+    <Content Include="Images\xml.png" />
+    <Content Include="Library\System.Data.SQLite.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="mb.ico" />
+    <None Include="Images\check_list.png" />
+    <None Include="Images\hate_it.png" />
+    <Content Include="Library\ObjectListView.dll" />
+    <Content Include="Library\RatingControl.dll" />
+    <Content Include="Library\VistaUIApi.dll" />
+    <Content Include="Library\WindowsFormsAero.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Repository\" />
+    <Folder Include="Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.SQL.Server.Compact.3.5">
+      <Visible>False</Visible>
+      <ProductName>SQL Server Compact 3.5 SP2</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

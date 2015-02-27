@@ -1,0 +1,45 @@
+MY-COMPANY-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE, enterprises, Integer32 FROM SNMPv2-SMI;
+
+-- root of our MIB will point to enterprises
+
+myCompanyMIB MODULE-IDENTITY
+    LAST-UPDATED
+        "200804230000Z"
+    ORGANIZATION
+        "vachacz.blogspot.com"
+    CONTACT-INFO
+        "email: vachacz@gmail.com"
+    DESCRIPTION
+        "Example MIB"
+    REVISION
+        "200804230000Z"
+    DESCRIPTION
+        "First and final revision"
+    ::= { enterprises 3011 }
+
+-- lets group all scalarValues in one node of our MIB
+
+scalarValues OBJECT IDENTIFIER ::= { myCompanyMIB 1 }
+
+-- time to define scalar values
+
+hostLoggedUsers OBJECT-TYPE
+    SYNTAX       Integer32 (0..65535)
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION
+        "Number of actually logged users on"
+    ::= { scalarValues 1 }
+
+hostName OBJECT-TYPE
+    SYNTAX       OCTET STRING
+    MAX-ACCESS   read-only
+    STATUS       current
+    DESCRIPTION
+        "Actual hostname"
+    ::= { scalarValues 2 }
+
+END

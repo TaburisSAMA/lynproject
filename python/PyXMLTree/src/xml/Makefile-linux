@@ -1,0 +1,110 @@
+###############################################################################
+# INTEL CONFIDENTIAL
+#
+# Copyright 2001 - 2006 Intel Corporation All Rights Reserved.
+#
+# The source code contained or described herein and all documents related to
+# the source code ("Material") are owned by Intel Corporation or its suppliers
+# or licensors.
+#
+# Title to the Material remains with Intel Corporation or its suppliers and
+# licensors. The Material contains trade secrets and proprietary and
+# confidential information of Intel or its suppliers and licensors.
+# The Material is protected by worldwide copyright and trade secret laws and
+# treaty provisions. No part of the Material may be used, copied, reproduced,
+# modified, published, uploaded, posted, transmitted, distributed, or disclosed 
+# in any way without Intel's prior express written permission.
+#
+# No license under any patent, copyright, trade secret or other intellectual
+# property right is granted to or conferred upon you by disclosure or delivery
+# of the Materials, either expressly, by implication, inducement, estoppel or
+# otherwise. Any license under such intellectual property rights must be
+# express and approved by Intel in writing.
+#
+###############################################################################
+
+BASE_XML_FILES = \
+  npf_f_error.xml \
+  npf_f_stats.xml
+
+OAM_XML_FILES?=npf_f_wmax_phy.xml npf_f_ssu.xml npf_f_oam.xml npf_f_rp3.xml
+
+WMAX_XML_FILES?=npf_f_wmax_bscp.xml npf_f_sysinfo.xml npf_f_wmax_mac_cps.xml npf_f_wmax_bscp_bsn.xml 
+
+WMAX_XML_EXTRA_FILES?=
+
+CC_XML_FILES =$(OAM_XML_FILES) $(WMAX_XML_FILES) $(WMAX_XML_EXTRA_FILES)
+
+XML_FILES = $(BASE_XML_FILES) $(CC_XML_FILES)
+XML_FILES_DEBUG = $(BASE_XML_FILES) $(OAM_XML_FILES)
+
+WRAPPERS_BASE_DIR = ../library/transport_wrappers
+
+XDR_DIR = $(WRAPPERS_BASE_DIR)/xdr
+H_DIR = ../include/fapi
+CPP_DIR = ../library/fapi_debug/source
+CPW_DIR = $(WRAPPERS_BASE_DIR)/cpw/source
+DPW_DIR = $(WRAPPERS_BASE_DIR)/dpw/source
+
+BASE_XDR_FILES = $(foreach file,$(BASE_XML_FILES),$(XDR_DIR)/x_$(file:.xml=.x))
+BASE_H_FILES = $(foreach file,$(BASE_XML_FILES),$(H_DIR)/$(file:.xml=.h))
+XDR_FILES = $(foreach file,$(XML_FILES),$(XDR_DIR)/x_$(file:.xml=.x))
+H_FILES = $(foreach file,$(XML_FILES),$(H_DIR)/$(file:.xml=.h))
+DEBUG_H_FILES = $(foreach file,$(XML_FILES),$(H_DIR)/$(file:.xml=_debug.h)) 
+DEBUG_CPP_FILES = $(foreach file,$(XML_FILES_DEBUG),$(CPP_DIR)/$(file:.xml=_debug.cpp))
+CPW_FILES = $(foreach file,$(CC_XML_FILES),$(CPW_DIR)/$(file:.xml=_cp_rpc_fapi.c))
+DPW_FILES = $(foreach file,$(CC_XML_FILES),$(DPW_DIR)/$(file:.xml=_dp_rpc_fapi.c))
+
+
+all lib: xdr_files h_files cpw_files dpw_files
+	@echo Done. All files have been generated.
+
+xdr_files: $(XDR_FILES)
+	$(MAKE) -f Makefile-linux -C $(XDR_DIR) src
+
+base_files: $(BASE_XDR_FILES)
+
+h_files: $(H_FILES) $(DEBUG_H_FILES)
+
+base_h_files: $(BASE_H_FILES)
+
+cpw_files: $(CPW_FILES) $(DEBUG_CPP_FILES)
+
+dpw_files: $(DPW_FILES)
+
+
+
+$(XDR_DIR):
+	mkdir -p $(XDR_DIR)
+$(H_DIR):
+	mkdir -p $(H_DIR)
+$(CPW_DIR):
+	mkdir -p $(CPW_DIR)
+$(DPW_DIR):
+	mkdir -p $(DPW_DIR)
+
+$(XDR_FILES):$(XDR_DIR)/x_%.x:fapi/%.xml $(XDR_DIR)
+	./tools/xmlfapi2any.py -x $< -o $@
+
+$(H_FILES):$(H_DIR)/%.h:fapi/%.xml $(H_DIR)
+	./tools/xmlfapi2any.py -h $< -o $@
+
+$(DEBUG_H_FILES):$(H_DIR)/%_debug.h:fapi/%.xml $(H_DIR)
+	./tools/xmlfapi2any.py -e $< -o $@
+
+$(DEBUG_CPP_FILES):$(CPP_DIR)/%_debug.cpp:fapi/%.xml $(CPP_DIR)
+	./tools/xmlfapi2any.py -g $< -o $@
+
+$(CPW_FILES):$(CPW_DIR)/%_cp_rpc_fapi.c:fapi/%.xml $(CPW_DIR)
+	./tools/xmlfapi2any.py -c $< -o $@
+
+$(DPW_FILES):$(DPW_DIR)/%_dp_rpc_fapi.c:fapi/%.xml $(DPW_DIR)
+	./tools/xmlfapi2any.py -d $< -o $@
+
+
+clean:
+	for file in $(XDR_FILES) $(H_FILE) $(DEBUG_H_FILES) $(CPW_FILE) $(DPW_FILES) $(DEBUG_CPP_FILES) ; \
+	do  \
+		rm $$file; \
+	done
+	$(MAKE) -f Makefile-linux -C $(XDR_DIR) clean 

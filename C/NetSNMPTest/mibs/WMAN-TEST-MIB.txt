@@ -1,0 +1,930 @@
+WMAN-TEST-MIB DEFINITIONS ::= BEGIN
+                                    
+  IMPORTS
+        MODULE-IDENTITY,
+        OBJECT-TYPE,
+        NOTIFICATION-TYPE,
+        Unsigned32, Integer32
+                FROM SNMPv2-SMI
+        SnmpAdminString
+                FROM SNMP-FRAMEWORK-MIB
+        TEXTUAL-CONVENTION,
+        RowStatus, TruthValue,
+        TimeStamp, DateAndTime        
+                FROM SNMPv2-TC
+        InetAddressType, InetAddress
+                FROM INET-ADDRESS-MIB
+        OBJECT-GROUP,
+        MODULE-COMPLIANCE,
+        NOTIFICATION-GROUP
+                FROM SNMPv2-CONF;
+
+wmanTestMib MODULE-IDENTITY
+        LAST-UPDATED    "200508020000Z" -- August 02, 2005
+        ORGANIZATION    "IEEE 802.16"
+        CONTACT-INFO
+            "WG E-mail: stds-802-16@ieee.org
+             WG Chair:  Roger B. Marks
+             Postal:    (U.S.) National Institute 
+			 of Standards and Technology
+             E-mail:    r.b.marks@ieee.org
+             
+             TGf Chair: Phillip Barber
+             Postal:    Huawei Technoligies Co., Ltd.
+             E-mail:    pbarber@futurewei.com             
+
+             Editor:    Joey Chou
+             Postal:    Intel Corporation
+                        5000 W. Chandler Blvd,
+                        Chandler, AZ 85227, USA
+             E-mail:    joey.chou@intel.com"             
+        DESCRIPTION
+            "This material is from IEEE Std 802.16f-2005
+             Copyright (c) 2005 IEEE.
+             This MIB Module defines device related managed objects
+             for IEEE 802.16-2004 based Subscriber Station
+             and Base Station, and is under       
+             iso(1).std(0).iso8802(8802).wman(16).wmanTestMib(1)"
+        REVISION        "200508020000Z"
+        DESCRIPTION
+            "The first version of WMAN-DEV-MIB module."
+        ::= {iso std(0) iso8802(8802) wman(16) 2 }
+        
+wmanTestMibObjects     OBJECT IDENTIFIER ::= { wmanTestMib 1 }
+wmanTestBsObjects      OBJECT IDENTIFIER ::= { wmanTestMibObjects 1 }
+wmanTestSsObjects      OBJECT IDENTIFIER ::= { wmanTestMibObjects 2 }
+wmanTestCommonObjects  OBJECT IDENTIFIER ::= { wmanTestMibObjects 3 }
+
+-- Textual Conventions
+WmanTestEventSeverity ::= TEXTUAL-CONVENTION
+        STATUS      current
+        DESCRIPTION     
+            "wmanTestEventSeverity defines the alarm Severity of an
+             event."
+        SYNTAX      INTEGER {emergency(1),
+                             alert(2),
+                             critical(3),
+                             error(4),
+                             warning(5),
+                             notice(6),
+                             informational(7),
+                             debug(8)}
+
+wmanTestBsSoftwareUpgradeTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF WmanTestBsSoftwareUpgradeEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table contains objects associated with BS software
+             upgrades."
+        ::= { wmanTestBsObjects 1 }
+
+wmanTestBsSoftwareUpgradeEntry OBJECT-TYPE
+        SYNTAX      WmanTestBsSoftwareUpgradeEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table may have multiple entries, and is indexed
+             by wmanTestBsDeviceIndex. "
+        INDEX       { wmanTestBsDeviceIndex }
+        ::= { wmanTestBsSoftwareUpgradeTable 1 }
+		
+WmanTestBsSoftwareUpgradeEntry ::= SEQUENCE {
+        wmanTestBsDeviceIndex                    INTEGER,
+        wmanTestBsVendorId                       OCTET STRING,
+        wmanTestBsHwId                           OCTET STRING,
+        wmanTestBsCurrentSwVersion               OCTET STRING,
+        wmanTestBsDownloadSwVersion              OCTET STRING,
+        wmanTestBsUpgradeFileName                OCTET STRING,
+        wmanTestBsSoftwareUpgradeAdminState      INTEGER,
+        wmanTestBsDownloadSwProgress             INTEGER,
+        wmanTestBsSoftwareUpgradeTimeStamp       DateAndTime}
+
+wmanTestBsDeviceIndex OBJECT-TYPE
+        SYNTAX      INTEGER (1 .. 10)
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "An index identifies a BS device."
+        ::= { wmanTestBsSoftwareUpgradeEntry 1 }
+		
+wmanTestBsVendorId OBJECT-TYPE
+        SYNTAX      OCTET STRING (SIZE (2..256))
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "This value identifies the managed BS vendor to which
+             the software upgrade is to be applied."
+        ::= { wmanTestBsSoftwareUpgradeEntry 2 }
+		
+wmanTestBsHwId OBJECT-TYPE
+        SYNTAX      OCTET STRING(SIZE (2..256))
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "This value identifies the hardware version to which
+             the software upgrade is to be applied."
+        ::= { wmanTestBsSoftwareUpgradeEntry 3 }
+		
+wmanTestBsCurrentSwVersion OBJECT-TYPE
+        SYNTAX      OCTET STRING(SIZE (2..256))
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "This value identifies the version of software
+             currently running in the BS. The value is
+             administered by the vendor identified in the Vendor
+             ID field. It should be defined by the vendor to be 
+             unique with respect to a given hardware ID. After the
+             downloaded software being successfully activated, the
+             BS shall copy wmanTestBsDownloadSwVersion into
+             wmanTestBsCurrentSwVersion."
+        ::= { wmanTestBsSoftwareUpgradeEntry 4 }
+		
+wmanTestBsDownloadSwVersion OBJECT-TYPE
+        SYNTAX      OCTET STRING(SIZE (2..256))
+        MAX-ACCESS  read-write
+        STATUS      current
+        DESCRIPTION
+            "This value identifies the version of software to be
+             downloaded. The value is administered by the vendor
+             identified in the Vendor ID field. It should be defined
+             by the vendor to be unique with respect to a given
+             hardware ID. This value shall be initialized before 
+             wmanTestBsSoftwareUpgradeState is set to Download or
+             Activate."
+        ::= { wmanTestBsSoftwareUpgradeEntry 5 }
+		
+wmanTestBsUpgradeFileName OBJECT-TYPE
+        SYNTAX      OCTET STRING(SIZE (2..256))
+        MAX-ACCESS  read-write
+        STATUS      current
+        DESCRIPTION
+            "The filename is a fully qualified directory path name,
+             indicating where the software is located."
+        ::= { wmanTestBsSoftwareUpgradeEntry 6 }
+		
+wmanTestBsSoftwareUpgradeAdminState OBJECT-TYPE
+        SYNTAX      INTEGER {null(0),
+                             download(1),
+                             activate(2)}
+        MAX-ACCESS  read-write
+        STATUS      current
+        DESCRIPTION
+            "Setting this value to Download causes the BS to initiate
+             the software download from  a server (e.g. software image
+             server). Setting this value to Activate will activate the
+             newly downloaded BS software. Reading this object returns
+             the last operation. The download and activation procedure
+             is vendor specific which will not be defined in this
+             standard."
+        DEFVAL      { null }
+        ::= { wmanTestBsSoftwareUpgradeEntry 7 }
+		
+wmanTestBsDownloadSwProgress OBJECT-TYPE
+        SYNTAX      INTEGER (0 .. 100)
+        UNITS       "%"
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "This value indicates the progress of software download in
+             percentage. For example, 50 means 50% of BS software has
+             been downloaded."
+        ::= { wmanTestBsSoftwareUpgradeEntry 8 }
+
+wmanTestBsSoftwareUpgradeTimeStamp OBJECT-TYPE
+        SYNTAX      DateAndTime
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "This time stamp indicates when the BS software was last
+             downloaded or activated."
+        ::= { wmanTestBsSoftwareUpgradeEntry 9 }
+                             
+--
+-- Base station Notification Group
+-- wmanTestBsNotification contains the BS SNMP Trap objects
+--
+wmanTestBsNotification 		  OBJECT IDENTIFIER ::= {wmanTestBsObjects 2}
+wmanTestBsTrapControl    OBJECT IDENTIFIER ::= {wmanTestBsNotification 1}
+wmanTestBsTrapDefinition OBJECT IDENTIFIER ::= {wmanTestBsNotification 2}
+
+-- This object groups all NOTIFICATION-TYPE objects for BS. 
+-- It is defined following RFC2758 sections 8.5 and 8.6 
+-- for the compatibility with SNMPv1.
+wmanTestBsTrapPrefix OBJECT IDENTIFIER ::= { wmanTestBsTrapDefinition 0 }
+
+wmanTestBsTrapControlRegister    OBJECT-TYPE
+        SYNTAX      BITS {wmanTestBsEvent(0),
+                          wmanTestBsLogBuffExceedThresholdTrapControl(1)}
+        MAX-ACCESS read-write
+        STATUS     current
+        DESCRIPTION
+            "The object is used to enable or disable Base Station traps.
+             From left to right, the set bit indicates the corresponding
+             Base Station trap is enabled."
+        ::= { wmanTestBsTrapControl 1 }
+
+--
+-- Base station Notification Trap Definitions
+--
+wmanTestBsEventTrap NOTIFICATION-TYPE
+        OBJECTS     {wmanTestCmnEventId,
+                     wmanTestCmnEventLogIndex,
+                     wmanTestCmnEventLoggedTime,
+                     wmanTestCmnEventDescription,
+                     wmanTestCmnEventSeverity}
+        STATUS      current
+        DESCRIPTION
+            "This trap is sent when an event is logged into the table
+             wmanTestCmnEventLogTable."
+        ::= { wmanTestBsTrapPrefix 1 }
+
+wmanTestBsLogBuffExceedThresholdTrap NOTIFICATION-TYPE
+        OBJECTS      {wmanTestCmnEventId,
+                      wmanTestCmnEventLogResidualBuffThreshold}
+        STATUS      current
+        DESCRIPTION
+            "This trap reports that the residual size of the log buffer
+             is lower than the configured threshold."
+        ::= { wmanTestBsTrapPrefix 2 }
+                        
+--
+-- SS object group – containing tables and objects to be implemented in 
+-- the Subscriber station
+wmanTestSsConfigFileEncodingTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF WmanTestSsConfigFileEncodingEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table contains configuration file encoding
+            information of the SS."
+        REFERENCE
+            "Subclause 11.2 in IEEE Std 802.16-2004"
+        ::= { wmanTestSsObjects 1 }
+
+wmanTestSsConfigFileEncodingEntry OBJECT-TYPE
+        SYNTAX      WmanTestSsConfigFileEncodingEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+              "This table has only one entry, and is indexed
+              by wmanTestSsDeviceIndex."
+        INDEX { wmanTestSsDeviceIndex }
+        ::= { wmanTestSsConfigFileEncodingTable 1 }
+
+WmanTestSsConfigFileEncodingEntry ::= SEQUENCE {
+        wmanTestSsDeviceIndex                    INTEGER,
+        wmanTestSsMicConfigSetting               OCTET STRING,
+        wmanTestSsVendorId                       OCTET STRING,
+        wmanTestSsHwId                           OCTET STRING,        
+        wmanTestSsSwVersion                      OCTET STRING,
+        wmanTestSsUpgradeFileName                OCTET STRING,
+        wmanTestSsSwUpgradeTftpServer            InetAddress,
+        wmanTestSsTftpServerTimeStamp            DateAndTime}        
+
+wmanTestSsDeviceIndex  OBJECT-TYPE
+        SYNTAX      INTEGER (1..1)
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION 
+            "An arbitrary index. Must have value of 1."
+        ::= { wmanTestSsConfigFileEncodingEntry 1 }
+                
+wmanTestSsMicConfigSetting OBJECT-TYPE
+        SYNTAX      OCTET STRING (SIZE(20))
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "The value field contains the SS MIC code. This is used
+            to detect unauthorized modification or corruption of
+            the configuration file."
+        ::= { wmanTestSsConfigFileEncodingEntry 2 }
+
+wmanTestSsVendorId OBJECT-TYPE
+        SYNTAX      OCTET STRING (SIZE(3))
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "This value identifies the managed SS vendor to which the
+            software upgrade is to be applied."
+        ::= { wmanTestSsConfigFileEncodingEntry 3 }
+        
+wmanTestSsHwId OBJECT-TYPE
+        SYNTAX      OCTET STRING (SIZE(0..255))
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "This value identifies the hardware version to which the
+            software upgrade is to be applied."
+        ::= { wmanTestSsConfigFileEncodingEntry 4 }
+        
+wmanTestSsSwVersion OBJECT-TYPE
+        SYNTAX      OCTET STRING (SIZE(0..255))
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "This value identifies the software version of the software
+             upgrade file. The value is administered by the vendor
+             identifed in the Vendor ID field. It should be defined by
+             the vendor to be unique with respect to a given hardware
+             ID."
+        ::= { wmanTestSsConfigFileEncodingEntry 5 }
+        
+wmanTestSsUpgradeFileName OBJECT-TYPE
+        SYNTAX      OCTET STRING (SIZE(0..255))
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "The filename is a fully qualified directory path
+            name which is in a format appropriate to the server."
+        ::= { wmanTestSsConfigFileEncodingEntry 6 }
+        
+wmanTestSsSwUpgradeTftpServer OBJECT-TYPE
+        SYNTAX      InetAddress
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "This object is the IP address of the TFTP server on
+            which the software upgrade file for the SS resides."
+        ::= { wmanTestSsConfigFileEncodingEntry 7 }
+        
+wmanTestSsTftpServerTimeStamp OBJECT-TYPE
+        SYNTAX      DateAndTime
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "This is the sending time of the configuration file in
+            seconds. The definition of time is as in IETF RFC 868."
+        ::= { wmanTestSsConfigFileEncodingEntry 8 }
+
+--
+-- Subscriber station Notification Group
+-- wmanTestSsNotificationObjects contains the SS SNMP Trap objects
+--
+wmanTestSsNotification    OBJECT IDENTIFIER ::= {wmanTestSsObjects 2}
+wmanTestSsTrapControl     OBJECT IDENTIFIER ::= {wmanTestSsNotification 1}
+wmanTestSsTrapDefinitions OBJECT IDENTIFIER ::= {wmanTestSsNotification 2}
+
+-- This object groups all NOTIFICATION-TYPE objects for BS. 
+-- It is defined following RFC2758 sections 8.5 and 8.6 
+-- for the compatibility with SNMPv1.
+wmanTestSsTrapPrefix OBJECT IDENTIFIER ::= { wmanTestSsTrapDefinitions 0 }
+
+wmanTestSsTrapControlRegister    OBJECT-TYPE
+        SYNTAX      BITS {wmanTestSsEventTrapControl(0),
+                          wmanTestSsLogBuffExceedThresholdTrapControl(1)}
+        MAX-ACCESS  read-write
+        STATUS      current
+        DESCRIPTION
+             "The object is used to enable Subscriber Station traps.
+             From left to right, the set bit indicates the corresponding
+             Subscriber Station trap is enabled."
+        ::= { wmanTestSsTrapControl  1 }
+
+wmanTestSsEventTrap NOTIFICATION-TYPE
+        OBJECTS     {wmanTestCmnEventId,
+                     wmanTestCmnEventLogIndex,
+                     wmanTestCmnEventLoggedTime,
+                     wmanTestCmnEventDescription,
+                     wmanTestCmnEventSeverity}
+        STATUS      current
+        DESCRIPTION
+            "This trap is sent when an event is logged into the table
+             wmanTestSsEventLogTable."
+        ::= { wmanTestSsTrapPrefix 1 }
+
+wmanTestSsLogBufferExceedThresholdTrap NOTIFICATION-TYPE
+        OBJECTS     {wmanTestCmnEventId,
+                     wmanTestCmnEventLogResidualBuffThreshold }
+        STATUS      current
+        DESCRIPTION
+            "This trap reports that the residual size of the log
+             buffer is lower than the configured threshold."
+        ::= { wmanTestSsTrapPrefix 2 }
+        
+--
+-- Common Event Log Group to be implemented in Base Station
+-- and Subscriber Station 
+--
+wmanTestCmnEventLog OBJECT IDENTIFIER ::= { wmanTestCommonObjects 1 }
+
+--
+-- Event log configuration
+--
+wmanTestCmnEventLogConfigTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF WmanTestCmnEventLogConfigEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table defines the configurable parameters that are
+             required for the Event Log operation."
+        ::= { wmanTestCmnEventLog 1 }
+
+wmanTestCmnEventLogConfigEntry OBJECT-TYPE
+        SYNTAX      WmanTestCmnEventLogConfigEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "Event log configuration is indexed by
+             wmanTestCmnDeviceIndex."
+        INDEX       { wmanTestCmnDeviceIndex }
+        ::= { wmanTestCmnEventLogConfigTable 1 }
+
+WmanTestCmnEventLogConfigEntry ::= SEQUENCE {        
+        wmanTestCmnDeviceIndex                   INTEGER,
+        wmanTestCmnEventLogEntryLimit            INTEGER,
+        wmanTestCmnEventLifeTimeLimit            INTEGER,
+        wmanTestCmnEventLogEntryLimitPerEventId  INTEGER,
+        wmanTestCmnEventLogSeverityThreshold     WmanTestEventSeverity,
+        wmanTestCmnEventLogWrapAroundBuffEnable  TruthValue,
+        wmanTestCmnEventLogLatestEvent           Unsigned32,
+        wmanTestCmnEventLogPersistenceSupported  TruthValue,
+        wmanTestCmnEventLogResidualBuffThreshold INTEGER}
+
+wmanTestCmnDeviceIndex  OBJECT-TYPE
+        SYNTAX      INTEGER (1 .. 10)
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION 
+            "An index identifies the BS or SS device."
+        ::= { wmanTestCmnEventLogConfigEntry 1 }
+                
+wmanTestCmnEventLogEntryLimit    OBJECT-TYPE
+        SYNTAX      INTEGER (1 .. 10000)
+        MAX-ACCESS  read-write
+        STATUS      current
+        DESCRIPTION
+            "The maximum number of event entries that may be held
+             in wmanTestCmnEventLogTable. If an application changes
+             the limit while there are events in the log, the
+             oldest events must be discarded to bring the log down
+             to the new limit."
+        DEFVAL      { 100 }
+        ::= { wmanTestCmnEventLogConfigEntry 2 }
+
+wmanTestCmnEventLifeTimeLimit    OBJECT-TYPE
+        SYNTAX      INTEGER (1 .. 10000)
+        UNITS       "minutes" 
+        MAX-ACCESS  read-write
+        STATUS      current
+        DESCRIPTION
+            "The number of minutes an event should be kept in the log
+             before it is automatically removed. If an application
+             changes the value of wmanTestCmnEventLifeTimeLimit, events
+             that are older than the new time may be discarded to meet
+             the new lifetime. A value of 0 means lifetime limit."
+        DEFVAL      { 1440 }
+        ::= { wmanTestCmnEventLogConfigEntry 3 }
+        
+wmanTestCmnEventLogEntryLimitPerEventId    OBJECT-TYPE
+        SYNTAX      INTEGER  (1 .. 100) 
+        MAX-ACCESS  read-write
+        STATUS      current
+        DESCRIPTION
+            "The number of log entries per event that can be
+             logged."
+        DEFVAL      { 10 }
+        ::= { wmanTestCmnEventLogConfigEntry 4 }
+        
+wmanTestCmnEventLogSeverityThreshold    OBJECT-TYPE
+        SYNTAX      WmanTestEventSeverity
+        MAX-ACCESS  read-write
+        STATUS      current
+        DESCRIPTION
+            "This object defines the minimum severity level of the
+             event that will be logged into the buffer."
+        DEFVAL      { warning }
+        ::= { wmanTestCmnEventLogConfigEntry 5 }
+                
+wmanTestCmnEventLogWrapAroundBuffEnable    OBJECT-TYPE
+        SYNTAX      TruthValue
+        MAX-ACCESS  read-write
+        STATUS      current
+        DESCRIPTION
+            "True (1), indicates that the log buffer will be wrapped
+             around when the buffer is full."
+        DEFVAL      { true }
+        ::= { wmanTestCmnEventLogConfigEntry 6 }
+
+wmanTestCmnEventLogLatestEvent OBJECT-TYPE
+        SYNTAX      Unsigned32 (1..4294967295)
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "This object is the index pointing to the latest event in
+             wmanTestCmnEventLogTable"
+        DEFVAL      { 1 }
+        ::= { wmanTestCmnEventLogConfigEntry 7 }
+        
+wmanTestCmnEventLogPersistenceSupported    OBJECT-TYPE
+        SYNTAX      TruthValue
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "True (1), indicates that the Event Log persisted through
+             power cycle and reset."
+        ::= { wmanTestCmnEventLogConfigEntry 8 }
+
+wmanTestCmnEventLogResidualBuffThreshold OBJECT-TYPE
+        SYNTAX      INTEGER (1 .. 100)
+        MAX-ACCESS  read-write
+        STATUS      current
+        DESCRIPTION
+            "This object defines the configurable parameter that
+             describes the threshold ratio of the residual buffer to
+             the total log buffer. If the ratio exceeds the threshold,
+             system triggers the TRAP "
+        DEFVAL      { 20 }
+        ::= { wmanTestCmnEventLogConfigEntry 9 }
+
+--
+--      Events Table
+--                              
+wmanTestCmnEventTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF WmanTestCmnEventEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table provides the events that are supported by BS or SS."
+        ::= { wmanTestCmnEventLog 2 }
+
+wmanTestCmnEventEntry OBJECT-TYPE
+        SYNTAX      WmanTestCmnEventEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "Each entry in this table represents an event that can be
+             generated by BS or SS. It is indexed by wmanTestCmnDeviceIndex
+             and wmanTestCmnEventIdentifier."
+        INDEX       { wmanTestCmnDeviceIndex, wmanTestCmnEventIdentifier }
+        ::= { wmanTestCmnEventTable 1 }
+
+WmanTestCmnEventEntry ::= SEQUENCE {        
+        wmanTestCmnEventIdentifier               INTEGER,
+        wmanTestCmnEventDescription              SnmpAdminString,
+        wmanTestCmnEventSeverity                 WmanTestEventSeverity,
+        wmanTestCmnEventNotification             TruthValue,
+        wmanTestCmnEventNotificationOid          OBJECT IDENTIFIER}
+
+wmanTestCmnEventIdentifier OBJECT-TYPE
+        SYNTAX      INTEGER (1..100000)
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "A numeric value represents the Event Identifier."
+        ::= { wmanTestCmnEventEntry 1 }
+                
+wmanTestCmnEventDescription  OBJECT-TYPE
+        SYNTAX      SnmpAdminString
+        MAX-ACCESS  read-write
+        STATUS      current
+        DESCRIPTION
+            "This object describes the event."
+        ::= { wmanTestCmnEventEntry 2 }
+                
+wmanTestCmnEventSeverity  OBJECT-TYPE
+        SYNTAX      WmanTestEventSeverity
+        MAX-ACCESS  read-write
+        STATUS      current
+        DESCRIPTION
+            "This object describes the severity of such event.
+             The system will assign a severity for each event. But,
+             it can be configurable by NMS"
+        ::= { wmanTestCmnEventEntry 3 }
+                
+wmanTestCmnEventNotification  OBJECT-TYPE
+        SYNTAX      TruthValue
+        MAX-ACCESS  read-write
+        STATUS      current
+        DESCRIPTION
+            "An event notification will be reported when it is
+             True (1)."             
+        DEFVAL      { false }
+        ::= { wmanTestCmnEventEntry 4 }
+                        
+wmanTestCmnEventNotificationOid OBJECT-TYPE
+        SYNTAX      OBJECT IDENTIFIER
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "This is the object identifier of a NOTIFICATION-TYPE
+             object. If wmanTestCmnEventNotification is True, a trap that
+             is identified by this OID will be reported."
+        ::= { wmanTestCmnEventEntry 5 }
+
+--
+-- Event log table
+--                                        
+wmanTestCmnEventLogTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF WmanTestCmnEventLogEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This is the Syslog table that is used to store local
+             events. This table should reside in the non-volatile
+             memory that should presist after power cycle or reboot.
+             The number of entries in this table is determined by
+             wmanTestCmnEventLogEntryLimit. It is a wrap around buffer.
+             When the buffer is full, the oldest entry will be removed
+             to make room for the newest entry."
+        ::= { wmanTestCmnEventLog 3 }
+
+wmanTestCmnEventLogEntry OBJECT-TYPE
+        SYNTAX      WmanTestCmnEventLogEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "Entries appear in this table when events occur, and are
+             removed to make ways for new entries when buffer is full,
+             the entry passes the lifetime limit. This table is
+             indexed by wmanTestCmnDeviceIndex and
+             wmanTestCmnEventLogIndex."
+        INDEX       { wmanTestCmnDeviceIndex, wmanTestCmnEventLogIndex }
+        ::= { wmanTestCmnEventLogTable 1 }
+
+WmanTestCmnEventLogEntry ::= SEQUENCE {        
+        wmanTestCmnEventLogIndex                 Unsigned32,
+        wmanTestCmnEventId                       INTEGER,
+        wmanTestCmnEventLoggedTime               TimeStamp,
+        wmanTestCmnEventLogDescription           SnmpAdminString,
+        wmanTestCmnEventLogSeverity              WmanTestEventSeverity}
+
+wmanTestCmnEventLogIndex OBJECT-TYPE
+        SYNTAX      Unsigned32 (1..4294967295)
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "A monotonically increasing integer for the sole purpose
+             of indexing entries within the event log. When it
+             reaches the maximum value, the agent wraps the value
+             back to 1."
+        ::= { wmanTestCmnEventLogEntry 1 }
+
+wmanTestCmnEventId OBJECT-TYPE
+        SYNTAX      INTEGER  (1 .. 100000)
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "The identifier of a SS event."
+        ::= { wmanTestCmnEventLogEntry 2 }
+        
+wmanTestCmnEventLoggedTime OBJECT-TYPE
+        SYNTAX      TimeStamp
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "The value of sysUpTime when the entry was placed in the
+             log. If the entry occurred before the most recent
+             management system initialization this object value must
+             be set to zero."
+        ::= { wmanTestCmnEventLogEntry 3 }
+                
+wmanTestCmnEventLogDescription  OBJECT-TYPE
+        SYNTAX      SnmpAdminString
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "This object describes the event."
+        ::= { wmanTestCmnEventLogEntry 4 }
+                
+wmanTestCmnEventLogSeverity  OBJECT-TYPE
+        SYNTAX      WmanTestEventSeverity
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+            "This object describes the severity of such event."
+        ::= { wmanTestCmnEventLogEntry 5 }
+
+--
+-- wmanTestCmnSnmpAgent contain objects related to the SNMP agent
+-- implemented by the device
+--
+wmanTestCmnSnmpAgent OBJECT IDENTIFIER ::= { wmanTestCommonObjects 2 }
+--
+-- SNMP agent trap destination table
+--
+wmanTestCmnSnmpV1V2TrapDestTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF WmanTestCmnSnmpV1V2TrapDestEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table contains the configuration objects for the
+             device implementing SNMP agent."
+        ::= { wmanTestCmnSnmpAgent 1 }
+
+wmanTestCmnSnmpV1V2TrapDestEntry OBJECT-TYPE
+        SYNTAX      WmanTestCmnSnmpV1V2TrapDestEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table is indexed by wmanTestCmnSnmpV1V2TrapDestIndex."
+        INDEX { wmanTestCmnSnmpV1V2TrapDestIndex }
+        ::= { wmanTestCmnSnmpV1V2TrapDestTable 1 }
+
+WmanTestCmnSnmpV1V2TrapDestEntry ::= SEQUENCE {
+        wmanTestCmnSnmpV1V2TrapDestIndex         INTEGER,
+        wmanTestCmnSnmpV1V2TrapDestIpAddrType    InetAddressType,
+        wmanTestCmnSnmpV1V2TrapDestIpAddr        InetAddress,
+        wmanTestCmnSnmpV1V2TrapDestPort          Integer32,
+        wmanTestCmnSnmpV1V2TrapDestRowStatus     RowStatus}
+
+wmanTestCmnSnmpV1V2TrapDestIndex  OBJECT-TYPE
+        SYNTAX      INTEGER (1..8)
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION 
+            "The index identifies the trap destination. The number of
+             rows is limited to eight."
+        ::= { wmanTestCmnSnmpV1V2TrapDestEntry 1 }
+
+wmanTestCmnSnmpV1V2TrapDestIpAddrType OBJECT-TYPE
+        SYNTAX      InetAddressType
+        MAX-ACCESS  read-create
+        STATUS      current
+        DESCRIPTION 
+            "The type of IP address used in the object
+             wmanTestCmnSnmpV1V2TrapDestV1V2TrapDestIpAddr."
+        ::= { wmanTestCmnSnmpV1V2TrapDestEntry 2 }
+
+wmanTestCmnSnmpV1V2TrapDestIpAddr OBJECT-TYPE
+        SYNTAX      InetAddress
+        MAX-ACCESS  read-create
+        STATUS      current
+        DESCRIPTION 
+            "IP address of SNMP manager configured as a trap
+             destination for versions V1 and V2 of SNMP. If this object
+             is not created or empty the traps are not sent."
+        ::= { wmanTestCmnSnmpV1V2TrapDestEntry 3 }
+
+wmanTestCmnSnmpV1V2TrapDestPort OBJECT-TYPE
+        SYNTAX      Integer32 (0..65535)
+        MAX-ACCESS  read-create
+        STATUS      current
+        DESCRIPTION
+             "Port number of SNMP manager configured as a trap
+              destination for versions V1 and V2 of SNMP."
+        REFERENCE
+            "Subclause 11.13.19.3.4.6 in IEEE Std 802.16-2004"
+        ::= { wmanTestCmnSnmpV1V2TrapDestEntry 4 }
+
+wmanTestCmnSnmpV1V2TrapDestRowStatus  OBJECT-TYPE
+        SYNTAX      RowStatus
+        MAX-ACCESS  read-create
+        STATUS      current
+        DESCRIPTION 
+            "This object is used to ensure that the write operation to
+             multiple columns is guaranteed to be treated as atomic
+             operation by agent."
+        ::= { wmanTestCmnSnmpV1V2TrapDestEntry 5 }
+
+--
+-- wmanTestCmnDeviceCofig contains common configuration objects for the
+-- device
+--
+wmanTestCmnDeviceConfig OBJECT IDENTIFIER ::= { wmanTestCommonObjects 3 }
+
+wmanTestCmnResetDevice  OBJECT-TYPE
+        SYNTAX      INTEGER {actionResetDeviceNoAction(0),
+                             actionResetDevice(1)}
+        MAX-ACCESS  read-write
+        STATUS      current
+        DESCRIPTION 
+            "This object should be implemented as follows:
+             - When set to actionsResetDevice value, instructs device
+               to reset itself
+             - When set to value different than actionsResetDevice it
+               should be ignored
+             - When read it should return actionsResetDeviceNoAction"
+        ::= { wmanTestCmnDeviceConfig 1 }
+
+--
+-- Conformance Information
+--
+wmanTestMibConformance OBJECT IDENTIFIER ::= {wmanTestMib 2}
+wmanTestMibGroups      OBJECT IDENTIFIER ::= {wmanTestMibConformance 1}
+wmanTestMibCompliances OBJECT IDENTIFIER ::= {wmanTestMibConformance 2}
+
+-- compliance statements
+wmanTestMibCompliance MODULE-COMPLIANCE
+        STATUS      current
+        DESCRIPTION
+            "The compliance statement for devices that implement
+             Wireless MAN interfaces as defined in IEEE Std 802.16-2004."
+
+        MODULE  -- wmanTestMib
+
+        GROUP wmanTestMibBsGroup      -- conditionally mandatory group
+        DESCRIPTION
+            "This group is mandatory for Base Station."
+
+        GROUP wmanTestMibBsSwUpgradeGroup    -- optional group
+        DESCRIPTION
+            "This group is optional for Base Station."
+                        
+        GROUP wmanTestMibSsGroup      -- conditionally mandatory group
+        DESCRIPTION
+            "This group is mandatory for Subscriber Station."
+            
+        GROUP wmanTestMibCmnGroup     -- conditionally mandatory group
+        DESCRIPTION
+            "This group is mandatory for Base Station and
+             Subscriber Station."
+                         
+        GROUP wmanTestMibBsNotificationGroup -- optional group
+        DESCRIPTION
+            "This group is optional for Base Station."
+                         
+        GROUP wmanTestMibSsNotificationGroup -- optional group
+        DESCRIPTION
+            "This group is optional for Subscriber Station."
+        ::= { wmanTestMibCompliances 1 }
+
+wmanTestMibBsGroup     OBJECT-GROUP
+        OBJECTS {-- BS Trap Control
+                 wmanTestBsTrapControlRegister}        
+        STATUS       current
+        DESCRIPTION
+            "This group contains objects for BS."
+        ::= { wmanTestMibGroups 1 }
+        
+wmanTestMibBsSwUpgradeGroup     OBJECT-GROUP
+        OBJECTS {-- BS Software Upgrade
+                 wmanTestBsVendorId,
+                 wmanTestBsHwId,
+                 wmanTestBsCurrentSwVersion,
+                 wmanTestBsDownloadSwVersion,
+                 wmanTestBsUpgradeFileName,
+                 wmanTestBsSoftwareUpgradeAdminState,
+                 wmanTestBsDownloadSwProgress,
+                 wmanTestBsSoftwareUpgradeTimeStamp}        
+        STATUS       current
+        DESCRIPTION
+            "This group contains objects for BS software upgrade."
+        ::= { wmanTestMibGroups 2 }
+                
+wmanTestMibSsGroup     OBJECT-GROUP
+        OBJECTS {-- SS configuration file encoding
+                 wmanTestSsMicConfigSetting,
+                 wmanTestSsVendorId,
+                 wmanTestSsHwId,        
+                 wmanTestSsSwVersion,
+                 wmanTestSsUpgradeFileName,
+                 wmanTestSsSwUpgradeTftpServer,
+                 wmanTestSsTftpServerTimeStamp,
+                 
+                 wmanTestSsTrapControlRegister}        
+        STATUS       current
+        DESCRIPTION
+            "This group contains objects for SS."
+        ::= { wmanTestMibGroups 3 }
+
+wmanTestMibCmnGroup     OBJECT-GROUP
+        OBJECTS {-- SNMP agent configuration
+                 wmanTestCmnSnmpV1V2TrapDestIpAddrType,
+                 wmanTestCmnSnmpV1V2TrapDestIpAddr,
+                 wmanTestCmnSnmpV1V2TrapDestPort,
+                 wmanTestCmnSnmpV1V2TrapDestRowStatus,
+                 wmanTestCmnResetDevice,
+                
+                 -- Events and event notification
+                 wmanTestCmnDeviceIndex,
+                 wmanTestCmnEventLogEntryLimit,
+                 wmanTestCmnEventLifeTimeLimit,
+                 wmanTestCmnEventLogEntryLimitPerEventId,
+                 wmanTestCmnEventLogSeverityThreshold,
+                 wmanTestCmnEventLogWrapAroundBuffEnable,
+                 wmanTestCmnEventLogLatestEvent,
+                 wmanTestCmnEventLogPersistenceSupported,
+                 wmanTestCmnEventLogResidualBuffThreshold,
+                 wmanTestCmnEventDescription,
+                 wmanTestCmnEventSeverity,
+                 wmanTestCmnEventNotification,
+                 wmanTestCmnEventNotificationOid,
+                 wmanTestCmnEventLogIndex,
+                 wmanTestCmnEventId,
+                 wmanTestCmnEventLoggedTime,
+                 wmanTestCmnEventLogDescription,
+                 wmanTestCmnEventLogSeverity}        
+        STATUS       current
+        DESCRIPTION
+            "This group contains objects for SS."
+        ::= { wmanTestMibGroups 4 }
+        
+wmanTestMibBsNotificationGroup     NOTIFICATION-GROUP
+        NOTIFICATIONS {wmanTestBsEventTrap,
+                       wmanTestBsLogBuffExceedThresholdTrap}
+        STATUS       current
+        DESCRIPTION
+            "This group contains event notifications for BS."
+        ::= { wmanTestMibGroups 5 }
+        
+wmanTestMibSsNotificationGroup     NOTIFICATION-GROUP
+        NOTIFICATIONS {wmanTestSsEventTrap,
+                       wmanTestSsLogBufferExceedThresholdTrap}
+        STATUS       current
+        DESCRIPTION
+            "This group contains event notifications for SS."
+        ::= { wmanTestMibGroups 6 }
+                  
+END
